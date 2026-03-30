@@ -1,0 +1,30 @@
+{
+  "name": "sportsstats",
+  "version": "1.0.0",
+  "description": "Web API для спортивной статистики с иерархией: виды спорта → лиги → команды → игроки → матчи. Реализована DDD-архитектура, REST API, JWT-авторизация, CI/CD (GitHub Actions), unit-тесты, SQL-Server, EF Core.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kulich1708/SportsStats.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/kulich1708/SportsStats/issues"
+  },
+  "homepage": "https://github.com/kulich1708/SportsStats#readme",
+  "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/exec": "^7.1.0",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^12.0.6",
+    "@semantic-release/release-notes-generator": "^14.1.0",
+    "semantic-release": "^25.0.3"
+  }
+}
