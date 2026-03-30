@@ -10,12 +10,6 @@
         "prepareCmd": "dotnet build -c Release && dotnet pack -c Release -p:Version=${nextRelease.version} -o ./artifacts"
       }
     ],
-    [
-      "@semantic-release/git",
-      {
-        "assets": [ "CHANGELOG.md", "*.csproj", "Directory.Build.props" ],
-        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
-      }
-    ]
+    "@semantic-release/github"
   ]
 }
