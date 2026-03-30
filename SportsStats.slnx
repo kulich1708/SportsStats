@@ -1,7 +1,7 @@
 <Solution>
-  <Project Path="D:/программирование/Projects/SportsStats/SportsStats.API/SportsStats.API.csproj" Id="312b7858-2127-486d-88ad-9f1f7d14cd8b" />
-  <Project Path="D:/программирование/Projects/SportsStats/SportsStats.Application/SportsStats.Application.csproj" Id="50a78906-90f1-4f9c-9529-c25afd842ca2" />
-  <Project Path="D:/программирование/Projects/SportsStats/SportsStats.Domain/SportsStats.Domain.csproj" Id="272fc6ca-00a0-4106-aa4c-9e59f3e2d081" />
-  <Project Path="D:/программирование/Projects/SportsStats/SportsStats.Infrastructure/SportsStats.Infrastructure.csproj" Id="9830f72e-a8a7-4798-808d-99d95c2acedf" />
-  <Project Path="D:/программирование/Projects/SportsStats/SportsStats.Tests/SportsStats.Tests.csproj" Id="bf14cfcd-e798-4783-89bd-c24147cf9e72" />
+  <Project Path="SportsStats.API/SportsStats.API.csproj" Id="312b7858-2127-486d-88ad-9f1f7d14cd8b" />
+  <Project Path="SportsStats.Application/SportsStats.Application.csproj" Id="50a78906-90f1-4f9c-9529-c25afd842ca2" />
+  <Project Path="SportsStats.Domain/SportsStats.Domain.csproj" Id="272fc6ca-00a0-4106-aa4c-9e59f3e2d081" />
+  <Project Path="SportsStats.Infrastructure/SportsStats.Infrastructure.csproj" Id="9830f72e-a8a7-4798-808d-99d95c2acedf" />
+  <Project Path="SportsStats.Tests/SportsStats.Tests.csproj" Id="bf14cfcd-e798-4783-89bd-c24147cf9e72" />
 </Solution>
