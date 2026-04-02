@@ -1,4 +1,4 @@
-﻿namespace Domain.Common
+﻿namespace SportsStats.Domain.Common
 {
 	public interface IEntity
 	{
