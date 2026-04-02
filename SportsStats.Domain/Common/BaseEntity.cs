@@ -11,6 +11,7 @@ namespace SportsStats.Domain.Common
 			get => _id;
 			protected set => _id = value;
 		}
+		public DateTime CreatedAt { get; protected set; } = DateTime.Now;
 
 		// Конструктор для создания новой сущности (без Id)
 		protected BaseEntity()
