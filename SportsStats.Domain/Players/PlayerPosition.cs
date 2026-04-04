@@ -4,24 +4,24 @@ using System.Text;
 
 namespace SportsStats.Domain.Players
 {
-	public class PlayerPosition<TPositionsType>
+	public class PlayerPosition
 	{
-		public TPositionsType PrimaryPosition { get; private set; }
-		public HashSet<TPositionsType> Positions { get; private set; }
+		public PositionType PrimaryPosition { get; private set; }
+		public HashSet<PositionType> Positions { get; private set; }
 
-		public PlayerPosition(TPositionsType primaryPosition)
+		public PlayerPosition(PositionType primaryPosition)
 		{
 			SetPrimaryPosition(primaryPosition);
 		}
-		public void SetPrimaryPosition(TPositionsType primaryPosition)
+		public void SetPrimaryPosition(PositionType primaryPosition)
 		{
 			PrimaryPosition = primaryPosition;
 		}
-		public void AddPosition(TPositionsType position)
+		public void AddPosition(PositionType position)
 		{
 			Positions.Add(position);
 		}
-		public void RemovePosition(TPositionsType position)
+		public void RemovePosition(PositionType position)
 		{
 			Positions.Remove(position);
 		}
@@ -29,7 +29,7 @@ namespace SportsStats.Domain.Players
 		{
 			Positions.Clear();
 		}
-		public void SetPositions(IEnumerable<TPositionsType> positions)
+		public void SetPositions(IEnumerable<PositionType> positions)
 		{
 			Positions = positions.ToHashSet();
 		}

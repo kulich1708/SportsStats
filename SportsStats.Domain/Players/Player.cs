@@ -4,13 +4,13 @@ using System.Text;
 
 namespace SportsStats.Domain.Players
 {
-	public class Player<TPosition>
+	public class Player
 	{
 		public string Name { get; private set; }
 		public string Surname { get; private set; }
 		public DateOnly Birthday { get; private set; }
 		public int TeamId { get; private set; }
-		public TPosition Position { get; private set; }
+		public PositionType Position { get; private set; }
 		public int JerseyNumber { get; private set; }
 		public Player(string name, string surname)
 		{
@@ -25,9 +25,9 @@ namespace SportsStats.Domain.Players
 			if (string.IsNullOrWhiteSpace(surname))
 				throw new ArgumentException("Фамилия не может быть пустой");
 			if (name.Count() > 20)
-				throw new ArgumentException("Имя не может быть длиньше 20 символов");
+				throw new ArgumentException("Имя не может быть длинее 20 символов");
 			if (surname.Count() > 20)
-				throw new ArgumentException("Фамилия не может быть длиньше 20 символов");
+				throw new ArgumentException("Фамилия не может быть длинее 20 символов");
 		}
 		public void SetBirthday(DateOnly birthday)
 		{
@@ -37,7 +37,7 @@ namespace SportsStats.Domain.Players
 		{
 			TeamId = teamId;
 		}
-		public void SetPosition(TPosition position)
+		public void SetPosition(PositionType position)
 		{
 			Position = position;
 		}
@@ -45,6 +45,7 @@ namespace SportsStats.Domain.Players
 		{
 			if (jerseyNumber < 1 || jerseyNumber > 99)
 				throw new ArgumentException("Номер игрока должен быть от 1 до 99");
+
 			JerseyNumber = jerseyNumber;
 		}
 	}

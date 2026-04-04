@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SportsStats.Domain.Hockey
+namespace SportsStats.Domain.Players
 {
-	public enum HockeyPositionsType
+	public enum PositionType
 	{
 		LeftWinger,
 		RightWinger,
