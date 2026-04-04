@@ -1,28 +1,42 @@
 using SportsStats.Domain.Common;
+using SportsStats.Domain.Matches;
 
 namespace SportsStats.Domain.Hockey
 {
-	public class HockeyGoalEvent : BaseEntity
+	public class HockeyGoalEvent : GoalEventBase
 	{
-		public int GoalScorerId { get; private set; }
-		public int? GoalAssistFirstId { get; private set; }
-		public int? GoalAssistSecondId { get; private set; }
-		public HockeyGoalNetType? GoalNetType { get; private set; }
-		public HockeyGoalStrengthType GoalStrengthType { get; private set; }
+		public int? FirstAssistId { get; private set; }
+		public int? SecondAssistId { get; private set; }
+		public HockeyGoalStrengthType StrengthType { get; private set; }
+		public HockeyGoalNetType? NetType { get; private set; }
 
-		public HockeyGoalEvent(int goalScorerId, HockeyGoalStrengthType goalStrengthType)
+
+		internal HockeyGoalEvent(int matchId, int scoringTeamId, int goalScorerId,
+								 int period, int time)
+			: base(matchId, scoringTeamId, goalScorerId, period, time) { }
+		public void SetAssists(int? firstAssistId, int? secondAssistId)
 		{
-			GoalScorerId = goalScorerId;
-			GoalStrengthType = goalStrengthType;
+			if (!firstAssistId.HasValue && secondAssistId.HasValue)
+				throw new ArgumentException("Второй ассистент не может быть указан, пока не указан первый");
+
+			FirstAssistId = firstAssistId;
+			SecondAssistId = secondAssistId;
 		}
-		public void SetAssists(int firstAssistId, int secondAssistId)
+		public void ChangeFirstAssists(int? assistsId)
 		{
-			GoalAssistFirstId = firstAssistId;
-			GoalAssistSecondId = secondAssistId;
+			FirstAssistId = assistsId;
 		}
-		public void SetGoalNetType(HockeyGoalNetType goalNetType)
+		public void ChangeSecondAssists(int? assistsId)
 		{
-			GoalNetType = goalNetType;
+			SecondAssistId = assistsId;
+		}
+		public void SetNetType(HockeyGoalNetType? netType)
+		{
+			NetType = netType;
+		}
+		public void SetStrengthType(HockeyGoalStrengthType strengthType)
+		{
+			StrengthType = strengthType;
 		}
 	}
 }
