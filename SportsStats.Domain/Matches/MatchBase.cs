@@ -1,7 +1,8 @@
 ﻿using SportsStats.Domain.Common;
+using SportsStats.Domain.Matches.Goals;
 using SportsStats.Domain.Players;
 using SportsStats.Domain.Shared;
-using SportsStats.Domain.Tournaments;
+using SportsStats.Domain.Tournaments.Rules;
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
@@ -10,7 +11,7 @@ using System.Timers;
 
 namespace SportsStats.Domain.Matches
 {
-	public abstract class MatchBase<TGoal> : BaseEntity, IAggregateRoot where TGoal : GoalEventBase
+	public class MatchBase : BaseEntity, IAggregateRoot
 	{
 		public int HomeTeamId { get; private set; }
 		public int AwayTeamId { get; private set; }
@@ -21,15 +22,15 @@ namespace SportsStats.Domain.Matches
 		public int HomeScore { get; protected set; }
 		public int AwayScore { get; protected set; }
 		public int TournamentId { get; private set; }
-		public MatchStatuses Status { get; private set; } = MatchStatuses.Waiting;
+		public MatchStatus Status { get; private set; } = MatchStatus.Waiting;
 
 
 		private IExistenceChecker _teamExistenceChecker;
 		private IExistenceChecker _tournamentExistenceChecker;
 		private IPlayerDataProvider _playerDataProvider;
 		private ITournamentDataProvider _tournamentDataProvider;
-		protected TimeBasedTournamentRules _timeBasedTournamentRules;
-		private List<TGoal> _goals;
+		protected MatchDurationRules _timeBasedTournamentRules;
+		private List<GoalEvent> _goals;
 
 		public MatchBase(int homeTeamId, int awayTeamId, int tournamentId,
 						 IExistenceChecker teamExistenceChecker,
@@ -62,19 +63,19 @@ namespace SportsStats.Domain.Matches
 		}
 		public void Start()
 		{
-			if (Status != MatchStatuses.Waiting)
+			if (Status != MatchStatus.Waiting)
 				throw new ArgumentException("Нельзя начать матч, который уже не в ожидании");
 
 			StartedAt = DateTime.Now;
-			Status = MatchStatuses.InProgress;
+			Status = MatchStatus.InProgress;
 		}
 		public void Finish()
 		{
-			if (Status != MatchStatuses.InProgress)
+			if (Status != MatchStatus.InProgress)
 				throw new ArgumentException("Нельзя завершить матч, который ещё не начат или уже закончен");
 
 			FinishedAt = DateTime.Now;
-			Status = MatchStatuses.Finished;
+			Status = MatchStatus.Finished;
 		}
 		public void AddGoal(int scoringTeamId, int goalScorerId, int period, int time)
 		{
@@ -88,7 +89,7 @@ namespace SportsStats.Domain.Matches
 
 			ValidateGoalTiming(period, time);
 
-			TGoal goal = CreateGoal(scoringTeamId, goalScorerId, period, time);
+			GoalEvent goal = CreateGoal(scoringTeamId, goalScorerId, period, time);
 			_goals.Add(goal);
 
 			if (IsGameEndingGoal(goal))
@@ -147,10 +148,13 @@ namespace SportsStats.Domain.Matches
 				throw new ArgumentException($"Нельзя добавить гол, забитый на {time} секунде основного периода, " +
 											$"так как его продолжительность {_timeBasedTournamentRules.PeriodDurationSeconds} секунд");
 		}
-		protected abstract TGoal CreateGoal(int scoringTeamId, int goalScorerId, int period, int time);
-		protected TGoal GetGoalById(int goalId)
+		protected GoalEvent CreateGoal(int scoringTeamId, int goalScorerId, int period, int time)
 		{
-			TGoal goal = _goals.SingleOrDefault(goal => goal.Id == goalId);
+			return new GoalEvent(Id, scoringTeamId, goalScorerId, period, time);
+		}
+		protected GoalEvent GetGoalEventById(int goalId)
+		{
+			GoalEvent goal = _goals.SingleOrDefault(goal => goal.Id == goalId);
 			if (goal == null)
 				throw new ArgumentException("Гол с данным Id не содержится в событиях этого матча");
 
@@ -158,11 +162,29 @@ namespace SportsStats.Domain.Matches
 		}
 		public bool IsMatchInProgress()
 		{
-			return Status == MatchStatuses.InProgress;
+			return Status == MatchStatus.InProgress;
 		}
-		protected bool IsGameEndingGoal(TGoal goal)
+		protected bool IsGameEndingGoal(GoalEvent goal)
 		{
 			return goal.Period > _timeBasedTournamentRules.PeriodsCount && _timeBasedTournamentRules.SuddenDeathOvertime;
+		}
+
+		// TODO разделить этот метод (для возможности редактирования гола в любой момент), на много маленьких, но будет проблема, что матч оброс множеством методов для гола.
+		// Решение: вынести управление голами в GoalRedactor и передавать его в матч.
+		// Со временем отказаться от наследования матчей и собирать матч как конструктор из разных блоков
+		// Например из PenaltyRedactor, GoalRedactor, PeriodRedactor и тд.
+		public void FillGoalDetails(int goalId, int? firstAssistId, int? secondAssistId,
+									HockeyGoalStrengthType strengthType, HockeyGoalNetType? netType)
+		{
+			GoalEvent goal = GetGoalEventById(goalId);
+			if (firstAssistId.HasValue && !IsPlayerOnMatchRoster(firstAssistId.Value))
+				throw new ArgumentException("Этот игрок не заявлен за команду, которая забила гол");
+			if (secondAssistId.HasValue && !IsPlayerOnMatchRoster(secondAssistId.Value))
+				throw new ArgumentException("Этот игрок не заявлен за команду, которая забила гол");
+
+			goal.SetAssists(firstAssistId, secondAssistId);
+			goal.SetNetType(netType);
+			goal.SetStrengthType(strengthType);
 		}
 	}
 }
