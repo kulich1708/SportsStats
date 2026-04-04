@@ -11,7 +11,7 @@ namespace SportsStats.Domain.Hockey
 		public HockeyGoalNetType? NetType { get; private set; }
 
 
-		internal HockeyGoalEvent(int matchId, int scoringTeamId, int goalScorerId,
+		public HockeyGoalEvent(int matchId, int scoringTeamId, int goalScorerId,
 								 int period, int time)
 			: base(matchId, scoringTeamId, goalScorerId, period, time) { }
 		public void SetAssists(int? firstAssistId, int? secondAssistId)

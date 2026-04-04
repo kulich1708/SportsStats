@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SportsStats.Domain.Common
 {
-	internal interface IAggregateRoot
+	public interface IAggregateRoot
 	{
 	}
 }

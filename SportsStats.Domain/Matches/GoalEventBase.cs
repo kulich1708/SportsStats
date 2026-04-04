@@ -14,7 +14,7 @@ namespace SportsStats.Domain.Matches
 		public int Period { get; private set; }
 		public int Time { get; private set; }
 
-		internal GoalEventBase(int matchId, int scoringTeamId, int goalScorerId, int period, int time)
+		public GoalEventBase(int matchId, int scoringTeamId, int goalScorerId, int period, int time)
 		{
 			MatchId = matchId;
 			ScoringTeamId = scoringTeamId;

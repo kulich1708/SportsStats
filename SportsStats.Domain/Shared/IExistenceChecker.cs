@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SportsStats.Domain.Shared
 {
-	internal interface IExistenceChecker
+	public interface IExistenceChecker
 	{
 		public bool Exists(int matchId);
 	}
