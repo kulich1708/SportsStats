@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SportsStats.Domain.Hockey
+namespace SportsStats.Domain.Matches.Goals
 {
 	public enum HockeyGoalStrengthType
 	{

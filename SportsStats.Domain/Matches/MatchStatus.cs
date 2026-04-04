@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SportsStats.Domain.Matches
 {
-	public enum MatchStatuses
+	public enum MatchStatus
 	{
 		Waiting,
 		InProgress,

@@ -1,11 +1,13 @@
-﻿using System;
+﻿using SportsStats.Domain.Common;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SportsStats.Domain.Tournaments
+namespace SportsStats.Domain.Tournaments.Rules
 {
-	public class TimeBasedTournamentRules : TournamentRulesBase
+	public class MatchDurationRules : BaseEntity
 	{
+		public string Name { get; private set; }
 		public int PeriodsCount { get; private set; }               // Количество периодов
 		public int PeriodDurationSeconds { get; private set; }      // Длительность одного периода
 		public bool HasOvertime { get; private set; }               // Наличие овертайма
@@ -14,7 +16,7 @@ namespace SportsStats.Domain.Tournaments
 		public int ShootoutsCount { get; private set; }             // Количество булитов. 0, если не предусмотрены
 		public bool SuddenDeathOvertime { get; private set; }       // Весь овертайм или до победного гола
 
-		public TimeBasedTournamentRules(
+		public MatchDurationRules(
 			string name,
 			int periodsCount,
 			int periodDurationSeconds,
@@ -22,8 +24,9 @@ namespace SportsStats.Domain.Tournaments
 			int? overtimeDurationSeconds,
 			int? overtimesCount,
 			bool suddenDeathOvertime,
-			int shootoutsCount = 0) : base(name)
+			int shootoutsCount = 0)
 		{
+			Name = name;
 			PeriodsCount = periodsCount;
 			PeriodDurationSeconds = periodDurationSeconds;
 			HasOvertime = hasOvertime;
@@ -53,9 +56,9 @@ namespace SportsStats.Domain.Tournaments
 		}
 
 		// Фабричные методы для удобства
-		public static TimeBasedTournamentRules CreateKHLRules()
+		public static MatchDurationRules CreateKHLRules()
 		{
-			return new TimeBasedTournamentRules(
+			return new MatchDurationRules(
 				name: "IIHF",
 				periodsCount: 3,
 				periodDurationSeconds: 1200,
@@ -67,9 +70,9 @@ namespace SportsStats.Domain.Tournaments
 			);
 		}
 
-		public static TimeBasedTournamentRules CreatePlayoffRules()
+		public static MatchDurationRules CreatePlayoffRules()
 		{
-			return new TimeBasedTournamentRules(
+			return new MatchDurationRules(
 				name: "IIHF Playoffs",
 				periodsCount: 3,
 				periodDurationSeconds: 1200,
@@ -77,20 +80,6 @@ namespace SportsStats.Domain.Tournaments
 				overtimeDurationSeconds: 1200,
 				overtimesCount: null,
 				suddenDeathOvertime: true,
-				shootoutsCount: 0
-			);
-		}
-
-		public static TimeBasedTournamentRules CreateFootballLeagueRules()
-		{
-			return new TimeBasedTournamentRules(
-				name: "Football League",
-				periodsCount: 2,
-				periodDurationSeconds: 2700,
-				hasOvertime: true,
-				overtimeDurationSeconds: 900,
-				overtimesCount: 2,
-				suddenDeathOvertime: false,
 				shootoutsCount: 0
 			);
 		}
