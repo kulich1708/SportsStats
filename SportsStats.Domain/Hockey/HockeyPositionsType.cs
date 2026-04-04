@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SportsStats.Domain.Hockey
 {
-	internal enum HockeyPositionsType
+	public enum HockeyPositionsType
 	{
 		LeftWinger,
 		RightWinger,

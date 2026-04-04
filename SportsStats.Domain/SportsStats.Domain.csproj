@@ -7,7 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Новая папка\" />
+    <Compile Remove="Новая папка1\**" />
+    <Compile Remove="Новая папка\**" />
+    <EmbeddedResource Remove="Новая папка1\**" />
+    <EmbeddedResource Remove="Новая папка\**" />
+    <None Remove="Новая папка1\**" />
+    <None Remove="Новая папка\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Shared\ValueObjects\" />
   </ItemGroup>
 
 </Project>
