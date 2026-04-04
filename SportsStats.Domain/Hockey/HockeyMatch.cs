@@ -6,7 +6,7 @@ using System.Text;
 
 namespace SportsStats.Domain.Hockey
 {
-	internal class HockeyMatch : MatchBase<HockeyGoalEvent>
+	public class HockeyMatch : MatchBase<HockeyGoalEvent>
 	{
 		public HockeyMatch(int homeTeamId, int awayTeamId, int tournamentId,
 						 IExistenceChecker teamExistenceChecker,

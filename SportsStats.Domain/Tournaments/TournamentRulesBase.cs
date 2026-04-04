@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SportsStats.Domain.Tournaments
 {
-	internal class TournamentRulesBase : BaseEntity
+	public class TournamentRulesBase : BaseEntity
 	{
 		public string Name { get; private set; }
 		public TournamentRulesBase(string name)

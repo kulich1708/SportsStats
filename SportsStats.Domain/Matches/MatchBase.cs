@@ -10,7 +10,7 @@ using System.Timers;
 
 namespace SportsStats.Domain.Matches
 {
-	internal abstract class MatchBase<TGoal> : BaseEntity, IAggregateRoot where TGoal : GoalEventBase
+	public abstract class MatchBase<TGoal> : BaseEntity, IAggregateRoot where TGoal : GoalEventBase
 	{
 		public int HomeTeamId { get; private set; }
 		public int AwayTeamId { get; private set; }

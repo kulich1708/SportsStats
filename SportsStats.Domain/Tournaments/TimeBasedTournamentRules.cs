@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SportsStats.Domain.Tournaments
 {
-	internal class TimeBasedTournamentRules : TournamentRulesBase
+	public class TimeBasedTournamentRules : TournamentRulesBase
 	{
 		public int PeriodsCount { get; private set; }               // Количество периодов
 		public int PeriodDurationSeconds { get; private set; }      // Длительность одного периода
