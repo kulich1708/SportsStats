@@ -16,6 +16,7 @@ namespace SportsStats.Domain.Matches
 		private List<int> _homeTeamRoster = new();
 		private List<int> _awayTeamRoster = new();
 		private readonly TournamentRules _rules;
+		private List<GoalEvent> _updatedGoals = new();
 		public int HomeTeamId { get; private set; }
 		public int AwayTeamId { get; private set; }
 		public IReadOnlyList<int> HomeTeamRoster => _homeTeamRoster;
@@ -29,6 +30,7 @@ namespace SportsStats.Domain.Matches
 		public MatchWinType HomeTeamWinType { get; private set; }
 		public MatchWinType AwayTeamWinType { get; private set; }
 		public bool IsOvertime { get; private set; }
+		public IReadOnlyList<GoalEvent> UpdatedGoals => _updatedGoals;
 
 		public Match(int tournamentId, int homeTeamId, int awayTeamId, TournamentRules rules)
 		{
@@ -139,6 +141,7 @@ namespace SportsStats.Domain.Matches
 
 			if (scoringTeamId == HomeTeamId) HomeTeamScore++;
 			else AwayTeamScore++;
+			_updatedGoals.Add(goal);
 
 			if (_rules.MatchDurationRules.IsOvertimePeriod(period))
 				IsOvertime = true;
@@ -202,6 +205,8 @@ namespace SportsStats.Domain.Matches
 			goal.SetAssists(firstAssistId, secondAssistId);
 			goal.SetNetType(netType);
 			goal.SetStrengthType(strengthType);
+
+			_updatedGoals.Add(goal);
 		}
 
 		public void AddPlayerToRoster(int playerId, int teamId)
@@ -223,5 +228,7 @@ namespace SportsStats.Domain.Matches
 			}
 
 		}
+
+		public void OnSaved() => _updatedGoals.Clear();
 	}
 }
