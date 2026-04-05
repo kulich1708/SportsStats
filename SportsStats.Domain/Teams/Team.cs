@@ -1,10 +1,11 @@
-﻿using System;
+﻿using SportsStats.Domain.Common;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace SportsStats.Domain.Teams
 {
-	public class Team
+	public class Team : IAggregateRoot
 	{
 	}
 }
