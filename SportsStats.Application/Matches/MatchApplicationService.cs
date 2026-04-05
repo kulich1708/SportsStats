@@ -2,6 +2,7 @@
 using SportsStats.Domain.Matches.Goals;
 using SportsStats.Domain.Players;
 using SportsStats.Domain.Tournaments;
+using SportsStats.Domain.Shared;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,17 +16,20 @@ namespace SportsStats.Application.Matches
 		private IMatchRepository _matchRepository;
 		private ITournamentRegistrationRepository _tournamentRegistrationRepository;
 		private IGoalRepository _goalRepository;
+		private ITimeProvider _timeProvider;
 
 		public MatchApplicationService(IPlayerRepository playerRepository,
 			ITournamentRepository tournamentRepository, IMatchRepository matchRepository,
 			ITournamentRegistrationRepository tournamentRegistrationRepository,
-			IGoalRepository goalRepository)
+			IGoalRepository goalRepository,
+			ITimeProvider timeProvider)
 		{
 			_playerRepository = playerRepository;
 			_tournamentRepository = tournamentRepository;
 			_matchRepository = matchRepository;
 			_tournamentRegistrationRepository = tournamentRegistrationRepository;
 			_goalRepository = goalRepository;
+			_timeProvider = timeProvider;
 		}
 
 		public Match CreateMatch(int tournamentId, int homeTeamId, int awayTeamId)
@@ -45,28 +49,28 @@ namespace SportsStats.Application.Matches
 			Match match = new Match(tournamentId, homeTeamId, awayTeamId, tournament.TournamentRules);
 			return _matchRepository.Save(match);
 		}
-		public void StartMatch(int matchId, DateTime startedAt)
+		public void StartMatch(int matchId)
 		{
 			Match match = GetMatchOrThrow(matchId);
 
-			match.Start(startedAt);
+			match.Start(_timeProvider.GetCurrentTime());
 
 			_matchRepository.Save(match);
 		}
-		public void FinishMatch(int matchId, DateTime finishedAt)
+		public void FinishMatch(int matchId)
 		{
 			Match match = GetMatchOrThrow(matchId);
 
-			match.Finish(finishedAt);
+			match.Finish(_timeProvider.GetCurrentTime());
 
 			_matchRepository.Save(match);
 		}
 
-		public void AddGoal(int matchId, int scoringTeamId, int goalScorerId, int period, int time, DateTime scoringMoment)
+		public void AddGoal(int matchId, int scoringTeamId, int goalScorerId, int period, int time)
 		{
 			Match match = GetMatchOrThrow(matchId);
 
-			match.AddGoal(scoringTeamId, goalScorerId, period, time, scoringMoment);
+			match.AddGoal(scoringTeamId, goalScorerId, period, time, _timeProvider.GetCurrentTime());
 
 			foreach (var goal in match.UpdatedGoals)
 				_goalRepository.Save(goal);
