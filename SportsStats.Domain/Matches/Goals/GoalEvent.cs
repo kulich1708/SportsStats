@@ -8,20 +8,18 @@ namespace SportsStats.Domain.Matches.Goals
 {
 	public class GoalEvent : BaseEntity
 	{
-		public int MatchId { get; private set; }
 		public int ScoringTeamId { get; private set; }
 		public int GoalScorerId { get; private set; }
 		public int Period { get; private set; }
 		public int Time { get; private set; }
 		public int? FirstAssistId { get; private set; }
 		public int? SecondAssistId { get; private set; }
-		public HockeyGoalStrengthType StrengthType { get; private set; }
-		public HockeyGoalNetType? NetType { get; private set; }
+		public GoalStrengthType StrengthType { get; private set; }
+		public GoalNetType? NetType { get; private set; }
 
 
-		public GoalEvent(int matchId, int scoringTeamId, int goalScorerId, int period, int time)
+		public GoalEvent(int scoringTeamId, int goalScorerId, int period, int time)
 		{
-			MatchId = matchId;
 			ScoringTeamId = scoringTeamId;
 			GoalScorerId = goalScorerId;
 			Period = period;
@@ -45,11 +43,11 @@ namespace SportsStats.Domain.Matches.Goals
 
 			SecondAssistId = assistsId;
 		}
-		public void SetNetType(HockeyGoalNetType? netType)
+		public void SetNetType(GoalNetType? netType)
 		{
 			NetType = netType;
 		}
-		public void SetStrengthType(HockeyGoalStrengthType strengthType)
+		public void SetStrengthType(GoalStrengthType strengthType)
 		{
 			StrengthType = strengthType;
 		}
