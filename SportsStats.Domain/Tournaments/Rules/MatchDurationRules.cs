@@ -15,6 +15,7 @@ namespace SportsStats.Domain.Tournaments.Rules
 		public int? OvertimesCount { get; init; }            // Возможное количество овертаймов. Если null, то бесконечно как в плей-офф в хоккее
 		public int ShootoutsCount { get; init; }             // Количество булитов. 0, если не предусмотрены
 		public bool SuddenDeathOvertime { get; init; }       // Весь овертайм или до победного гола
+		public bool IsDrawPossible { get; init; }
 
 		public MatchDurationRules(
 			string name,
@@ -24,6 +25,7 @@ namespace SportsStats.Domain.Tournaments.Rules
 			int? overtimeDurationSeconds,
 			int? overtimesCount,
 			bool suddenDeathOvertime,
+			bool isDrawPossible,
 			int shootoutsCount = 0)
 		{
 			Name = name;
@@ -33,7 +35,9 @@ namespace SportsStats.Domain.Tournaments.Rules
 			OvertimeDurationSeconds = overtimeDurationSeconds;
 			OvertimesCount = overtimesCount;
 			SuddenDeathOvertime = suddenDeathOvertime;
+			IsDrawPossible = isDrawPossible;
 			ShootoutsCount = shootoutsCount;
+
 
 			ValidateRules();
 		}
