@@ -1,10 +1,12 @@
 ﻿using SportsStats.Domain.Common;
 using SportsStats.Domain.Matches.Goals;
 using SportsStats.Domain.Tournaments.Rules;
+using SportsStats.Domain.Matches;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
+using SportsStats.Domain.Shared.Enums;
 
 namespace SportsStats.Domain.Matches
 {
@@ -13,7 +15,7 @@ namespace SportsStats.Domain.Matches
 		private readonly List<GoalEvent> _goals = new();
 		private List<int> _homeTeamRoster = new();
 		private List<int> _awayTeamRoster = new();
-		private TournamentRules _rules;
+		private readonly TournamentRules _rules;
 		public int HomeTeamId { get; private set; }
 		public int AwayTeamId { get; private set; }
 		public IReadOnlyList<int> HomeTeamRoster => _homeTeamRoster;
@@ -24,6 +26,9 @@ namespace SportsStats.Domain.Matches
 		public MatchStatus Status { get; private set; } = MatchStatus.Waiting;
 		public int HomeTeamScore { get; private set; } = 0;
 		public int AwayTeamScore { get; private set; } = 0;
+		public MatchWinType HomeTeamWinType { get; private set; }
+		public MatchWinType AwayTeamWinType { get; private set; }
+		public bool IsOvertime { get; private set; }
 
 		public Match(int tournamentId, int homeTeamId, int awayTeamId, TournamentRules rules)
 		{
@@ -49,9 +54,43 @@ namespace SportsStats.Domain.Matches
 		{
 			if (Status != MatchStatus.InProgress)
 				throw new ArgumentException("Нельзя завершить матч, который ещё не начат или уже закончен");
+			if (HomeTeamScore == AwayTeamScore && !_rules.MatchDurationRules.IsDrawPossible)
+				throw new ArgumentException("Нельзя завершить матч с ничейным счётом, когда ничья запрещена правилами");
 
 			FinishedAt = finishedAt;
 			Status = MatchStatus.Finished;
+
+			if (HomeTeamScore > AwayTeamScore)
+			{
+				if (IsOvertime)
+				{
+					HomeTeamWinType = MatchWinType.OT_WIN;
+					AwayTeamWinType = MatchWinType.OT_LOSS;
+				}
+				else
+				{
+					HomeTeamWinType = MatchWinType.REGULATION_WIN;
+					AwayTeamWinType = MatchWinType.REGULATION_LOSS;
+				}
+			}
+			else if (HomeTeamScore < AwayTeamScore)
+			{
+				if (IsOvertime)
+				{
+					HomeTeamWinType = MatchWinType.OT_LOSS;
+					AwayTeamWinType = MatchWinType.OT_WIN;
+				}
+				else
+				{
+					HomeTeamWinType = MatchWinType.REGULATION_LOSS;
+					AwayTeamWinType = MatchWinType.REGULATION_WIN;
+				}
+			}
+			else
+			{
+				HomeTeamWinType = MatchWinType.DRAW;
+				AwayTeamWinType = MatchWinType.DRAW;
+			}
 		}
 
 
@@ -81,6 +120,14 @@ namespace SportsStats.Domain.Matches
 		{
 			return Status == MatchStatus.InProgress;
 		}
+		public bool IsMatchFinished()
+		{
+			return Status == MatchStatus.Finished;
+		}
+		public bool IsMatchWaiting()
+		{
+			return Status == MatchStatus.Waiting;
+		}
 
 
 		public void AddGoal(int scoringTeamId, int goalScorerId, int period, int time, DateTime scoringMoment)
@@ -92,6 +139,9 @@ namespace SportsStats.Domain.Matches
 
 			if (scoringTeamId == HomeTeamId) HomeTeamScore++;
 			else AwayTeamScore++;
+
+			if (_rules.MatchDurationRules.IsOvertimePeriod(period))
+				IsOvertime = true;
 
 			if (_rules.MatchDurationRules.DoesGoalEndMatch(period))
 				Finish(scoringMoment);
@@ -158,6 +208,10 @@ namespace SportsStats.Domain.Matches
 		{
 			if (!IsTeamInMatch(teamId))
 				throw new ArgumentException("Нельзя заявить игрока за команду, которая не учавствует в матче");
+			if (IsPlayerOnRoster(playerId))
+				throw new ArgumentException("Нельзя добавить игрока дважды");
+			if (!IsMatchWaiting())
+				throw new ArgumentException("Нельзя добавить игрока, после начала матча");
 
 			if (teamId == HomeTeamId)
 			{
