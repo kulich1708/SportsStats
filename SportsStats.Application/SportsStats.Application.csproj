@@ -10,8 +10,4 @@
     <ProjectReference Include="..\SportsStats.Domain\SportsStats.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Matches\" />
-  </ItemGroup>
-
 </Project>
