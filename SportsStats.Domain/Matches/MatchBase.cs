@@ -150,7 +150,7 @@ namespace SportsStats.Domain.Matches
 		}
 		protected GoalEvent CreateGoal(int scoringTeamId, int goalScorerId, int period, int time)
 		{
-			return new GoalEvent(Id, scoringTeamId, goalScorerId, period, time);
+			return new GoalEvent(scoringTeamId, goalScorerId, period, time);
 		}
 		protected GoalEvent GetGoalEventById(int goalId)
 		{
@@ -174,7 +174,7 @@ namespace SportsStats.Domain.Matches
 		// Со временем отказаться от наследования матчей и собирать матч как конструктор из разных блоков
 		// Например из PenaltyRedactor, GoalRedactor, PeriodRedactor и тд.
 		public void FillGoalDetails(int goalId, int? firstAssistId, int? secondAssistId,
-									HockeyGoalStrengthType strengthType, HockeyGoalNetType? netType)
+									GoalStrengthType strengthType, GoalNetType? netType)
 		{
 			GoalEvent goal = GetGoalEventById(goalId);
 			if (firstAssistId.HasValue && !IsPlayerOnMatchRoster(firstAssistId.Value))

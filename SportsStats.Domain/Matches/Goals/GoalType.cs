@@ -4,34 +4,34 @@ using System.Text;
 
 namespace SportsStats.Domain.Matches.Goals
 {
-	public enum HockeyGoalStrengthType
+	public enum GoalStrengthType
 	{
 		EvenStrength,
 		PowerPlay,
 		Shorthanded,
 	}
-	public enum HockeyGoalNetType
+	public enum GoalNetType
 	{
 		EmptyNet
 	}
 
 	public static class HockeyGoalTypeText
 	{
-		private static readonly Dictionary<HockeyGoalStrengthType, string> StrengthDescription = new()
+		private static readonly Dictionary<GoalStrengthType, string> StrengthDescription = new()
 		{
-			[HockeyGoalStrengthType.EvenStrength] = "В равных составах",
-			[HockeyGoalStrengthType.PowerPlay] = "В большинстве",
-			[HockeyGoalStrengthType.Shorthanded] = "В меньшенстве",
+			[GoalStrengthType.EvenStrength] = "В равных составах",
+			[GoalStrengthType.PowerPlay] = "В большинстве",
+			[GoalStrengthType.Shorthanded] = "В меньшенстве",
 		};
-		public static string GetDescription(this HockeyGoalStrengthType strengthType)
+		public static string GetDescription(this GoalStrengthType strengthType)
 		{
 			return StrengthDescription.TryGetValue(strengthType, out var text) ? text : string.Empty;
 		}
-		public static Dictionary<HockeyGoalNetType, string> NetDescription = new()
+		public static Dictionary<GoalNetType, string> NetDescription = new()
 		{
-			[HockeyGoalNetType.EmptyNet] = "В пустые ворота"
+			[GoalNetType.EmptyNet] = "В пустые ворота"
 		};
-		public static string GetDescription(this HockeyGoalNetType netType)
+		public static string GetDescription(this GoalNetType netType)
 		{
 			return NetDescription.TryGetValue(netType, out var text) ? text : string.Empty;
 		}
