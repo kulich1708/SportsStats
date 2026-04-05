@@ -5,16 +5,16 @@ using System.Text;
 
 namespace SportsStats.Domain.Tournaments.Rules
 {
-	public class MatchDurationRules : BaseEntity
+	public record MatchDurationRules
 	{
-		public string Name { get; private set; }
-		public int PeriodsCount { get; private set; }               // Количество периодов
-		public int PeriodDurationSeconds { get; private set; }      // Длительность одного периода
-		public bool HasOvertime { get; private set; }               // Наличие овертайма
-		public int? OvertimeDurationSeconds { get; private set; }   // Длительность одного овертайма. Если null, то бесконечное время до первого гола
-		public int? OvertimesCount { get; private set; }            // Возможное количество овертаймов. Если null, то бесконечно как в плей-офф в хоккее
-		public int ShootoutsCount { get; private set; }             // Количество булитов. 0, если не предусмотрены
-		public bool SuddenDeathOvertime { get; private set; }       // Весь овертайм или до победного гола
+		public string Name { get; init; }
+		public int PeriodsCount { get; init; }               // Количество периодов
+		public int PeriodDurationSeconds { get; init; }      // Длительность одного периода
+		public bool HasOvertime { get; init; }               // Наличие овертайма
+		public int? OvertimeDurationSeconds { get; init; }   // Длительность одного овертайма. Если null, то бесконечное время до первого гола
+		public int? OvertimesCount { get; init; }            // Возможное количество овертаймов. Если null, то бесконечно как в плей-офф в хоккее
+		public int ShootoutsCount { get; init; }             // Количество булитов. 0, если не предусмотрены
+		public bool SuddenDeathOvertime { get; init; }       // Весь овертайм или до победного гола
 
 		public MatchDurationRules(
 			string name,
@@ -31,13 +31,14 @@ namespace SportsStats.Domain.Tournaments.Rules
 			PeriodDurationSeconds = periodDurationSeconds;
 			HasOvertime = hasOvertime;
 			OvertimeDurationSeconds = overtimeDurationSeconds;
+			OvertimesCount = overtimesCount;
 			SuddenDeathOvertime = suddenDeathOvertime;
 			ShootoutsCount = shootoutsCount;
 
-			Validate();
+			ValidateRules();
 		}
 
-		private void Validate()
+		private void ValidateRules()
 		{
 			if (PeriodsCount <= 0)
 				throw new ArgumentException("Periods count must be positive");
@@ -53,6 +54,38 @@ namespace SportsStats.Domain.Tournaments.Rules
 				throw new ArgumentException("There cannot be multiple overtimes unless their duration is specified");
 			if (HasOvertime && (!OvertimeDurationSeconds.HasValue || !OvertimesCount.HasValue) && ShootoutsCount > 0)
 				throw new ArgumentException("Shootouts are impossible with endless overtime");
+		}
+		public bool IsValidPeriod(int period)
+		{
+			if (period <= 0)
+				return false;
+
+			if (period > PeriodsCount && !HasOvertime)
+				return false;
+
+			if (OvertimesCount.HasValue && period > OvertimesCount + PeriodsCount)
+				return false;
+
+			return true;
+		}
+		public bool IsValidTimeInPeriod(int period, int time)
+		{
+			if (!IsValidPeriod(period)) return false;
+
+			if (time < 0) return false;
+
+			if (period <= PeriodsCount)
+				return time <= PeriodDurationSeconds;
+
+			return time <= (OvertimeDurationSeconds ?? int.MaxValue);
+		}
+		public bool DoesGoalEndMatch(int period)
+		{
+			return IsValidPeriod(period) && period > PeriodsCount && SuddenDeathOvertime;
+		}
+		public bool IsOvertimePeriod(int period)
+		{
+			return IsValidPeriod(period) && period > PeriodsCount;
 		}
 
 		// Фабричные методы для удобства

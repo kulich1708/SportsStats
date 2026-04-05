@@ -5,16 +5,16 @@ using System.Text;
 
 namespace SportsStats.Domain.Tournaments.Rules
 {
-	public class TournamentRules : BaseEntity
+	public class TournamentRules
 	{
 
-		public int MatchDurationRulesId { get; private set; }
-		public int MatchRosterRulesId { get; private set; }
+		public MatchDurationRules MatchDurationRules { get; private set; }
+		public MatchRosterRules MatchRosterRules { get; private set; }
 
-		public TournamentRules(int matchDurationRulesId, int matchRosterRulesId)
+		public TournamentRules(MatchDurationRules matchDurationRules, MatchRosterRules matchRosterRules)
 		{
-			MatchDurationRulesId = matchDurationRulesId;
-			MatchRosterRulesId = matchRosterRulesId;
+			MatchDurationRules = matchDurationRules ?? throw new ArgumentNullException();
+			MatchRosterRules = matchRosterRules ?? throw new ArgumentNullException();
 		}
 	}
 }
