@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SportsStats.Domain.Players
 {
-	public class Player : IAggregateRoot
+	public class Player : BaseEntity, IAggregateRoot
 	{
 		public string Name { get; private set; }
 		public string Surname { get; private set; }
