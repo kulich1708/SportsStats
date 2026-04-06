@@ -61,6 +61,12 @@ namespace SportsStats.Application.Tournaments
 
 			_tournamentRepository.Save(tournament);
 		}
+		public void SetStatus(int tournamentId, TournamentStatus status)
+		{
+			Tournament tournament = GetTournamentOrThrow(tournamentId);
+			tournament.SetStatus(status);
+			_tournamentRepository.Save(tournament);
+		}
 
 		// Временно через фабрику
 		public void SetRules(int tournamentId)
