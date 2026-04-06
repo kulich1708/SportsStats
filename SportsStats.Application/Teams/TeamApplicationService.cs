@@ -16,7 +16,7 @@ namespace SportsStats.Application.Teams
 			_teamRepository = teamRepository;
 		}
 
-		public Team Create(int teamId, string name)
+		public Team Create(string name)
 		{
 			Team team = new Team(name);
 			return _teamRepository.Save(team);
