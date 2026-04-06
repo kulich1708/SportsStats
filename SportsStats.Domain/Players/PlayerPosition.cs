@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SportsStats.Domain.Players
 {
-	public class PlayerPosition
+	public record PlayerPosition
 	{
 		public PositionType PrimaryPosition { get; private set; }
 		public HashSet<PositionType> Positions { get; private set; }
