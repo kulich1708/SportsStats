@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="ConsoleApp/ConsoleApp.csproj" Id="ca4ee48d-7566-46c7-88a9-00183f3ffbfe" />
   <Project Path="SportsStats.API/SportsStats.API.csproj" Id="312b7858-2127-486d-88ad-9f1f7d14cd8b" />
   <Project Path="SportsStats.Application/SportsStats.Application.csproj" Id="50a78906-90f1-4f9c-9529-c25afd842ca2" />
   <Project Path="SportsStats.Domain/SportsStats.Domain.csproj" Id="272fc6ca-00a0-4106-aa4c-9e59f3e2d081" />

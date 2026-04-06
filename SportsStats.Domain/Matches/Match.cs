@@ -27,10 +27,11 @@ namespace SportsStats.Domain.Matches
 		public MatchStatus Status { get; private set; } = MatchStatus.Waiting;
 		public int HomeTeamScore { get; private set; } = 0;
 		public int AwayTeamScore { get; private set; } = 0;
-		public MatchWinType HomeTeamWinType { get; private set; }
-		public MatchWinType AwayTeamWinType { get; private set; }
+		public MatchWinType? HomeTeamWinType { get; private set; }
+		public MatchWinType? AwayTeamWinType { get; private set; }
 		public bool IsOvertime { get; private set; }
 		public IReadOnlyList<GoalEvent> UpdatedGoals => _updatedGoals;
+		public IReadOnlyList<GoalEvent> Goals => _goals;
 
 		public Match(int tournamentId, int homeTeamId, int awayTeamId, TournamentRules rules)
 		{

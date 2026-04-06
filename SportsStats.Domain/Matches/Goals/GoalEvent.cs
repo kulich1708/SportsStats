@@ -14,7 +14,7 @@ namespace SportsStats.Domain.Matches.Goals
 		public int Time { get; private set; }
 		public int? FirstAssistId { get; private set; }
 		public int? SecondAssistId { get; private set; }
-		public GoalStrengthType StrengthType { get; private set; }
+		public GoalStrengthType? StrengthType { get; private set; }
 		public GoalNetType? NetType { get; private set; }
 
 
@@ -29,6 +29,11 @@ namespace SportsStats.Domain.Matches.Goals
 
 		public void SetAssists(int? firstAssistId, int? secondAssistId)
 		{
+			if (firstAssistId.HasValue && secondAssistId.HasValue &&
+				firstAssistId.Value == secondAssistId.Value)
+				throw new ArgumentException("Нельзя установить первым и вторым ассистентом одного и того же игрока");
+			if (firstAssistId == GoalScorerId || secondAssistId == GoalScorerId)
+				throw new ArgumentException("Нельзя установить ассистентом игрока, который забил этот гол");
 			SetFirstAssists(firstAssistId);
 			SetSecondAssists(secondAssistId);
 		}
