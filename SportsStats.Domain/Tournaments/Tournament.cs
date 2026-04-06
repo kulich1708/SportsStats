@@ -30,7 +30,7 @@ namespace SportsStats.Domain.Tournaments
 		public void Start(DateTime startedAt)
 		{
 			if (_teamsId.Count() < 2)
-				throw new AggregateException("Нельзя начать турнир, если не заявлено как минимум 2 команды");
+				throw new ArgumentException("Нельзя начать турнир, если не заявлено как минимум 2 команды");
 			Status = TournamentStatus.InProgress;
 			StartedAt = startedAt;
 		}
@@ -56,13 +56,13 @@ namespace SportsStats.Domain.Tournaments
 		public void SetStatus(TournamentStatus status)
 		{
 			if (status == TournamentStatus.Draft && Status != status)
-				throw new AggregateException("Нельзя установить статус Draft, после любого другого");
+				throw new ArgumentException("Нельзя установить статус Draft, после любого другого");
 			if (status == TournamentStatus.Registration && Status != TournamentStatus.Draft && status != Status && HasRules())
-				throw new AggregateException("Статус Registration  можно установить только если сейчас установлен статус Draft и уже установлены правила турнира");
+				throw new ArgumentException("Статус Registration  можно установить только если сейчас установлен статус Draft и уже установлены правила турнира");
 			if (status == TournamentStatus.InProgress && Status != TournamentStatus.Registration && status != Status)
-				throw new AggregateException("Статус InProgress можно установить только если сейчас установлен статус Registration ");
+				throw new ArgumentException("Статус InProgress можно установить только если сейчас установлен статус Registration ");
 			if (status == TournamentStatus.Finished && Status != TournamentStatus.InProgress && status != Status)
-				throw new AggregateException("Статус Finished можно установить только если сейчас установлен статус InProgress");
+				throw new ArgumentException("Статус Finished можно установить только если сейчас установлен статус InProgress");
 
 			Status = status;
 
