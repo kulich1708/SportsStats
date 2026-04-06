@@ -11,9 +11,15 @@ namespace SportsStats.Application.Players
 		private IPlayerRepository _playerRepository;
 		private ITeamRepository _teamRepository;
 
-		public Player Create(string name, string surname)
+		public PlayerApplicationService(IPlayerRepository playerRepository, ITeamRepository teamRepository)
 		{
-			Player player = new Player(name, surname);
+			_playerRepository = playerRepository;
+			_teamRepository = teamRepository;
+		}
+
+		public Player Create(string name, string surname, PositionType position)
+		{
+			Player player = new Player(name, surname, position);
 			return _playerRepository.Save(player);
 		}
 		public void ChangeTeam(int playerId, int teamId)
@@ -22,15 +28,6 @@ namespace SportsStats.Application.Players
 			Team team = GetTeamOrThrow(teamId);
 
 			player.ChangeTeam(teamId);
-
-			_playerRepository.Save(player);
-		}
-
-		public void SetPosition(int playerId, PositionType position)
-		{
-			Player player = GetPlayerOrThrow(playerId);
-
-			player.SetPosition(position);
 
 			_playerRepository.Save(player);
 		}
