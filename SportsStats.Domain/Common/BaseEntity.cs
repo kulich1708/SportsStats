@@ -23,6 +23,10 @@ namespace SportsStats.Domain.Common
 		{
 			_id = id;
 		}
+		public void SetId(int id)
+		{
+			_id = id;
+		}
 
 		// Сравнение сущностей по Id и типу
 		public override bool Equals(object? obj)
