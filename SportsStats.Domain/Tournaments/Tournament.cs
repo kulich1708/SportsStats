@@ -9,7 +9,7 @@ namespace SportsStats.Domain.Tournaments
 	public class Tournament : BaseEntity, IAggregateRoot
 	{
 		private TournamentRules _tournamentRules;
-		private List<int> _teamsId;
+		private List<int> _teamsId = new();
 		public string Name { get; private set; }
 		public DateTime StartedAt { get; private set; }
 		public DateTime FinishedAt { get; private set; }
