@@ -6,7 +6,8 @@ namespace SportsStats.Domain.Tournaments
 {
 	public enum TournamentStatus
 	{
-		Waiting,
+		Draft,
+		Registration,
 		InProgress,
 		Finished
 	}
