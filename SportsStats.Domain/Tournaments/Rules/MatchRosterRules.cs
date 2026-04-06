@@ -40,5 +40,14 @@ namespace SportsStats.Domain.Tournaments.Rules
 			if (MaxPlayers < calculatedMinPlayers || MinPlayers > calculatedMaxPlayers)
 				throw new ArgumentException("Проверьте настройки состава");
 		}
+
+		public static MatchRosterRules CreateKHLRules()
+		{
+			return new MatchRosterRules(
+			maxPlayers: 22, minPlayers: 20,
+			minForwards: 12, maxForwards: 13,
+			minDefensemans: 6, maxDefensemans: 7,
+			minGoalies: 2, maxGoalies: 2);
+		}
 	}
 }
