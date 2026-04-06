@@ -8,5 +8,9 @@ namespace SportsStats.Domain.Teams
 	public class Team : BaseEntity, IAggregateRoot
 	{
 		public string Name { get; private set; }
+		public Team(string name)
+		{
+			Name = name;
+		}
 	}
 }
