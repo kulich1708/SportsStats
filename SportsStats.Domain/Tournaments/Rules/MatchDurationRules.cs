@@ -25,7 +25,7 @@ namespace SportsStats.Domain.Tournaments.Rules
 			int? overtimeDurationSeconds,
 			int? overtimesCount,
 			bool suddenDeathOvertime,
-			bool isDrawPossible,
+			bool isDrawPossible = false,
 			int shootoutsCount = 0)
 		{
 			Name = name;
