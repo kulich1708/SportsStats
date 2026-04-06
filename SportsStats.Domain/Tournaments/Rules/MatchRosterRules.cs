@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SportsStats.Domain.Tournaments.Rules
 {
-	public class MatchRosterRules
+	public record MatchRosterRules
 	{
 		public int MaxPlayers { get; private set; }
 		public int MinPlayers { get; private set; }

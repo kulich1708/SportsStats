@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SportsStats.Domain.Tournaments.Rules
 {
-	public class TournamentRules
+	public record TournamentRules
 	{
 
 		public MatchDurationRules MatchDurationRules { get; private set; }
