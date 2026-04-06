@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SportsStats.Domain.Tournaments.Rules
 {
-	public class MatchPointsRules
+	public record MatchPointsRules
 	{
 		public Dictionary<MatchWinType, int> Points = new();
 		public MatchPointsRules(int regWin, int otWin, int regLoss, int otLoss)
