@@ -1,6 +1,7 @@
 ﻿using SportsStats.Domain.Shared;
 using SportsStats.Domain.Teams;
 using SportsStats.Domain.Tournaments;
+using SportsStats.Domain.Tournaments.Rules;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -28,21 +29,27 @@ namespace SportsStats.Application.Tournaments
 
 			return tournament;
 		}
-		public void Start(int tournamentId)
+		private Tournament DoSomething(int tournamentId, Action<Tournament> action)
 		{
 			Tournament tournament = GetTournamentOrThrow(tournamentId);
 
-			tournament.Start(_timeProvider.GetCurrentTime());
+			action(tournament);
 
-			_tournamentRepository.Save(tournament);
+			return _tournamentRepository.Save(tournament);
+		}
+		public Tournament Create(string name)
+		{
+			Tournament tournament = new Tournament(name);
+
+			return _tournamentRepository.Save(tournament);
+		}
+		public void Start(int tournamentId)
+		{
+			DoSomething(tournamentId, tournament => tournament.Start(_timeProvider.GetCurrentTime()));
 		}
 		public void Finish(int tournamentId)
 		{
-			Tournament tournament = GetTournamentOrThrow(tournamentId);
-
-			tournament.Finish(_timeProvider.GetCurrentTime());
-
-			_tournamentRepository.Save(tournament);
+			DoSomething(tournamentId, tournament => tournament.Finish(_timeProvider.GetCurrentTime()));
 		}
 		public void RegistrateTeam(int tournamentId, int teamId)
 		{
@@ -53,6 +60,12 @@ namespace SportsStats.Application.Tournaments
 			tournament.RegistrateTeam(teamId);
 
 			_tournamentRepository.Save(tournament);
+		}
+
+		// Временно через фабрику
+		public void SetRules(int tournamentId)
+		{
+			DoSomething(tournamentId, tournament => tournament.SetRules(TournamentRules.CreateKHLRules()));
 		}
 	}
 }
