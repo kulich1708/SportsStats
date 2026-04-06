@@ -34,7 +34,7 @@ namespace SportsStats.Domain.Players
 		{
 			Birthday = birthday;
 		}
-		public void SetTeam(int teamId)
+		public void ChangeTeam(int teamId)
 		{
 			TeamId = teamId;
 		}
