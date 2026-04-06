@@ -18,5 +18,12 @@ namespace SportsStats.Domain.Tournaments.Rules
 			MatchRosterRules = matchRosterRules ?? throw new ArgumentNullException();
 			MatchPointsRules = matchPointsRules ?? throw new ArgumentNullException();
 		}
+		public static TournamentRules CreateKHLRules()
+		{
+			var durationRules = MatchDurationRules.CreateKHLRules();
+			var rosterRules = MatchRosterRules.CreateKHLRules();
+			var pointsRules = MatchPointsRules.CreateKHLRules();
+			return new TournamentRules(durationRules, rosterRules, pointsRules);
+		}
 	}
 }
