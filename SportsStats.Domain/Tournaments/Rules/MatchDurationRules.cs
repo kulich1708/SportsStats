@@ -79,9 +79,11 @@ namespace SportsStats.Domain.Tournaments.Rules
 			if (time < 0) return false;
 
 			if (period <= PeriodsCount)
-				return time <= PeriodDurationSeconds;
+				return time < PeriodDurationSeconds;
+			if (OvertimeDurationSeconds.HasValue)
+				return time < OvertimeDurationSeconds;
 
-			return time <= (OvertimeDurationSeconds ?? int.MaxValue);
+			return true;
 		}
 		public bool DoesGoalEndMatch(int period)
 		{
