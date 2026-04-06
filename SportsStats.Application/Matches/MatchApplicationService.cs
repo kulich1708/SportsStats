@@ -14,20 +14,17 @@ namespace SportsStats.Application.Matches
 		private IPlayerRepository _playerRepository;
 		private ITournamentRepository _tournamentRepository;
 		private IMatchRepository _matchRepository;
-		private ITournamentRegistrationRepository _tournamentRegistrationRepository;
 		private IGoalRepository _goalRepository;
 		private ITimeProvider _timeProvider;
 
 		public MatchApplicationService(IPlayerRepository playerRepository,
 			ITournamentRepository tournamentRepository, IMatchRepository matchRepository,
-			ITournamentRegistrationRepository tournamentRegistrationRepository,
 			IGoalRepository goalRepository,
 			ITimeProvider timeProvider)
 		{
 			_playerRepository = playerRepository;
 			_tournamentRepository = tournamentRepository;
 			_matchRepository = matchRepository;
-			_tournamentRegistrationRepository = tournamentRegistrationRepository;
 			_goalRepository = goalRepository;
 			_timeProvider = timeProvider;
 		}
@@ -35,13 +32,15 @@ namespace SportsStats.Application.Matches
 		public Match CreateMatch(int tournamentId, int homeTeamId, int awayTeamId)
 		{
 			Tournament tournament = _tournamentRepository.FindById(tournamentId);
-			List<int> tournamentTeams = _tournamentRegistrationRepository.FindRegisteredTeamIds(tournamentId);
+			List<int> tournamentTeams = tournament.TeamsId.ToList();
 
 			if (tournament == null)
 				throw new ArgumentException("Нет турнира с таким Id");
 
 			if (tournament.Status == TournamentStatus.Finished)
 				throw new ArgumentException("Нельзя добавить матч в законченный турнир");
+			if (tournament.Status == TournamentStatus.Draft)
+				throw new ArgumentException("Турнир ещё закрыт для добавления матчей");
 
 			if (!tournamentTeams.Contains(homeTeamId) || !tournamentTeams.Contains(awayTeamId))
 				throw new ArgumentException("Команда не заявлена на этот чемпионат");
@@ -94,7 +93,7 @@ namespace SportsStats.Application.Matches
 			_matchRepository.Save(match);
 		}
 		public void FillGoalDetails(int matchId, int goalId, int? firstAssistId, int? secondAssistId,
-									GoalStrengthType strengthType, GoalNetType? netType)
+									GoalStrengthType strengthType, GoalNetType? netType = null)
 		{
 			Match match = GetMatchOrThrow(matchId);
 
