@@ -10,12 +10,13 @@ namespace SportsStats.Domain.Players
 		public string Name { get; private set; }
 		public string Surname { get; private set; }
 		public int TeamId { get; private set; }
-		public PositionType Position { get; private set; }
-		public Player(string name, string surname)
+		public PositionType Position { get; init; }
+		public Player(string name, string surname, PositionType position)
 		{
 			ValidateNameAndSurname(name, surname);
 			Name = name;
 			Surname = surname;
+			Position = position;
 		}
 		private void ValidateNameAndSurname(string name, string surname)
 		{
@@ -31,10 +32,6 @@ namespace SportsStats.Domain.Players
 		public void ChangeTeam(int teamId)
 		{
 			TeamId = teamId;
-		}
-		public void SetPosition(PositionType position)
-		{
-			Position = position;
 		}
 	}
 }
