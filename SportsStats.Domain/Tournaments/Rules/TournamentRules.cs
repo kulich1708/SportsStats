@@ -12,6 +12,7 @@ namespace SportsStats.Domain.Tournaments.Rules
 		public MatchRosterRules MatchRosterRules { get; private set; }
 		public MatchPointsRules MatchPointsRules { get; private set; }
 
+		private TournamentRules() { }
 		public TournamentRules(MatchDurationRules matchDurationRules, MatchRosterRules matchRosterRules, MatchPointsRules matchPointsRules)
 		{
 			MatchDurationRules = matchDurationRules ?? throw new ArgumentNullException();
