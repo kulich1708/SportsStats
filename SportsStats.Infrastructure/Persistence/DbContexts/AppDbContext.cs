@@ -13,7 +13,6 @@ namespace SportsStats.Infrastructure.Persistence.DbContexts
 		{
 		}
 
-		// Это свойство = таблица Products в базе данных
-		public DbSet<Player> Products { get; set; }
+		public DbSet<Player> Players { get; set; }
 	}
 }
