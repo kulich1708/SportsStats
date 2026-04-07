@@ -1,12 +1,16 @@
 <Project>
-  <PropertyGroup>
-    <Version Condition="'$(Version)' == ''">0.0.1-local</Version>
-    <Authors>Kulichkov Vladislav</Authors>
-    <RepositoryUrl>https://github.com/kulich1708/SportsStats</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <PackageProjectUrl>https://github.com/kulich1708/SportsStats</PackageProjectUrl>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-  </PropertyGroup>
+	<PropertyGroup>
+		<Version Condition="'$(Version)' == ''">0.0.1-local</Version>
+		<Authors>Kulichkov Vladislav</Authors>
+		<RepositoryUrl>https://github.com/kulich1708/SportsStats</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageProjectUrl>https://github.com/kulich1708/SportsStats</PackageProjectUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<EFStartupProject>SportsStats.API</EFStartupProject>
+	</PropertyGroup>
 </Project>
