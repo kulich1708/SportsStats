@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SportsStats.Infrastructure.Persistence.DbContexts;
@@ -11,9 +12,11 @@ using SportsStats.Infrastructure.Persistence.DbContexts;
 namespace SportsStats.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260407124302_AddRulesTest")]
+    partial class AddRulesTest
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -195,13 +198,25 @@ namespace SportsStats.Infrastructure.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
-                    b.Property<string>("TeamsId")
-                        .IsRequired()
-                        .HasColumnType("jsonb");
-
                     b.HasKey("Id");
 
                     b.ToTable("Tournaments");
+                });
+
+            modelBuilder.Entity("SportsStats.Domain.Tournaments.TournamentTest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TournamentsTest");
                 });
 
             modelBuilder.Entity("SportsStats.Domain.Matches.Goals.GoalEvent", b =>
@@ -215,112 +230,47 @@ namespace SportsStats.Infrastructure.Migrations
                         .HasForeignKey("MatchId1");
                 });
 
-            modelBuilder.Entity("SportsStats.Domain.Tournaments.Tournament", b =>
+            modelBuilder.Entity("SportsStats.Domain.Tournaments.TournamentTest", b =>
                 {
-                    b.OwnsOne("SportsStats.Domain.Tournaments.Rules.TournamentRules", "TournamentRules", b1 =>
+                    b.OwnsOne("SportsStats.Domain.Tournaments.Rules.MatchDurationRules", "TournamentRules", b1 =>
                         {
-                            b1.Property<int>("TournamentId");
+                            b1.Property<int>("TournamentTestId")
+                                .HasColumnType("integer");
 
-                            b1.HasKey("TournamentId");
+                            b1.Property<bool>("HasOvertime")
+                                .HasColumnType("boolean");
 
-                            b1.ToTable("Tournaments");
+                            b1.Property<bool>("IsDrawPossible")
+                                .HasColumnType("boolean");
 
-                            b1
-                                .ToJson("TournamentRules")
-                                .HasColumnType("jsonb");
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<int?>("OvertimeDurationSeconds")
+                                .HasColumnType("integer");
+
+                            b1.Property<int?>("OvertimesCount")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("PeriodDurationSeconds")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("PeriodsCount")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("ShootoutsCount")
+                                .HasColumnType("integer");
+
+                            b1.Property<bool>("SuddenDeathOvertime")
+                                .HasColumnType("boolean");
+
+                            b1.HasKey("TournamentTestId");
+
+                            b1.ToTable("TournamentsTest");
 
                             b1.WithOwner()
-                                .HasForeignKey("TournamentId");
-
-                            b1.OwnsOne("MatchPointsRules", "MatchPointsRules", b2 =>
-                                {
-                                    b2.Property<int>("TournamentRulesTournamentId");
-
-                                    b2.Property<int?>("DrawPoints");
-
-                                    b2.Property<int>("LossPoints");
-
-                                    b2.Property<int>("OTLossPoints");
-
-                                    b2.Property<int>("OTWinPoints");
-
-                                    b2.Property<int>("WinPoints");
-
-                                    b2.HasKey("TournamentRulesTournamentId");
-
-                                    b2.ToTable("Tournaments");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("TournamentRulesTournamentId");
-                                });
-
-                            b1.OwnsOne("SportsStats.Domain.Tournaments.Rules.MatchDurationRules", "MatchDurationRules", b2 =>
-                                {
-                                    b2.Property<int>("TournamentRulesTournamentId");
-
-                                    b2.Property<bool>("HasOvertime");
-
-                                    b2.Property<bool>("IsDrawPossible");
-
-                                    b2.Property<string>("Name")
-                                        .IsRequired();
-
-                                    b2.Property<int?>("OvertimeDurationSeconds");
-
-                                    b2.Property<int?>("OvertimesCount");
-
-                                    b2.Property<int>("PeriodDurationSeconds");
-
-                                    b2.Property<int>("PeriodsCount");
-
-                                    b2.Property<int>("ShootoutsCount");
-
-                                    b2.Property<bool>("SuddenDeathOvertime");
-
-                                    b2.HasKey("TournamentRulesTournamentId");
-
-                                    b2.ToTable("Tournaments");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("TournamentRulesTournamentId");
-                                });
-
-                            b1.OwnsOne("SportsStats.Domain.Tournaments.Rules.MatchRosterRules", "MatchRosterRules", b2 =>
-                                {
-                                    b2.Property<int>("TournamentRulesTournamentId");
-
-                                    b2.Property<int>("MaxDefensemans");
-
-                                    b2.Property<int>("MaxForwards");
-
-                                    b2.Property<int>("MaxGoalies");
-
-                                    b2.Property<int>("MaxPlayers");
-
-                                    b2.Property<int>("MinDefensemans");
-
-                                    b2.Property<int>("MinForwards");
-
-                                    b2.Property<int>("MinGoalies");
-
-                                    b2.Property<int>("MinPlayers");
-
-                                    b2.HasKey("TournamentRulesTournamentId");
-
-                                    b2.ToTable("Tournaments");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("TournamentRulesTournamentId");
-                                });
-
-                            b1.Navigation("MatchDurationRules")
-                                .IsRequired();
-
-                            b1.Navigation("MatchPointsRules")
-                                .IsRequired();
-
-                            b1.Navigation("MatchRosterRules")
-                                .IsRequired();
+                                .HasForeignKey("TournamentTestId");
                         });
 
                     b.Navigation("TournamentRules")
