@@ -32,7 +32,8 @@ namespace SportsStats.Domain.Matches
 		public bool IsOvertime { get; private set; }
 		public IReadOnlyList<GoalEvent> UpdatedGoals => _updatedGoals;
 		public IReadOnlyList<GoalEvent> Goals => _goals;
-
+		public TournamentRules Rules => _rules;
+		private Match() { }
 		public Match(int tournamentId, int homeTeamId, int awayTeamId, TournamentRules rules)
 		{
 			if (homeTeamId == awayTeamId)

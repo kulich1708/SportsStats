@@ -17,6 +17,7 @@ namespace SportsStats.Domain.Tournaments.Rules
 		public bool SuddenDeathOvertime { get; init; }       // Весь овертайм или до победного гола
 		public bool IsDrawPossible { get; init; }
 
+		private MatchDurationRules() { }
 		public MatchDurationRules(
 			string name,
 			int periodsCount,
