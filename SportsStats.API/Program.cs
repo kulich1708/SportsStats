@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
+using SportsStats.Infrastructure.Persistence.DbContexts;
 using System.Reflection;
 
 namespace SportsStats.API
@@ -8,6 +10,12 @@ namespace SportsStats.API
 		public static void Main(string[] args)
 		{
 			var builder = WebApplication.CreateBuilder(args);
+
+
+			// рнкэйн щрн лхмхлсл дкъ ад
+			builder.Services.AddDbContext<AppDbContext>(options =>
+				options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+			);
 
 			ConfigureServices(builder);
 
