@@ -2,19 +2,20 @@
 using SportsStats.Domain.Tournaments.Rules;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace SportsStats.Domain.Tournaments
 {
 	public class Tournament : BaseEntity, IAggregateRoot
 	{
-		private TournamentRules _tournamentRules;
 		private List<int> _teamsId = new();
 		public string Name { get; private set; }
 		public DateTime StartedAt { get; private set; }
 		public DateTime FinishedAt { get; private set; }
 		public TournamentStatus Status { get; private set; } = TournamentStatus.Draft;
-		public TournamentRules TournamentRules => _tournamentRules;
+
+		public TournamentRules TournamentRules { get; private set; }
 		public IReadOnlyList<int> TeamsId => _teamsId;
 
 		public Tournament(string name)
@@ -25,7 +26,7 @@ namespace SportsStats.Domain.Tournaments
 		{
 			if (!IsDraft())
 				throw new ArgumentException("Правила можно установить только когда турнир в статусе Draft");
-			_tournamentRules = tournamentRules;
+			TournamentRules = tournamentRules;
 		}
 		public void Start(DateTime startedAt)
 		{
@@ -44,7 +45,7 @@ namespace SportsStats.Domain.Tournaments
 		public bool IsRegistration() => Status == TournamentStatus.Registration;
 		public bool IsInProgress() => Status == TournamentStatus.InProgress;
 		public bool IsFinished() => Status == TournamentStatus.Finished;
-		public bool HasRules() => _tournamentRules != null;
+		public bool HasRules() => TournamentRules != null;
 
 		public void RegistrateTeam(int teamId)
 		{
