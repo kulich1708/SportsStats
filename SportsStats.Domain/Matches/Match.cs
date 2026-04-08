@@ -134,7 +134,7 @@ namespace SportsStats.Domain.Matches
 		}
 
 
-		public void AddGoal(int scoringTeamId, int goalScorerId, int period, int time, DateTime scoringMoment)
+		public GoalEvent AddGoal(int scoringTeamId, int goalScorerId, int period, int time, DateTime scoringMoment)
 		{
 			ValidateGoal(scoringTeamId, goalScorerId, period, time);
 
@@ -150,7 +150,7 @@ namespace SportsStats.Domain.Matches
 
 			if (_rules.MatchDurationRules.DoesGoalEndMatch(period))
 				Finish(scoringMoment);
-
+			return goal;
 		}
 
 		protected void ValidateGoal(int scoringTeamId, int goalScorerId, int period, int time)

@@ -6,7 +6,7 @@ namespace SportsStats.Domain.Tournaments
 {
 	public interface ITournamentRepository
 	{
-		public Tournament FindById(int tournamentId);
-		public Tournament Save(Tournament tournament);
+		public Task<Tournament?> FindById(int tournamentId);
+		public Task<Tournament> Save(Tournament tournament);
 	}
 }
