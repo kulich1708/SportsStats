@@ -1,0 +1,36 @@
+﻿using SportsStats.Domain.Matches;
+using SportsStats.Domain.Teams;
+using SportsStats.Infrastructure.Persistence.DbContexts;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace SportsStats.Infrastructure.Persistence.Repositories
+{
+	public class MatchRepository : IMatchRepository
+	{
+		private readonly AppDbContext _context;
+
+		public MatchRepository(AppDbContext context)
+		{
+			_context = context;
+		}
+
+		public async Task<Match?> FindById(int matchId)
+		{
+			return await _context.Matches.FirstOrDefaultAsync(match => match.Id == matchId);
+		}
+
+		public async Task<Match> Save(Match match)
+		{
+			if (match.Id == 0)
+				await _context.Matches.AddAsync(match);
+			else
+				_context.Matches.Update(match);
+
+			//await _context.SaveChangesAsync();
+			return match;
+		}
+	}
+}

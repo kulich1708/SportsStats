@@ -6,7 +6,7 @@ namespace SportsStats.Domain.Matches
 {
 	public interface IMatchRepository
 	{
-		public Match FindById(int id);
-		public Match Save(Match match);
+		public Task<Match?> FindById(int id);
+		public Task<Match> Save(Match match);
 	}
 }

@@ -6,107 +6,86 @@ using SportsStats.Domain.Shared;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using SportsStats.Domain.Services;
 
 namespace SportsStats.Application.Matches
 {
-	public class MatchApplicationService
+	public class MatchApplicationService(IPlayerRepository playerRepository,
+		ITournamentRepository tournamentRepository, IMatchRepository matchRepository,
+		IGoalRepository goalRepository,
+		ITimeProvider timeProvider)
 	{
-		private IPlayerRepository _playerRepository;
-		private ITournamentRepository _tournamentRepository;
-		private IMatchRepository _matchRepository;
-		private IGoalRepository _goalRepository;
-		private ITimeProvider _timeProvider;
+		private readonly IPlayerRepository _playerRepository = playerRepository;
+		private readonly ITournamentRepository _tournamentRepository = tournamentRepository;
+		private readonly IMatchRepository _matchRepository = matchRepository;
+		private readonly IGoalRepository _goalRepository = goalRepository;
+		private readonly ITimeProvider _timeProvider = timeProvider;
 
-		public MatchApplicationService(IPlayerRepository playerRepository,
-			ITournamentRepository tournamentRepository, IMatchRepository matchRepository,
-			IGoalRepository goalRepository,
-			ITimeProvider timeProvider)
+		public async Task<Match> CreateMatch(int tournamentId, int homeTeamId, int awayTeamId)
 		{
-			_playerRepository = playerRepository;
-			_tournamentRepository = tournamentRepository;
-			_matchRepository = matchRepository;
-			_goalRepository = goalRepository;
-			_timeProvider = timeProvider;
+			Tournament tournament = await _tournamentRepository.FindById(tournamentId)
+				?? throw new ArgumentException("Нет турнира с таким Id");
+
+			Match match = new MatchCreationService().CreateMatch(tournament, homeTeamId, awayTeamId);
+			return await _matchRepository.Save(match);
 		}
-
-		public Match CreateMatch(int tournamentId, int homeTeamId, int awayTeamId)
+		public async Task StartMatch(int matchId)
 		{
-			Tournament tournament = _tournamentRepository.FindById(tournamentId);
-			List<int> tournamentTeams = tournament.TeamsId.ToList();
-
-			if (tournament == null)
-				throw new ArgumentException("Нет турнира с таким Id");
-
-			if (tournament.Status == TournamentStatus.Finished)
-				throw new ArgumentException("Нельзя добавить матч в законченный турнир");
-			if (tournament.Status == TournamentStatus.Draft)
-				throw new ArgumentException("Турнир ещё закрыт для добавления матчей");
-
-			if (!tournamentTeams.Contains(homeTeamId) || !tournamentTeams.Contains(awayTeamId))
-				throw new ArgumentException("Команда не заявлена на этот чемпионат");
-
-			Match match = new Match(tournamentId, homeTeamId, awayTeamId, tournament.TournamentRules);
-			return _matchRepository.Save(match);
-		}
-		public void StartMatch(int matchId)
-		{
-			Match match = GetMatchOrThrow(matchId);
+			Match match = await GetMatchOrThrow(matchId);
 
 			match.Start(_timeProvider.GetCurrentTime());
 
-			_matchRepository.Save(match);
+			await _matchRepository.Save(match);
 		}
-		public void FinishMatch(int matchId)
+		public async Task FinishMatch(int matchId)
 		{
-			Match match = GetMatchOrThrow(matchId);
+			Match match = await GetMatchOrThrow(matchId);
 
 			match.Finish(_timeProvider.GetCurrentTime());
 
-			_matchRepository.Save(match);
+			await _matchRepository.Save(match);
 		}
 
-		public void AddGoal(int matchId, int scoringTeamId, int goalScorerId, int period, int time)
+		public async Task<GoalEvent> AddGoal(int matchId, int scoringTeamId, int goalScorerId, int period, int time)
 		{
-			Match match = GetMatchOrThrow(matchId);
+			Match match = await GetMatchOrThrow(matchId);
 
-			match.AddGoal(scoringTeamId, goalScorerId, period, time, _timeProvider.GetCurrentTime());
+			GoalEvent goal = match.AddGoal(scoringTeamId, goalScorerId, period, time, _timeProvider.GetCurrentTime());
 
-			foreach (var goal in match.UpdatedGoals)
-				_goalRepository.Save(goal);
+			//foreach (var goal in match.UpdatedGoals)
+			//	await _goalRepository.Save(goal);
 			match.OnSaved();
-			_matchRepository.Save(match);
-
+			await _matchRepository.Save(match);
+			return goal;
 		}
-		public void AddPlayerToRoster(int matchId, int playerId, int teamId)
+		public async Task AddPlayerToRoster(int matchId, int playerId, int teamId)
 		{
-			Match match = GetMatchOrThrow(matchId);
-			Player player = _playerRepository.FindById(playerId);
-
-			if (player == null)
-				throw new ArgumentException("Игрока с таким id не существует");
+			Match match = await GetMatchOrThrow(matchId);
+			Player player = await _playerRepository.FindById(playerId)
+				?? throw new ArgumentException("Игрока с таким id не существует");
 
 			if (player.TeamId != teamId)
 				throw new ArgumentException("Игрок не состоит в данной команде");
 
 			match.AddPlayerToRoster(playerId, teamId);
 
-			_matchRepository.Save(match);
+			await _matchRepository.Save(match);
 		}
-		public void FillGoalDetails(int matchId, int goalId, int? firstAssistId, int? secondAssistId,
+		public async Task FillGoalDetails(int matchId, int goalId, int? firstAssistId, int? secondAssistId,
 									GoalStrengthType strengthType, GoalNetType? netType = null)
 		{
-			Match match = GetMatchOrThrow(matchId);
+			Match match = await GetMatchOrThrow(matchId);
 
 			match.FillGoalDetails(goalId, firstAssistId, secondAssistId, strengthType, netType);
 
-			foreach (var goal in match.UpdatedGoals)
-				_goalRepository.Save(goal);
+			//foreach (var goal in match.UpdatedGoals)
+			//	await _goalRepository.Save(goal);
 			match.OnSaved();
-			_matchRepository.Save(match);
+			await _matchRepository.Save(match);
 		}
-		private Match GetMatchOrThrow(int matchId)
+		private async Task<Match> GetMatchOrThrow(int matchId)
 		{
-			return _matchRepository.FindById(matchId)
+			return await _matchRepository.FindById(matchId)
 				?? throw new ArgumentException($"Матч {matchId} не существует");
 		}
 	}

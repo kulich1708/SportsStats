@@ -9,18 +9,9 @@ namespace SportsStats.Domain.Services
 {
 	public class MatchCreationService : IMatchCreationService
 	{
-		private readonly ITournamentRepository _tournamentRepository;
-		private readonly IMatchRepository _matchRepository;
 
-		public MatchCreationService(ITournamentRepository tournamentRepository, IMatchRepository matchRepository)
+		public Match CreateMatch(Tournament tournament, int homeTeamId, int awayTeamId)
 		{
-			_tournamentRepository = tournamentRepository;
-			_matchRepository = matchRepository;
-		}
-
-		public Match CreateMatch(int tournamentId, int homeTeamId, int awayTeamId)
-		{
-			Tournament tournament = GetTournamentOrThrow(tournamentId);
 			if (!tournament.IsRegistration() && !tournament.IsInProgress())
 				throw new ArgumentException("Нельзя создать матч в турнире, который ещё не открыт");
 			if (!IsTeamInTournament(tournament, homeTeamId))
@@ -28,17 +19,10 @@ namespace SportsStats.Domain.Services
 			if (!IsTeamInTournament(tournament, awayTeamId))
 				throw new ArgumentException("Гостевая команда не заявлена на турнир");
 
-			Match match = new Match(tournamentId, homeTeamId, awayTeamId, tournament.TournamentRules);
+			Match match = new Match(tournament.Id, homeTeamId, awayTeamId, tournament.TournamentRules);
 
-			return _matchRepository.Save(match);
+			return match;
 
-		}
-		private Tournament GetTournamentOrThrow(int tournamentId)
-		{
-			Tournament tournament = _tournamentRepository.FindById(tournamentId)
-				?? throw new ArgumentException("Турнир с таким Id не существует");
-
-			return tournament;
 		}
 		private bool IsTeamInTournament(Tournament tournament, int teamId) => tournament.TeamsId.Contains(teamId);
 	}
