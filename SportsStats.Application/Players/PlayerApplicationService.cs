@@ -6,40 +6,34 @@ using System.Text;
 
 namespace SportsStats.Application.Players
 {
-	public class PlayerApplicationService
+	public class PlayerApplicationService(IPlayerRepository playerRepository, ITeamRepository teamRepository)
 	{
-		private IPlayerRepository _playerRepository;
-		private ITeamRepository _teamRepository;
+		private readonly IPlayerRepository _playerRepository = playerRepository;
+		private readonly ITeamRepository _teamRepository = teamRepository;
 
-		public PlayerApplicationService(IPlayerRepository playerRepository, ITeamRepository teamRepository)
+		public async Task<Player> Create(string name, string surname, PositionType position)
 		{
-			_playerRepository = playerRepository;
-			_teamRepository = teamRepository;
+			Player player = new(name, surname, position);
+			return await _playerRepository.Save(player);
 		}
-
-		public Player Create(string name, string surname, PositionType position)
+		public async Task ChangeTeam(int playerId, int teamId)
 		{
-			Player player = new Player(name, surname, position);
-			return _playerRepository.Save(player);
-		}
-		public void ChangeTeam(int playerId, int teamId)
-		{
-			Player player = GetPlayerOrThrow(playerId);
-			Team team = GetTeamOrThrow(teamId);
+			Player player = await GetPlayerOrThrow(playerId);
+			await GetTeamOrThrow(teamId);
 
 			player.ChangeTeam(teamId);
 
-			_playerRepository.Save(player);
+			await _playerRepository.Save(player);
 		}
 
-		private Player GetPlayerOrThrow(int playerId)
+		private async Task<Player> GetPlayerOrThrow(int playerId)
 		{
-			return _playerRepository.FindById(playerId)
+			return await _playerRepository.FindById(playerId)
 				?? throw new ArgumentException("Игрок с таким Id не найден");
 		}
-		private Team GetTeamOrThrow(int teamId)
+		private async Task<Team> GetTeamOrThrow(int teamId)
 		{
-			return _teamRepository.FindById(teamId)
+			return await _teamRepository.FindById(teamId)
 				?? throw new ArgumentException("Команда с таким id не найдена");
 		}
 	}

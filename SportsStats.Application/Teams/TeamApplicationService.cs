@@ -8,18 +8,14 @@ using System.Text;
 
 namespace SportsStats.Application.Teams
 {
-	public class TeamApplicationService
+	public class TeamApplicationService(ITeamRepository teamRepository)
 	{
-		private ITeamRepository _teamRepository;
-		public TeamApplicationService(ITeamRepository teamRepository)
-		{
-			_teamRepository = teamRepository;
-		}
+		private readonly ITeamRepository _teamRepository = teamRepository;
 
-		public Team Create(string name)
+		public async Task<Team> Create(string name)
 		{
-			Team team = new Team(name);
-			return _teamRepository.Save(team);
+			Team team = new(name);
+			return await _teamRepository.Save(team);
 		}
 
 	}

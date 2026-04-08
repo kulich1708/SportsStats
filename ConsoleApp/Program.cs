@@ -1,36 +1,25 @@
-﻿using SportsStats.Application.Matches;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using SportsStats.Application.Matches;
 using SportsStats.Application.Players;
 using SportsStats.Application.Teams;
 using SportsStats.Application.Tournaments;
 using SportsStats.Domain.Common;
+using SportsStats.Domain.Matches;
+using SportsStats.Domain.Matches.Goals;
 using SportsStats.Domain.Players;
 using SportsStats.Domain.Shared;
 using SportsStats.Domain.Teams;
 using SportsStats.Domain.Tournaments;
-using SportsStats.Domain.Matches;
-using SportsStats.Domain.Matches.Goals;
+using SportsStats.Infrastructure.Persistence.DbContexts;
+using SportsStats.Infrastructure.Persistence.Repositories;
 using System.Numerics;
 using System.Text;
 
 namespace SportsStats.ConsoleApp
 {
-	public static class Program
+	public static class PrintExtension
 	{
-		public static Random random = new Random();
-		public static InMemoryPlayerRepository inMemoryPlayerRepository = new InMemoryPlayerRepository();
-		public static InMemoryTeamRepository inMemoryTeamRepository = new InMemoryTeamRepository();
-		public static InMemoryTournamentRepository inMemoryTournamentRepository = new InMemoryTournamentRepository();
-		public static InMemoryMatchRepository inMemoryMatchRepository = new InMemoryMatchRepository();
-		public static InMemoryGoalRepository InMemoryGoalRepository = new InMemoryGoalRepository();
-		public static TimeProvider timeProvider = new TimeProvider();
-
-		public static PlayerApplicationService playerApplicationService = new PlayerApplicationService(inMemoryPlayerRepository,
-			inMemoryTeamRepository);
-		public static TeamApplicationService teamApplicationService = new TeamApplicationService(inMemoryTeamRepository);
-		public static TournamentApplicationService tournamentApplicationService = new(inMemoryTournamentRepository, timeProvider,
-			inMemoryTeamRepository);
-		public static MatchApplicationService matchApplicationService = new(inMemoryPlayerRepository, inMemoryTournamentRepository,
-			inMemoryMatchRepository, InMemoryGoalRepository, timeProvider);
 		public static string Print(this Player player)
 		{
 			string result = $"{player.Name} {player.Surname}, id: {player.Id}\nКоманда: {player.TeamId}\nПозиция: {player.Position}";
@@ -46,10 +35,10 @@ namespace SportsStats.ConsoleApp
 			string result = $"{tournament.Name}, id: {tournament.Id}";
 			return result;
 		}
-		public static string Print(this Match match)
+		public async static Task<string> Print(this Match match, ITeamRepository teamRepository, IPlayerRepository playerRepository)
 		{
 			var stringBuilder = new StringBuilder();
-			stringBuilder.AppendLine($"{inMemoryTeamRepository.FindById(match.HomeTeamId).Name}    {match.HomeTeamScore}:{match.AwayTeamScore}    {inMemoryTeamRepository.FindById(match.AwayTeamId).Name}");
+			stringBuilder.AppendLine($"{(await teamRepository.FindById(match.HomeTeamId)).Name}    {match.HomeTeamScore}:{match.AwayTeamScore}    {(await teamRepository.FindById(match.AwayTeamId)).Name}");
 			stringBuilder.AppendLine($"tournament ID: {match.TournamentId}");
 			stringBuilder.AppendLine($"Status: {match.Status}");
 			stringBuilder.AppendLine($"Home team roster: {string.Join(" ", match.HomeTeamRoster)}");
@@ -59,20 +48,20 @@ namespace SportsStats.ConsoleApp
 			stringBuilder.AppendLine($"Is overtime: {match.IsOvertime}");
 
 			foreach (var goal in match.Goals)
-				stringBuilder.AppendLine(goal.Print());
+				stringBuilder.AppendLine(await goal.Print(teamRepository, playerRepository));
 
 			return stringBuilder.ToString();
 		}
-		public static string Print(this GoalEvent goal)
+		public async static Task<string> Print(this GoalEvent goal, ITeamRepository teamRepository, IPlayerRepository playerRepository)
 		{
 			var stringBuilder = new StringBuilder();
-			stringBuilder.AppendLine($"Гол команды {inMemoryTeamRepository.FindById(goal.ScoringTeamId).Name}");
-			stringBuilder.Append($"{inMemoryPlayerRepository.FindById(goal.GoalScorerId).Surname}");
+			stringBuilder.AppendLine($"Гол команды {(await teamRepository.FindById(goal.ScoringTeamId)).Name}");
+			stringBuilder.Append($"{(await playerRepository.FindById(goal.GoalScorerId)).Surname}");
 			if (goal.FirstAssistId.HasValue)
 			{
-				stringBuilder.Append($" ({inMemoryPlayerRepository.FindById(goal.FirstAssistId.Value).Surname}");
+				stringBuilder.Append($" ({(await playerRepository.FindById(goal.FirstAssistId.Value)).Surname}");
 				if (goal.SecondAssistId.HasValue)
-					stringBuilder.Append($", {inMemoryPlayerRepository.FindById(goal.SecondAssistId.Value).Surname}");
+					stringBuilder.Append($", {(await playerRepository.FindById(goal.SecondAssistId.Value)).Surname}");
 				stringBuilder.Append(")");
 			}
 			if (goal.StrengthType.HasValue)
@@ -84,15 +73,51 @@ namespace SportsStats.ConsoleApp
 
 			return stringBuilder.ToString();
 		}
+	}
+	public class Test
+	{
+		public DbContextOptionsBuilder<AppDbContext> Options { get; private set; }
+		public AppDbContext Context { get; private set; }
+		public Random Random = new();
+		public PlayerRepository PlayerRepository { get; private set; }
+		public TeamRepository TeamRepository { get; private set; }
+		public TournamentRepository TournamentRepository { get; private set; }
+		public MatchRepository MatchRepository { get; private set; }
+		//public InMemoryGoalRepository InMemoryGoalRepository = new InMemoryGoalRepository();
+		public TimeProvider timeProvider = new();
 
-		public static List<int> CreateTeams()
+		public PlayerApplicationService PlayerApplicationService { get; private set; }
+		public TeamApplicationService TeamApplicationService { get; private set; }
+		public TournamentApplicationService TournamentApplicationService { get; private set; }
+		public MatchApplicationService MatchApplicationService { get; private set; }
+		public Test()
+		{
+			Options = new DbContextOptionsBuilder<AppDbContext>()
+					.UseNpgsql("Host=localhost;Database=SportsStats;Username=VladislavKulichkov;Password=qw06062013?");
+			Context = new(Options.Options);
+
+
+			TeamRepository = new(Context);
+			TournamentRepository = new(Context);
+			PlayerRepository = new(Context);
+			MatchRepository = new(Context);
+
+			TeamApplicationService = new(TeamRepository);
+			TournamentApplicationService = new(TournamentRepository, timeProvider, TeamRepository);
+			MatchApplicationService = new(PlayerRepository, TournamentRepository, MatchRepository, null, timeProvider);
+			PlayerApplicationService = new(PlayerRepository, TeamRepository);
+		}
+		public async Task<List<int>> CreateTeams()
 		{
 			List<int> ids = new List<int>();
-			ids.Add(teamApplicationService.Create("АВАНГАРД").Id);
-			ids.Add(teamApplicationService.Create("Ска").Id);
+			var team1 = await TeamApplicationService.Create("АВАНГАРД");
+			var team2 = await TeamApplicationService.Create("Ска");
+			ids.Add(team1.Id);
+			ids.Add(team2.Id);
+			Console.WriteLine("teams created");
 			return ids;
 		}
-		public static List<int> CreatePlayers(int count, PositionType position, List<int> teamsId)
+		public async Task<List<Player>> CreatePlayers(int count, PositionType position, List<int> teamsId)
 		{
 			// Список из 40 имён
 			List<string> firstNames = new List<string>
@@ -114,205 +139,108 @@ namespace SportsStats.ConsoleApp
 			"Фролов", "Александров", "Дмитриев", "Королёв", "Гусев", "Киселёв", "Ильин", "Максимов"
 		};
 
-			List<int> playersId = new();
+			List<Player> players = new();
 
 			for (int i = 1; i <= count; i++)
 			{
-				int firstNameIndex = random.Next(firstNames.Count);
-				int lastNameIndex = random.Next(lastNames.Count);
+				int firstNameIndex = Random.Next(firstNames.Count);
+				int lastNameIndex = Random.Next(lastNames.Count);
 
-				Player player = playerApplicationService.Create(firstNames[firstNameIndex], lastNames[lastNameIndex], position);
-				playerApplicationService.ChangeTeam(player.Id, teamsId[(i - 1) % teamsId.Count]);
-				playersId.Add(player.Id);
+				Player player = await PlayerApplicationService.Create(firstNames[firstNameIndex], lastNames[lastNameIndex], position);
+				players.Add(player);
 			}
-			return playersId;
+			return players;
 		}
-		public static int CreateTournament(List<int> teamsId)
+		public async Task<int> CreateTournament(List<int> teamsId)
 		{
-			Tournament tournament = tournamentApplicationService.Create("Кубок открытия");
-			tournamentApplicationService.SetRules(tournament.Id);
-			tournamentApplicationService.SetStatus(tournament.Id, TournamentStatus.Registration);
+			Tournament tournament = await TournamentApplicationService.Create("Кубок открытия");
+
+			await Context.SaveChangesAsync();
+			await TournamentApplicationService.SetRules(tournament.Id);
+			await TournamentApplicationService.SetStatus(tournament.Id, TournamentStatus.Registration);
 
 			foreach (int teamId in teamsId)
-				tournamentApplicationService.RegistrateTeam(tournament.Id, teamId);
+				await TournamentApplicationService.RegistrateTeam(tournament.Id, teamId);
 
 			return tournament.Id;
 		}
-		public static void Main()
+		public async Task Start()
 		{
-			List<int> teamsId = CreateTeams();
-			inMemoryTeamRepository.Print();
+			Console.WriteLine("Тест запущен, проверка соединения");
+			if (!Context.Database.CanConnect())
+				Console.WriteLine("Не удалось подключиться");
 
+			//List<int> teamsId = await CreateTeams();
+			//List<int> teamsId = new() { 3, 4 };
+			//int tournamentId = await CreateTournament(teamsId);
 
-			CreatePlayers(8, PositionType.LeftWinger, teamsId);
-			CreatePlayers(8, PositionType.RightWinger, teamsId);
-			CreatePlayers(8, PositionType.Center, teamsId);
-			CreatePlayers(6, PositionType.LeftDefenseman, teamsId);
-			CreatePlayers(6, PositionType.RightDefenseman, teamsId);
-			CreatePlayers(4, PositionType.Goalie, teamsId);
-			List<Player> players = inMemoryPlayerRepository.Players.Values.ToList();
+			//await Context.SaveChangesAsync();
+			int tournamentId = Context.Tournaments.Where(t => t.Status == TournamentStatus.Registration).FirstOrDefault()?.Id ?? 0;
+			List<int> teamsId = Context.Tournaments.Where(t => t.Status == TournamentStatus.Registration).FirstOrDefault()?.TeamsId.ToList() ?? [];
+			IEnumerable<Player> newPlayers = [];
+			newPlayers = newPlayers.Concat(await CreatePlayers(8, PositionType.LeftWinger, teamsId));
+			newPlayers = newPlayers.Concat(await CreatePlayers(8, PositionType.RightWinger, teamsId));
+			newPlayers = newPlayers.Concat(await CreatePlayers(8, PositionType.Center, teamsId));
+			newPlayers = newPlayers.Concat(await CreatePlayers(6, PositionType.LeftDefenseman, teamsId));
+			newPlayers = newPlayers.Concat(await CreatePlayers(6, PositionType.RightDefenseman, teamsId));
+			newPlayers = newPlayers.Concat(await CreatePlayers(4, PositionType.Goalie, teamsId));
+			List<Player> newPlayersList = newPlayers.ToList();
+			Console.WriteLine(string.Join(" ", newPlayersList.Select(p => p.Id)));
+			await Context.SaveChangesAsync();
+			//Context = new(Options.Options);
+			for (int i = 0; i < newPlayersList.Count; i++)
+			{
+				await PlayerApplicationService.ChangeTeam(newPlayersList[i].Id, teamsId[(i) % teamsId.Count]);
+			}
 			Console.WriteLine("Список всех игроков:\n");
-			inMemoryPlayerRepository.Print();
-
-			int tournamentId = CreateTournament(teamsId);
-			inMemoryTournamentRepository.Print();
-			int teamIdWithoutTournament = teamApplicationService.Create("ЦСКА").Id;
+			await Context.Players.ForEachAsync(player => Console.WriteLine(player.Print()));
+			//await Context.SaveChangesAsync();
 
 
-			int matchId = matchApplicationService.CreateMatch(tournamentId, teamsId[0], teamsId[1]).Id;
-			players.ForEach(player => matchApplicationService.AddPlayerToRoster(matchId, player.Id, player.TeamId));
-			matchApplicationService.StartMatch(matchId);
-			matchApplicationService.AddGoal(matchId, teamsId[0], 1, 1, 20);
-			matchApplicationService.AddGoal(matchId, teamsId[0], 1, 1, 1199);
-			matchApplicationService.AddGoal(matchId, teamsId[1], 2, 2, 20);
-			matchApplicationService.AddGoal(matchId, teamsId[1], 4, 3, 1199);
-			matchApplicationService.AddGoal(matchId, teamsId[0], 1, 4, 299);
-			matchApplicationService.FillGoalDetails(matchId, 1, 3, 5, GoalStrengthType.EvenStrength);
+			Match match = await MatchApplicationService.CreateMatch(tournamentId, teamsId[0], teamsId[1]);
 
+			await Context.SaveChangesAsync();
+			int matchId = match.Id;
+			foreach (var player in newPlayersList)
+				await MatchApplicationService.AddPlayerToRoster(matchId, player.Id, player.TeamId);
 
-			Match match = inMemoryMatchRepository.FindById(matchId);
-			Console.WriteLine(match.Print());
+			await Context.SaveChangesAsync();
+			await MatchApplicationService.StartMatch(matchId);
+
+			await Context.SaveChangesAsync();
+			List<Player> HomeTeamPlayers = await Context.Players.Where(player => player.TeamId == match.HomeTeamId).ToListAsync();
+			List<Player> AwayTeamPlayers = await Context.Players.Where(player => player.TeamId == match.AwayTeamId).ToListAsync();
+
+			GoalEvent firstGoal = await MatchApplicationService.AddGoal(matchId, teamsId[0], HomeTeamPlayers[0].Id, 1, 20);
+			await MatchApplicationService.AddGoal(matchId, teamsId[0], HomeTeamPlayers[0].Id, 1, 1199);
+			await MatchApplicationService.AddGoal(matchId, teamsId[1], AwayTeamPlayers[0].Id, 2, 20);
+			await MatchApplicationService.AddGoal(matchId, teamsId[1], AwayTeamPlayers[1].Id, 3, 1199);
+			await MatchApplicationService.AddGoal(matchId, teamsId[0], HomeTeamPlayers[0].Id, 4, 299);
+			await Context.SaveChangesAsync();
+			await MatchApplicationService.FillGoalDetails(matchId, firstGoal.Id, HomeTeamPlayers[1].Id, HomeTeamPlayers[2].Id, GoalStrengthType.EvenStrength);
+
+			//Console.WriteLine(match.Print(TeamRepository));
+
+			await Context.SaveChangesAsync();
+			Match matchInDb = await MatchRepository.FindById(matchId);
+			Console.WriteLine(await match.Print(TeamRepository, PlayerRepository));
+			Console.WriteLine(await matchInDb.Print(TeamRepository, PlayerRepository));
 		}
 	}
-	public class InMemoryRepository
+	public static class Program
 	{
-		public void SetId(BaseEntity entity, ref int nextId)
+		public static async Task Main()
 		{
-			// Симулируем генерацию ID как в реальной БД
-			if (entity.Id == 0) // или default
-			{
-				entity.SetId(nextId++); // Нужен метод для установки ID
-			}
-		}
-	}
-	public class InMemoryPlayerRepository : InMemoryRepository, IPlayerRepository
-	{
-		private Dictionary<int, Player> _players = new();
-		private int _nextId = 1;
-		public IReadOnlyDictionary<int, Player> Players => _players;
-
-		public Player FindById(int playerId)
-		{
-			return _players.TryGetValue(playerId, out Player player) ? player : null;
-		}
-		public Player Save(Player player)
-		{
-			SetId(player, ref _nextId);
-			return _players[player.Id] = player;
-		}
-		public void Print()
-		{
-			foreach (var item in _players)
-			{
-				Console.WriteLine($"{item.Key}: {item.Value.Print()}");
-				Console.WriteLine();
-			}
-		}
-	}
-	public class InMemoryTeamRepository : InMemoryRepository, ITeamRepository
-	{
-		private Dictionary<int, Team> _teams = new();
-		private int _nextId = 1;
-		public IReadOnlyDictionary<int, Team> Teams => _teams;
-		public Team FindById(int teamId)
-		{
-			return _teams.TryGetValue(teamId, out Team team) ? team : null;
+			var test = new Test();
+			await test.Start();
 		}
 
-		public Team Save(Team team)
-		{
-			SetId(team, ref _nextId);
-			return _teams[team.Id] = team;
-		}
-		public void Print()
-		{
-			foreach (var item in _teams)
-			{
-				Console.WriteLine($"{item.Key}: {item.Value.Print()}");
-				Console.WriteLine();
-			}
-		}
-	}
-	public class InMemoryTournamentRepository : InMemoryRepository, ITournamentRepository
-	{
-
-		private Dictionary<int, Tournament> _tournaments = new();
-		private int _nextId = 1;
-		public IReadOnlyDictionary<int, Tournament> Tournaments => _tournaments;
-		public Tournament FindById(int teamId)
-		{
-			return _tournaments.TryGetValue(teamId, out Tournament team) ? team : null;
-		}
-
-		public Tournament Save(Tournament team)
-		{
-			SetId(team, ref _nextId);
-			return _tournaments[team.Id] = team;
-		}
-		public void Print()
-		{
-			foreach (var item in _tournaments)
-			{
-				Console.WriteLine($"{item.Key}: {item.Value.Print()}");
-				Console.WriteLine();
-			}
-		}
-	}
-	public class InMemoryMatchRepository : InMemoryRepository, IMatchRepository
-	{
-
-		private Dictionary<int, Match> _matches = new();
-		private int _nextId = 1;
-		public IReadOnlyDictionary<int, Match> Matches => _matches;
-		public Match FindById(int matchId)
-		{
-			return _matches.TryGetValue(matchId, out Match match) ? match : null;
-		}
-
-		public Match Save(Match match)
-		{
-			SetId(match, ref _nextId);
-			return _matches[match.Id] = match;
-		}
-		public void Print()
-		{
-			foreach (var item in _matches)
-			{
-				Console.WriteLine($"Match ID: {item.Key}: \n{item.Value.Print()}");
-				Console.WriteLine();
-			}
-		}
-	}
-	public class InMemoryGoalRepository : InMemoryRepository, IGoalRepository
-	{
-
-		private Dictionary<int, GoalEvent> _goals = new();
-		private int _nextId = 1;
-		public IReadOnlyDictionary<int, GoalEvent> Goals => _goals;
-		public GoalEvent FindById(int goalId)
-		{
-			return _goals.TryGetValue(goalId, out GoalEvent goal) ? goal : null;
-		}
-
-		public GoalEvent Save(GoalEvent goal)
-		{
-			SetId(goal, ref _nextId);
-			return _goals[goal.Id] = goal;
-		}
-		public void Print()
-		{
-			foreach (var item in _goals)
-			{
-				Console.WriteLine($"Match ID: {item.Key}: \n{item.Value.Print()}");
-				Console.WriteLine();
-			}
-		}
 	}
 	public class TimeProvider : ITimeProvider
 	{
 		public DateTime GetCurrentTime()
 		{
-			return DateTime.Now;
+			return DateTime.UtcNow;
 		}
 	}
 }

@@ -8,70 +8,65 @@ using System.Text;
 
 namespace SportsStats.Application.Tournaments
 {
-	public class TournamentApplicationService
+	public class TournamentApplicationService(
+		ITournamentRepository tournamentRepository,
+		ITimeProvider timeProvider,
+		ITeamRepository teamRepository)
 	{
-		private ITournamentRepository _tournamentRepository;
-		private ITimeProvider _timeProvider;
-		private ITeamRepository _teamRepository;
-		public TournamentApplicationService(
-			ITournamentRepository tournamentRepository,
-			ITimeProvider timeProvider,
-			ITeamRepository teamRepository)
+		private readonly ITournamentRepository _tournamentRepository = tournamentRepository;
+		private readonly ITimeProvider _timeProvider = timeProvider;
+		private readonly ITeamRepository _teamRepository = teamRepository;
+
+		private async Task<Tournament> GetTournamentOrThrow(int tournamentId)
 		{
-			_tournamentRepository = tournamentRepository;
-			_timeProvider = timeProvider;
-			_teamRepository = teamRepository;
-		}
-		private Tournament GetTournamentOrThrow(int tournamentId)
-		{
-			Tournament tournament = _tournamentRepository.FindById(tournamentId)
+			Tournament tournament = await _tournamentRepository.FindById(tournamentId)
 				?? throw new ArgumentException($"Не существует туринра с id {tournamentId}");
 
 			return tournament;
 		}
-		private Tournament DoSomething(int tournamentId, Action<Tournament> action)
+		private async Task<Tournament> DoSomething(int tournamentId, Action<Tournament> action)
 		{
-			Tournament tournament = GetTournamentOrThrow(tournamentId);
+			Tournament tournament = await GetTournamentOrThrow(tournamentId);
 
 			action(tournament);
 
-			return _tournamentRepository.Save(tournament);
+			return await _tournamentRepository.Save(tournament);
 		}
-		public Tournament Create(string name)
+		public async Task<Tournament> Create(string name)
 		{
-			Tournament tournament = new Tournament(name);
+			Tournament tournament = new(name);
 
-			return _tournamentRepository.Save(tournament);
+			return await _tournamentRepository.Save(tournament);
 		}
-		public void Start(int tournamentId)
+		public async Task Start(int tournamentId)
 		{
-			DoSomething(tournamentId, tournament => tournament.Start(_timeProvider.GetCurrentTime()));
+			await DoSomething(tournamentId, tournament => tournament.Start(_timeProvider.GetCurrentTime()));
 		}
-		public void Finish(int tournamentId)
+		public async Task Finish(int tournamentId)
 		{
-			DoSomething(tournamentId, tournament => tournament.Finish(_timeProvider.GetCurrentTime()));
+			await DoSomething(tournamentId, tournament => tournament.Finish(_timeProvider.GetCurrentTime()));
 		}
-		public void RegistrateTeam(int tournamentId, int teamId)
+		public async Task RegistrateTeam(int tournamentId, int teamId)
 		{
-			Tournament tournament = GetTournamentOrThrow(tournamentId);
-			Team team = _teamRepository.FindById(teamId)
+			Tournament tournament = await GetTournamentOrThrow(tournamentId);
+			Team team = await _teamRepository.FindById(teamId)
 				?? throw new ArgumentException($"Не существует команды с id {teamId}");
 
 			tournament.RegistrateTeam(teamId);
 
-			_tournamentRepository.Save(tournament);
+			await _tournamentRepository.Save(tournament);
 		}
-		public void SetStatus(int tournamentId, TournamentStatus status)
+		public async Task SetStatus(int tournamentId, TournamentStatus status)
 		{
-			Tournament tournament = GetTournamentOrThrow(tournamentId);
+			Tournament tournament = await GetTournamentOrThrow(tournamentId);
 			tournament.SetStatus(status);
-			_tournamentRepository.Save(tournament);
+			await _tournamentRepository.Save(tournament);
 		}
 
 		// Временно через фабрику
-		public void SetRules(int tournamentId)
+		public async Task SetRules(int tournamentId)
 		{
-			DoSomething(tournamentId, tournament => tournament.SetRules(TournamentRules.CreateKHLRules()));
+			await DoSomething(tournamentId, tournament => tournament.SetRules(TournamentRules.CreateKHLRules()));
 		}
 	}
 }

@@ -6,7 +6,7 @@ namespace SportsStats.Domain.Matches.Goals
 {
 	public interface IGoalRepository
 	{
-		public GoalEvent FindById(int goalId);
-		public GoalEvent Save(GoalEvent goalEvent);
+		public Task<GoalEvent> FindById(int goalId);
+		public Task<GoalEvent> Save(GoalEvent goalEvent);
 	}
 }

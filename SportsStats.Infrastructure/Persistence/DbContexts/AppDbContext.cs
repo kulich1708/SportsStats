@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SportsStats.Domain.Common;
 using SportsStats.Domain.Matches;
 using SportsStats.Domain.Players;
@@ -45,6 +46,25 @@ namespace SportsStats.Infrastructure.Persistence.DbContexts
 					rulesBuilder.OwnsOne(r => r.MatchPointsRules);
 				});
 			});
+
+			modelBuilder.Entity<Match>(entity =>
+			{
+				entity.Property(match => match.HomeTeamRoster)
+					.HasColumnType("jsonb")
+					.HasConversion(
+						p => JsonSerializer.Serialize(p),
+						p => JsonSerializer.Deserialize<List<int>>(p));
+				entity.Property(match => match.AwayTeamRoster)
+					.HasColumnType("jsonb")
+					.HasConversion(
+						p => JsonSerializer.Serialize(p),
+						p => JsonSerializer.Deserialize<List<int>>(p));
+			});
 		}
+		//protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+		//{
+		//	optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information);
+		//	optionsBuilder.EnableSensitiveDataLogging(); // Для отладки
+		//}
 	}
 }
