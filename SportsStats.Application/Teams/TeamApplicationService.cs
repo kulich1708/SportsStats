@@ -16,6 +16,7 @@ namespace SportsStats.Application.Teams
 		{
 			Team team = new(name);
 
+			await _teamRepository.AddAsync(team);
 			await _teamRepository.SaveChangesAsync();
 
 			return team;
