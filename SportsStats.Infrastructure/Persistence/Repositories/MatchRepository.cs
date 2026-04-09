@@ -22,15 +22,13 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 			return await _context.Matches.FirstOrDefaultAsync(match => match.Id == matchId);
 		}
 
-		public async Task<Match> Save(Match match)
+		public async Task SaveChangesAsync()
 		{
-			if (match.Id == 0)
-				await _context.Matches.AddAsync(match);
-			else
-				_context.Matches.Update(match);
-
-			//await _context.SaveChangesAsync();
-			return match;
+			await _context.SaveChangesAsync();
+		}
+		public async Task AddAsync(Match match)
+		{
+			await _context.Matches.AddAsync(match);
 		}
 	}
 }

@@ -7,6 +7,8 @@ namespace SportsStats.Domain.Matches
 	public interface IMatchRepository
 	{
 		public Task<Match?> FindById(int id);
-		public Task<Match> Save(Match match);
+		public Task SaveChangesAsync();
+		// Для добавления НОВОЙ сущности
+		public Task AddAsync(Match match);
 	}
 }
