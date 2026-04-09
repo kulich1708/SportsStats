@@ -14,7 +14,11 @@ namespace SportsStats.Application.Players
 		public async Task<Player> Create(string name, string surname, PositionType position)
 		{
 			Player player = new(name, surname, position);
-			return await _playerRepository.Save(player);
+
+			await _playerRepository.AddAsync(player);
+			await _playerRepository.SaveChangesAsync();
+
+			return player;
 		}
 		public async Task ChangeTeam(int playerId, int teamId)
 		{
@@ -23,7 +27,7 @@ namespace SportsStats.Application.Players
 
 			player.ChangeTeam(teamId);
 
-			await _playerRepository.Save(player);
+			await _playerRepository.SaveChangesAsync();
 		}
 
 		private async Task<Player> GetPlayerOrThrow(int playerId)
