@@ -1,4 +1,5 @@
-﻿using SportsStats.Domain.Shared;
+﻿using SportsStats.Application.Tournaments.DTOs.Responses;
+using SportsStats.Domain.Shared;
 using SportsStats.Domain.Teams;
 using SportsStats.Domain.Tournaments;
 using SportsStats.Domain.Tournaments.Rules;
@@ -34,14 +35,14 @@ namespace SportsStats.Application.Tournaments
 			await _tournamentRepository.SaveChangesAsync();
 			return tournament;
 		}
-		public async Task<Tournament> Create(string name)
+		public async Task<int> Create(string name)
 		{
 			Tournament tournament = new(name);
 
 			await _tournamentRepository.AddAsync(tournament);
 			await _tournamentRepository.SaveChangesAsync();
 
-			return tournament;
+			return tournament.Id;
 		}
 		public async Task Start(int tournamentId)
 		{
@@ -67,6 +68,17 @@ namespace SportsStats.Application.Tournaments
 		public async Task SetRules(int tournamentId)
 		{
 			await DoSomething(tournamentId, tournament => tournament.SetRules(TournamentRules.CreateKHLRules()));
+		}
+
+		public async Task<List<TournamentDTO>> GetTournamentsAsync(bool onlyStarted = false)
+		{
+			var tournaments = await _tournamentRepository.GetTournamentsAsync(onlyStarted);
+			return tournaments.Select(TournamentMapper.ToDTO).ToList();
+		}
+		public async Task<TournamentDTO?> GetTournament(int tournamentId)
+		{
+			var tournament = await _tournamentRepository.FindById(tournamentId);
+			return tournament == null ? null : TournamentMapper.ToDTO(tournament);
 		}
 	}
 }
