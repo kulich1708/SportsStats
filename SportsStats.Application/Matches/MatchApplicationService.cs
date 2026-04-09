@@ -12,13 +12,11 @@ namespace SportsStats.Application.Matches
 {
 	public class MatchApplicationService(IPlayerRepository playerRepository,
 		ITournamentRepository tournamentRepository, IMatchRepository matchRepository,
-		IGoalRepository goalRepository,
 		ITimeProvider timeProvider)
 	{
 		private readonly IPlayerRepository _playerRepository = playerRepository;
 		private readonly ITournamentRepository _tournamentRepository = tournamentRepository;
 		private readonly IMatchRepository _matchRepository = matchRepository;
-		private readonly IGoalRepository _goalRepository = goalRepository;
 		private readonly ITimeProvider _timeProvider = timeProvider;
 
 		public async Task<Match> CreateMatch(int tournamentId, int homeTeamId, int awayTeamId)
@@ -29,7 +27,6 @@ namespace SportsStats.Application.Matches
 			Match match = new MatchCreationService().CreateMatch(tournament, homeTeamId, awayTeamId);
 			await _matchRepository.AddAsync(match);
 			await _matchRepository.SaveChangesAsync();
-			Console.WriteLine($"Id матча из аппликейшина: {match.Id}");
 			return match;
 		}
 		public async Task StartMatch(int matchId)
