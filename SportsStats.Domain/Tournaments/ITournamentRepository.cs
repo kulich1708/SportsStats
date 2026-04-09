@@ -9,5 +9,6 @@ namespace SportsStats.Domain.Tournaments
 		public Task<Tournament?> FindById(int tournamentId);
 		public Task SaveChangesAsync();
 		public Task AddAsync(Tournament tournament);
+		public Task<List<Tournament>> GetTournamentsAsync(bool onlyStarted);
 	}
 }
