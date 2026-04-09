@@ -12,7 +12,7 @@ namespace SportsStats.Domain.Services
 
 		public Match CreateMatch(Tournament tournament, int homeTeamId, int awayTeamId)
 		{
-			if (!tournament.IsRegistration() && !tournament.IsInProgress())
+			if (!tournament.IsRegistration() && !tournament.IsStarted())
 				throw new ArgumentException("Нельзя создать матч в турнире, который ещё не открыт");
 			if (!IsTeamInTournament(tournament, homeTeamId))
 				throw new ArgumentException("Домашняя команда не заявлена на турнир");
