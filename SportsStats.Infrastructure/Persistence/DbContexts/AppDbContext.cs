@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
 using SportsStats.Domain.Common;
 using SportsStats.Domain.Matches;
@@ -29,10 +30,17 @@ namespace SportsStats.Infrastructure.Persistence.DbContexts
 			modelBuilder.Entity<Tournament>(entity =>
 			{
 				entity.Property(t => t.TeamsId)
-					.HasColumnType("jsonb")
-					.HasConversion(
-						v => JsonSerializer.Serialize(v),
-						v => JsonSerializer.Deserialize<List<int>>(v));
+					  .HasField("_teamsId")
+					  .HasColumnType("jsonb")
+					  .HasConversion(
+							v => JsonSerializer.Serialize(v),
+							v => JsonSerializer.Deserialize<List<int>>(v),
+							new ValueComparer<IReadOnlyList<int>>(
+								(c1, c2) => (c1 == c2) || (c1 != null && c2 != null && c1.SequenceEqual(c2)),
+								c => c.Aggregate(0, (hash, item) => HashCode.Combine(hash, item.GetHashCode())),
+								c => c.ToList()  // Для снимка создаём List, но он будет обёрнут в IReadOnlyList
+							)
+					  );
 
 				// Конфигурация корневого VO
 				entity.OwnsOne(t => t.TournamentRules, rulesBuilder =>
