@@ -9,7 +9,7 @@ namespace SportsStats.Domain.Tournaments
 {
 	public class Tournament : BaseEntity, IAggregateRoot
 	{
-		private List<int> _teamsId = new();
+		private readonly List<int> _teamsId = [];
 		public string Name { get; private set; }
 		public DateTime StartedAt { get; private set; }
 		public DateTime FinishedAt { get; private set; }
@@ -24,26 +24,47 @@ namespace SportsStats.Domain.Tournaments
 		}
 		public void SetRules(TournamentRules tournamentRules)
 		{
-			if (!IsDraft())
+			if (!IsDrafted())
 				throw new ArgumentException("Правила можно установить только когда турнир в статусе Draft");
 			TournamentRules = tournamentRules;
 		}
 		public void Start(DateTime startedAt)
 		{
-			if (_teamsId.Count() < 2)
+			if (IsStarted())
+				throw new ArgumentException("Турнир уже начат");
+			if (!IsRegistration())
+				throw new ArgumentException("Турнир можно начать только после регистрации команд");
+			if (_teamsId.Count < 2)
 				throw new ArgumentException("Нельзя начать турнир, если не заявлено как минимум 2 команды");
+
 			Status = TournamentStatus.InProgress;
 			StartedAt = startedAt;
 		}
 		public void Finish(DateTime finishAt)
 		{
+			if (IsFinished())
+				throw new AggregateException("Туринр уже завершён");
+			if (!IsStarted())
+				throw new ArgumentException("Турнир можно завершить только после того, как он начался");
+
 			Status = TournamentStatus.Finished;
 			FinishedAt = finishAt;
 		}
+		public void Registration()
+		{
+			if (IsRegistration())
+				throw new ArgumentException("Турнир уже открыт для регистрации команд");
+			if (!IsDrafted())
+				throw new ArgumentException("Открыть регистрацию команд можно только если турнир находится в статусе Draft");
+			if (!HasRules())
+				throw new ArgumentException("Открыть регистрацию команд можно только если турниру уже установлены правила");
 
-		public bool IsDraft() => Status == TournamentStatus.Draft;
+			Status = TournamentStatus.Registration;
+		}
+
+		public bool IsDrafted() => Status == TournamentStatus.Draft;
 		public bool IsRegistration() => Status == TournamentStatus.Registration;
-		public bool IsInProgress() => Status == TournamentStatus.InProgress;
+		public bool IsStarted() => Status == TournamentStatus.InProgress;
 		public bool IsFinished() => Status == TournamentStatus.Finished;
 		public bool HasRules() => TournamentRules != null;
 
@@ -53,20 +74,6 @@ namespace SportsStats.Domain.Tournaments
 				throw new ArgumentException("Можно заявить команду, только когда турнир в статусе Registration");
 
 			_teamsId.Add(teamId);
-		}
-		public void SetStatus(TournamentStatus status)
-		{
-			if (status == TournamentStatus.Draft && Status != status)
-				throw new ArgumentException("Нельзя установить статус Draft, после любого другого");
-			if (status == TournamentStatus.Registration && Status != TournamentStatus.Draft && status != Status && HasRules())
-				throw new ArgumentException("Статус Registration  можно установить только если сейчас установлен статус Draft и уже установлены правила турнира");
-			if (status == TournamentStatus.InProgress && Status != TournamentStatus.Registration && status != Status)
-				throw new ArgumentException("Статус InProgress можно установить только если сейчас установлен статус Registration ");
-			if (status == TournamentStatus.Finished && Status != TournamentStatus.InProgress && status != Status)
-				throw new ArgumentException("Статус Finished можно установить только если сейчас установлен статус InProgress");
-
-			Status = status;
-
 		}
 	}
 }

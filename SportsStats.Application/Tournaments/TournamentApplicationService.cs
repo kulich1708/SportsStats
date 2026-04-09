@@ -51,16 +51,16 @@ namespace SportsStats.Application.Tournaments
 		{
 			await DoSomething(tournamentId, tournament => tournament.Finish(_timeProvider.GetCurrentTime()));
 		}
+		public async Task Registration(int tournamentId)
+		{
+			await DoSomething(tournamentId, tournament => tournament.Registration());
+		}
 		public async Task RegistrateTeam(int tournamentId, int teamId)
 		{
 			Team team = await _teamRepository.FindById(teamId)
 				?? throw new ArgumentException($"Не существует команды с id {teamId}");
 
 			await DoSomething(tournamentId, tournament => tournament.RegistrateTeam(teamId));
-		}
-		public async Task SetStatus(int tournamentId, TournamentStatus status)
-		{
-			await DoSomething(tournamentId, tournament => tournament.SetStatus(status));
 		}
 
 		// Временно через фабрику
