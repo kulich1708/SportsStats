@@ -1,6 +1,18 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
+using SportsStats.Application.Matches;
+using SportsStats.Application.Players;
+using SportsStats.Application.Teams;
+using SportsStats.Application.Tournaments;
+using SportsStats.Domain.Matches;
+using SportsStats.Domain.Players;
+using SportsStats.Domain.Shared;
+using SportsStats.Domain.Teams;
+using SportsStats.Domain.Tournaments;
 using SportsStats.Infrastructure.Persistence.DbContexts;
+using SportsStats.Infrastructure.Persistence.Repositories;
+using SportsStats.Infrastructure.Services;
+using SportsStats.API.Middleware;
 using System.Reflection;
 
 namespace SportsStats.API
@@ -29,6 +41,17 @@ namespace SportsStats.API
 		private static void ConfigureServices(WebApplicationBuilder builder)
 		{
 			var services = builder.Services;
+
+			services.AddScoped<ITournamentRepository, TournamentRepository>();
+			services.AddScoped<ITeamRepository, TeamRepository>();
+			services.AddScoped<IMatchRepository, MatchRepository>();
+			services.AddScoped<IPlayerRepository, PlayerRepository>();
+			services.AddScoped<ITimeProvider, SystemTimeProvider>();
+
+			services.AddScoped<TournamentApplicationService>();
+			services.AddScoped<MatchApplicationService>();
+			services.AddScoped<PlayerApplicationService>();
+			services.AddScoped<TeamApplicationService>();
 
 			services.AddControllers();
 			services.AddEndpointsApiExplorer();
@@ -60,6 +83,7 @@ namespace SportsStats.API
 
 		private static void ConfigureMiddleware(WebApplication app)
 		{
+			app.UseMiddleware<GlobalExceptionHandler>();
 			if (app.Environment.IsDevelopment())
 			{
 				var version = Assembly.GetExecutingAssembly()
