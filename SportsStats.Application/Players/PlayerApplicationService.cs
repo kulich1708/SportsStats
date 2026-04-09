@@ -11,7 +11,7 @@ namespace SportsStats.Application.Players
 		private readonly IPlayerRepository _playerRepository = playerRepository;
 		private readonly ITeamRepository _teamRepository = teamRepository;
 
-		public async Task<Player> Create(string name, string surname, PositionType position)
+		public async Task<Player> CreateAsync(string name, string surname, PositionType position)
 		{
 			Player player = new(name, surname, position);
 
@@ -20,24 +20,24 @@ namespace SportsStats.Application.Players
 
 			return player;
 		}
-		public async Task ChangeTeam(int playerId, int teamId)
+		public async Task ChangeTeamAsync(int playerId, int teamId)
 		{
-			Player player = await GetPlayerOrThrow(playerId);
-			await GetTeamOrThrow(teamId);
+			Player player = await GetPlayerOrThrowAsync(playerId);
+			await GetTeamOrThrowAsync(teamId);
 
 			player.ChangeTeam(teamId);
 
 			await _playerRepository.SaveChangesAsync();
 		}
 
-		private async Task<Player> GetPlayerOrThrow(int playerId)
+		private async Task<Player> GetPlayerOrThrowAsync(int playerId)
 		{
-			return await _playerRepository.FindById(playerId)
+			return await _playerRepository.GetAsync(playerId)
 				?? throw new ArgumentException("Игрок с таким Id не найден");
 		}
-		private async Task<Team> GetTeamOrThrow(int teamId)
+		private async Task<Team> GetTeamOrThrowAsync(int teamId)
 		{
-			return await _teamRepository.FindById(teamId)
+			return await _teamRepository.GetAsync(teamId)
 				?? throw new ArgumentException("Команда с таким id не найдена");
 		}
 	}

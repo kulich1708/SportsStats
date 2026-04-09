@@ -7,17 +7,12 @@ using System.Text;
 
 namespace SportsStats.Infrastructure.Persistence.Repositories
 {
-	public class PlayerRepository : IPlayerRepository
+	public class PlayerRepository(AppDbContext context) : IPlayerRepository
 	{
 
-		private readonly AppDbContext _context;
+		private readonly AppDbContext _context = context;
 
-		public PlayerRepository(AppDbContext context)
-		{
-			_context = context;
-		}
-
-		public async Task<Player?> FindById(int playerId)
+		public async Task<Player?> GetAsync(int playerId)
 		{
 			return await _context.Players.FirstOrDefaultAsync(player => player.Id == playerId);
 		}

@@ -7,16 +7,11 @@ using System.Text;
 
 namespace SportsStats.Infrastructure.Persistence.Repositories
 {
-	public class TeamRepository : ITeamRepository
+	public class TeamRepository(AppDbContext context) : ITeamRepository
 	{
-		private readonly AppDbContext _context;
+		private readonly AppDbContext _context = context;
 
-		public TeamRepository(AppDbContext context)
-		{
-			_context = context;
-		}
-
-		public async Task<Team?> FindById(int teamId)
+		public async Task<Team?> GetAsync(int teamId)
 		{
 			return await _context.Teams.FirstOrDefaultAsync(team => team.Id == teamId);
 		}

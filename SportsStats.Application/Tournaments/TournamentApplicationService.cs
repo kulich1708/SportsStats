@@ -19,23 +19,23 @@ namespace SportsStats.Application.Tournaments
 		private readonly ITimeProvider _timeProvider = timeProvider;
 		private readonly ITeamRepository _teamRepository = teamRepository;
 
-		private async Task<Tournament> GetTournamentOrThrow(int tournamentId)
+		private async Task<Tournament> GetTournamentOrThrowAsync(int tournamentId)
 		{
-			Tournament tournament = await _tournamentRepository.FindById(tournamentId)
+			Tournament tournament = await _tournamentRepository.GetAsync(tournamentId)
 				?? throw new ArgumentException($"Не существует туринра с id {tournamentId}");
 
 			return tournament;
 		}
-		private async Task<Tournament> DoSomething(int tournamentId, Action<Tournament> action)
+		private async Task<Tournament> UpdateAndSaveAsync(int tournamentId, Action<Tournament> action)
 		{
-			Tournament tournament = await GetTournamentOrThrow(tournamentId);
+			Tournament tournament = await GetTournamentOrThrowAsync(tournamentId);
 
 			action(tournament);
 
 			await _tournamentRepository.SaveChangesAsync();
 			return tournament;
 		}
-		public async Task<int> Create(string name)
+		public async Task<int> CreateAsync(string name)
 		{
 			Tournament tournament = new(name);
 
@@ -44,40 +44,40 @@ namespace SportsStats.Application.Tournaments
 
 			return tournament.Id;
 		}
-		public async Task Start(int tournamentId)
+		public async Task StartAsync(int tournamentId)
 		{
-			await DoSomething(tournamentId, tournament => tournament.Start(_timeProvider.GetCurrentTime()));
+			await UpdateAndSaveAsync(tournamentId, tournament => tournament.Start(_timeProvider.GetCurrentTime()));
 		}
-		public async Task Finish(int tournamentId)
+		public async Task FinishAsync(int tournamentId)
 		{
-			await DoSomething(tournamentId, tournament => tournament.Finish(_timeProvider.GetCurrentTime()));
+			await UpdateAndSaveAsync(tournamentId, tournament => tournament.Finish(_timeProvider.GetCurrentTime()));
 		}
-		public async Task Registration(int tournamentId)
+		public async Task RegistrationAsync(int tournamentId)
 		{
-			await DoSomething(tournamentId, tournament => tournament.Registration());
+			await UpdateAndSaveAsync(tournamentId, tournament => tournament.Registration());
 		}
-		public async Task RegistrateTeam(int tournamentId, int teamId)
+		public async Task RegistrateTeamAsync(int tournamentId, int teamId)
 		{
-			Team team = await _teamRepository.FindById(teamId)
+			Team team = await _teamRepository.GetAsync(teamId)
 				?? throw new ArgumentException($"Не существует команды с id {teamId}");
 
-			await DoSomething(tournamentId, tournament => tournament.RegistrateTeam(teamId));
+			await UpdateAndSaveAsync(tournamentId, tournament => tournament.RegistrateTeam(teamId));
 		}
 
 		// Временно через фабрику
-		public async Task SetRules(int tournamentId)
+		public async Task SetRulesAsync(int tournamentId)
 		{
-			await DoSomething(tournamentId, tournament => tournament.SetRules(TournamentRules.CreateKHLRules()));
+			await UpdateAndSaveAsync(tournamentId, tournament => tournament.SetRules(TournamentRules.CreateKHLRules()));
 		}
 
-		public async Task<List<TournamentDTO>> GetTournamentsAsync(bool onlyStarted = false)
+		public async Task<List<TournamentDTO>> GetAllAsync(bool onlyStarted = false)
 		{
-			var tournaments = await _tournamentRepository.GetTournamentsAsync(onlyStarted);
+			var tournaments = await _tournamentRepository.GetAllAsync(onlyStarted);
 			return tournaments.Select(TournamentMapper.ToDTO).ToList();
 		}
-		public async Task<TournamentDTO?> GetTournament(int tournamentId)
+		public async Task<TournamentDTO?> GetAsync(int tournamentId)
 		{
-			var tournament = await _tournamentRepository.FindById(tournamentId);
+			var tournament = await _tournamentRepository.GetAsync(tournamentId);
 			return tournament == null ? null : TournamentMapper.ToDTO(tournament);
 		}
 	}
