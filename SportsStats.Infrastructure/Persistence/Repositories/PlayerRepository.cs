@@ -28,7 +28,7 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 		}
 		public async Task AddAsync(Player player)
 		{
-			await _context.AddAsync(player);
+			await _context.Players.AddAsync(player);
 		}
 	}
 }
