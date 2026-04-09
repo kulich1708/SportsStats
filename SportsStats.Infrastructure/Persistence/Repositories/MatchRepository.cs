@@ -19,7 +19,7 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 
 		public async Task<Match?> FindById(int matchId)
 		{
-			return await _context.Matches.FirstOrDefaultAsync(match => match.Id == matchId);
+			return await _context.Matches.Include(match => match.Goals).FirstOrDefaultAsync(match => match.Id == matchId);
 		}
 
 		public async Task SaveChangesAsync()
