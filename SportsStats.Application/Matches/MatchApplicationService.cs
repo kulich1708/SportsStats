@@ -27,7 +27,10 @@ namespace SportsStats.Application.Matches
 				?? throw new ArgumentException("Нет турнира с таким Id");
 
 			Match match = new MatchCreationService().CreateMatch(tournament, homeTeamId, awayTeamId);
-			return await _matchRepository.Save(match);
+			await _matchRepository.AddAsync(match);
+			await _matchRepository.SaveChangesAsync();
+			Console.WriteLine($"Id матча из аппликейшина: {match.Id}");
+			return match;
 		}
 		public async Task StartMatch(int matchId)
 		{
@@ -35,7 +38,7 @@ namespace SportsStats.Application.Matches
 
 			match.Start(_timeProvider.GetCurrentTime());
 
-			await _matchRepository.Save(match);
+			await _matchRepository.SaveChangesAsync();
 		}
 		public async Task FinishMatch(int matchId)
 		{
@@ -43,7 +46,7 @@ namespace SportsStats.Application.Matches
 
 			match.Finish(_timeProvider.GetCurrentTime());
 
-			await _matchRepository.Save(match);
+			await _matchRepository.SaveChangesAsync();
 		}
 
 		public async Task<GoalEvent> AddGoal(int matchId, int scoringTeamId, int goalScorerId, int period, int time)
@@ -52,10 +55,7 @@ namespace SportsStats.Application.Matches
 
 			GoalEvent goal = match.AddGoal(scoringTeamId, goalScorerId, period, time, _timeProvider.GetCurrentTime());
 
-			//foreach (var goal in match.UpdatedGoals)
-			//	await _goalRepository.Save(goal);
-			match.OnSaved();
-			await _matchRepository.Save(match);
+			await _matchRepository.SaveChangesAsync();
 			return goal;
 		}
 		public async Task AddPlayerToRoster(int matchId, int playerId, int teamId)
@@ -69,7 +69,7 @@ namespace SportsStats.Application.Matches
 
 			match.AddPlayerToRoster(playerId, teamId);
 
-			await _matchRepository.Save(match);
+			await _matchRepository.SaveChangesAsync();
 		}
 		public async Task FillGoalDetails(int matchId, int goalId, int? firstAssistId, int? secondAssistId,
 									GoalStrengthType strengthType, GoalNetType? netType = null)
@@ -78,10 +78,7 @@ namespace SportsStats.Application.Matches
 
 			match.FillGoalDetails(goalId, firstAssistId, secondAssistId, strengthType, netType);
 
-			//foreach (var goal in match.UpdatedGoals)
-			//	await _goalRepository.Save(goal);
-			match.OnSaved();
-			await _matchRepository.Save(match);
+			await _matchRepository.SaveChangesAsync();
 		}
 		private async Task<Match> GetMatchOrThrow(int matchId)
 		{
