@@ -33,7 +33,11 @@ namespace SportsStats.API.Controllers
 		[HttpPost]
 		public async Task<ActionResult<int>> Create([FromBody] CreateTournamentDTO createTournamentDTO)
 		{
-			return Ok(await _tournamentApplicationService.Create(createTournamentDTO.Name));
+			string name = createTournamentDTO.Name;
+			if (string.IsNullOrWhiteSpace(name))
+				return BadRequest(new { error = "Название турнира не может быть пустым" });
+
+			return Ok(await _tournamentApplicationService.Create(name));
 		}
 		[HttpPost("{id}/start")]
 		public async Task<ActionResult> Start(int id)
