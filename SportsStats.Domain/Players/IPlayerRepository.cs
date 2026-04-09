@@ -9,5 +9,6 @@ namespace SportsStats.Domain.Players
 		public Task<Player?> GetAsync(int playerId);
 		public Task SaveChangesAsync();
 		public Task AddAsync(Player player);
+		public Task<List<Player>> GetAllAsync(int? teamId = null);
 	}
 }
