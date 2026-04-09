@@ -38,6 +38,7 @@ namespace SportsStats.ConsoleApp
 		public async static Task<string> Print(this Match match, ITeamRepository teamRepository, IPlayerRepository playerRepository)
 		{
 			var stringBuilder = new StringBuilder();
+			stringBuilder.AppendLine($"Match ID: {match.Id}");
 			stringBuilder.AppendLine($"{(await teamRepository.FindById(match.HomeTeamId)).Name}    {match.HomeTeamScore}:{match.AwayTeamScore}    {(await teamRepository.FindById(match.AwayTeamId)).Name}");
 			stringBuilder.AppendLine($"tournament ID: {match.TournamentId}");
 			stringBuilder.AppendLine($"Status: {match.Status}");
@@ -76,20 +77,20 @@ namespace SportsStats.ConsoleApp
 	}
 	public class Test
 	{
+		public TimeProvider timeProvider = new();
+		public Random Random = new();
 		public DbContextOptionsBuilder<AppDbContext> Options { get; private set; }
 		public AppDbContext Context { get; private set; }
-		public Random Random = new();
 		public PlayerRepository PlayerRepository { get; private set; }
 		public TeamRepository TeamRepository { get; private set; }
 		public TournamentRepository TournamentRepository { get; private set; }
 		public MatchRepository MatchRepository { get; private set; }
-		//public InMemoryGoalRepository InMemoryGoalRepository = new InMemoryGoalRepository();
-		public TimeProvider timeProvider = new();
 
 		public PlayerApplicationService PlayerApplicationService { get; private set; }
 		public TeamApplicationService TeamApplicationService { get; private set; }
 		public TournamentApplicationService TournamentApplicationService { get; private set; }
 		public MatchApplicationService MatchApplicationService { get; private set; }
+
 		public Test()
 		{
 			Options = new DbContextOptionsBuilder<AppDbContext>()
@@ -104,9 +105,10 @@ namespace SportsStats.ConsoleApp
 
 			TeamApplicationService = new(TeamRepository);
 			TournamentApplicationService = new(TournamentRepository, timeProvider, TeamRepository);
-			MatchApplicationService = new(PlayerRepository, TournamentRepository, MatchRepository, null, timeProvider);
+			MatchApplicationService = new(PlayerRepository, TournamentRepository, MatchRepository, timeProvider);
 			PlayerApplicationService = new(PlayerRepository, TeamRepository);
 		}
+
 		public async Task<List<int>> CreateTeams()
 		{
 			List<int> ids = new List<int>();
@@ -117,6 +119,7 @@ namespace SportsStats.ConsoleApp
 			Console.WriteLine("teams created");
 			return ids;
 		}
+
 		public async Task<List<Player>> CreatePlayers(int count, PositionType position, List<int> teamsId)
 		{
 			// Список из 40 имён
@@ -170,13 +173,12 @@ namespace SportsStats.ConsoleApp
 			if (!Context.Database.CanConnect())
 				Console.WriteLine("Не удалось подключиться");
 
-			//List<int> teamsId = await CreateTeams();
-			//List<int> teamsId = new() { 3, 4 };
-			//int tournamentId = await CreateTournament(teamsId);
+			List<int> teamsId = await CreateTeams();
+			int tournamentId = await CreateTournament(teamsId);
 
-			//await Context.SaveChangesAsync();
-			int tournamentId = Context.Tournaments.Where(t => t.Status == TournamentStatus.Registration).FirstOrDefault()?.Id ?? 0;
-			List<int> teamsId = Context.Tournaments.Where(t => t.Status == TournamentStatus.Registration).FirstOrDefault()?.TeamsId.ToList() ?? [];
+			//int tournamentId = Context.Tournaments.Where(t => t.Status == TournamentStatus.Registration).FirstOrDefault()?.Id ?? 0;
+			//List<int> teamsId = Context.Tournaments.Where(t => t.Status == TournamentStatus.Registration).FirstOrDefault()?.TeamsId.ToList() ?? [];
+
 			IEnumerable<Player> newPlayers = [];
 			newPlayers = newPlayers.Concat(await CreatePlayers(8, PositionType.LeftWinger, teamsId));
 			newPlayers = newPlayers.Concat(await CreatePlayers(8, PositionType.RightWinger, teamsId));
@@ -185,43 +187,48 @@ namespace SportsStats.ConsoleApp
 			newPlayers = newPlayers.Concat(await CreatePlayers(6, PositionType.RightDefenseman, teamsId));
 			newPlayers = newPlayers.Concat(await CreatePlayers(4, PositionType.Goalie, teamsId));
 			List<Player> newPlayersList = newPlayers.ToList();
+
 			Console.WriteLine(string.Join(" ", newPlayersList.Select(p => p.Id)));
-			await Context.SaveChangesAsync();
-			//Context = new(Options.Options);
+
 			for (int i = 0; i < newPlayersList.Count; i++)
-			{
 				await PlayerApplicationService.ChangeTeam(newPlayersList[i].Id, teamsId[(i) % teamsId.Count]);
-			}
-			Console.WriteLine("Список всех игроков:\n");
+
+			Console.WriteLine("Список всех игроков:");
 			await Context.Players.ForEachAsync(player => Console.WriteLine(player.Print()));
-			//await Context.SaveChangesAsync();
+			Console.WriteLine();
+			Console.WriteLine();
 
 
 			Match match = await MatchApplicationService.CreateMatch(tournamentId, teamsId[0], teamsId[1]);
 
-			await Context.SaveChangesAsync();
 			int matchId = match.Id;
 			foreach (var player in newPlayersList)
 				await MatchApplicationService.AddPlayerToRoster(matchId, player.Id, player.TeamId);
 
-			await Context.SaveChangesAsync();
 			await MatchApplicationService.StartMatch(matchId);
 
-			await Context.SaveChangesAsync();
 			List<Player> HomeTeamPlayers = await Context.Players.Where(player => player.TeamId == match.HomeTeamId).ToListAsync();
 			List<Player> AwayTeamPlayers = await Context.Players.Where(player => player.TeamId == match.AwayTeamId).ToListAsync();
 
+			Console.WriteLine(await match.Print(TeamRepository, PlayerRepository));
+			Console.WriteLine();
+			Console.WriteLine();
+
 			GoalEvent firstGoal = await MatchApplicationService.AddGoal(matchId, teamsId[0], HomeTeamPlayers[0].Id, 1, 20);
+
+			Console.WriteLine(await match.Print(TeamRepository, PlayerRepository));
+			Console.WriteLine();
+			Console.WriteLine();
 			await MatchApplicationService.AddGoal(matchId, teamsId[0], HomeTeamPlayers[0].Id, 1, 1199);
 			await MatchApplicationService.AddGoal(matchId, teamsId[1], AwayTeamPlayers[0].Id, 2, 20);
 			await MatchApplicationService.AddGoal(matchId, teamsId[1], AwayTeamPlayers[1].Id, 3, 1199);
 			await MatchApplicationService.AddGoal(matchId, teamsId[0], HomeTeamPlayers[0].Id, 4, 299);
-			await Context.SaveChangesAsync();
+
+			Console.WriteLine(await match.Print(TeamRepository, PlayerRepository));
+			Console.WriteLine();
+			Console.WriteLine();
 			await MatchApplicationService.FillGoalDetails(matchId, firstGoal.Id, HomeTeamPlayers[1].Id, HomeTeamPlayers[2].Id, GoalStrengthType.EvenStrength);
 
-			//Console.WriteLine(match.Print(TeamRepository));
-
-			await Context.SaveChangesAsync();
 			Match matchInDb = await MatchRepository.FindById(matchId);
 			Console.WriteLine(await match.Print(TeamRepository, PlayerRepository));
 			Console.WriteLine(await matchInDb.Print(TeamRepository, PlayerRepository));
