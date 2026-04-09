@@ -7,16 +7,11 @@ using System.Text;
 
 namespace SportsStats.Infrastructure.Persistence.Repositories
 {
-	public class TournamentRepository : ITournamentRepository
+	public class TournamentRepository(AppDbContext context) : ITournamentRepository
 	{
-		private readonly AppDbContext _context;
+		private readonly AppDbContext _context = context;
 
-		public TournamentRepository(AppDbContext context)
-		{
-			_context = context;
-		}
-
-		public async Task<Tournament?> FindById(int tournamentId)
+		public async Task<Tournament?> GetAsync(int tournamentId)
 		{
 			return await _context.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId);
 		}
@@ -33,7 +28,7 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 		/// <summary>
 		/// NOTE: Логика фильтрации должна совпадать с методом Tournament.IsStarted()
 		/// </summary>
-		public async Task<List<Tournament>> GetTournamentsAsync(bool onlyStarted)
+		public async Task<List<Tournament>> GetAllAsync(bool onlyStarted)
 		{
 			if (onlyStarted)
 				return await _context.Tournaments.Where(t => t.Status == TournamentStatus.InProgress).ToListAsync();

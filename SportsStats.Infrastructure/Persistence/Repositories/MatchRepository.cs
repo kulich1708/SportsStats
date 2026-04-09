@@ -8,16 +8,11 @@ using System.Text;
 
 namespace SportsStats.Infrastructure.Persistence.Repositories
 {
-	public class MatchRepository : IMatchRepository
+	public class MatchRepository(AppDbContext context) : IMatchRepository
 	{
-		private readonly AppDbContext _context;
+		private readonly AppDbContext _context = context;
 
-		public MatchRepository(AppDbContext context)
-		{
-			_context = context;
-		}
-
-		public async Task<Match?> FindById(int matchId)
+		public async Task<Match?> GetAsync(int matchId)
 		{
 			return await _context.Matches.Include(match => match.Goals).FirstOrDefaultAsync(match => match.Id == matchId);
 		}

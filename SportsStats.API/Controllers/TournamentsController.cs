@@ -20,13 +20,13 @@ namespace SportsStats.API.Controllers
 		[HttpGet]
 		public async Task<ActionResult<List<TournamentDTO>>> GetTournaments([FromQuery] bool onlyStarted = false)
 		{
-			var tournaments = await _tournamentApplicationService.GetTournamentsAsync(onlyStarted);
+			var tournaments = await _tournamentApplicationService.GetAllAsync(onlyStarted);
 			return Ok(tournaments);
 		}
 		[HttpGet("{id}")]
 		public async Task<ActionResult<TournamentDTO>> GetTournament(int id)
 		{
-			var tournament = await _tournamentApplicationService.GetTournament(id);
+			var tournament = await _tournamentApplicationService.GetAsync(id);
 			return Ok(tournament);
 		}
 
@@ -37,38 +37,38 @@ namespace SportsStats.API.Controllers
 			if (string.IsNullOrWhiteSpace(name))
 				return BadRequest(new { error = "Название турнира не может быть пустым" });
 
-			return Ok(await _tournamentApplicationService.Create(name));
+			return Ok(await _tournamentApplicationService.CreateAsync(name));
 		}
 		[HttpPost("{id}/start")]
 		public async Task<ActionResult> Start(int id)
 		{
-			await _tournamentApplicationService.Start(id);
+			await _tournamentApplicationService.StartAsync(id);
 			return Ok();
 		}
 		[HttpPost("{id}/registration")]
 		public async Task<ActionResult> Registration(int id)
 		{
-			await _tournamentApplicationService.Registration(id);
+			await _tournamentApplicationService.RegistrationAsync(id);
 			return Ok();
 		}
 		[HttpPost("{id}/finish")]
 		public async Task<ActionResult> Finish(int id)
 		{
-			await _tournamentApplicationService.Finish(id);
+			await _tournamentApplicationService.FinishAsync(id);
 			return Ok();
 		}
 
 		[HttpPost("{tournamentId}/teams/{teamId}")]
 		public async Task<ActionResult> RegistrateTeam(int tournamentId, int teamId)
 		{
-			await _tournamentApplicationService.RegistrateTeam(tournamentId, teamId);
+			await _tournamentApplicationService.RegistrateTeamAsync(tournamentId, teamId);
 			return Ok();
 		}
 
 		[HttpPost("{id}/rules")]
 		public async Task<ActionResult> SetRules(int id)
 		{
-			await _tournamentApplicationService.SetRules(id);
+			await _tournamentApplicationService.SetRulesAsync(id);
 			return Ok();
 		}
 	}
