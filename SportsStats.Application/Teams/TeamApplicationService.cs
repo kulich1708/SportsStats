@@ -12,7 +12,7 @@ namespace SportsStats.Application.Teams
 	{
 		private readonly ITeamRepository _teamRepository = teamRepository;
 
-		public async Task<Team> Create(string name)
+		public async Task<Team> CreateAsync(string name)
 		{
 			Team team = new(name);
 

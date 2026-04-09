@@ -19,9 +19,9 @@ namespace SportsStats.Application.Matches
 		private readonly IMatchRepository _matchRepository = matchRepository;
 		private readonly ITimeProvider _timeProvider = timeProvider;
 
-		public async Task<Match> CreateMatch(int tournamentId, int homeTeamId, int awayTeamId)
+		public async Task<Match> CreateAsync(int tournamentId, int homeTeamId, int awayTeamId)
 		{
-			Tournament tournament = await _tournamentRepository.FindById(tournamentId)
+			Tournament tournament = await _tournamentRepository.GetAsync(tournamentId)
 				?? throw new ArgumentException("Нет турнира с таким Id");
 
 			Match match = new MatchCreationService().CreateMatch(tournament, homeTeamId, awayTeamId);
@@ -29,36 +29,36 @@ namespace SportsStats.Application.Matches
 			await _matchRepository.SaveChangesAsync();
 			return match;
 		}
-		public async Task StartMatch(int matchId)
+		public async Task StartAsync(int matchId)
 		{
-			Match match = await GetMatchOrThrow(matchId);
+			Match match = await GetMatchOrThrowAsync(matchId);
 
 			match.Start(_timeProvider.GetCurrentTime());
 
 			await _matchRepository.SaveChangesAsync();
 		}
-		public async Task FinishMatch(int matchId)
+		public async Task FinishAsync(int matchId)
 		{
-			Match match = await GetMatchOrThrow(matchId);
+			Match match = await GetMatchOrThrowAsync(matchId);
 
 			match.Finish(_timeProvider.GetCurrentTime());
 
 			await _matchRepository.SaveChangesAsync();
 		}
 
-		public async Task<GoalEvent> AddGoal(int matchId, int scoringTeamId, int goalScorerId, int period, int time)
+		public async Task<GoalEvent> AddGoalAsync(int matchId, int scoringTeamId, int goalScorerId, int period, int time)
 		{
-			Match match = await GetMatchOrThrow(matchId);
+			Match match = await GetMatchOrThrowAsync(matchId);
 
 			GoalEvent goal = match.AddGoal(scoringTeamId, goalScorerId, period, time, _timeProvider.GetCurrentTime());
 
 			await _matchRepository.SaveChangesAsync();
 			return goal;
 		}
-		public async Task AddPlayerToRoster(int matchId, int playerId, int teamId)
+		public async Task AddPlayerToRosterAsync(int matchId, int playerId, int teamId)
 		{
-			Match match = await GetMatchOrThrow(matchId);
-			Player player = await _playerRepository.FindById(playerId)
+			Match match = await GetMatchOrThrowAsync(matchId);
+			Player player = await _playerRepository.GetAsync(playerId)
 				?? throw new ArgumentException("Игрока с таким id не существует");
 
 			if (player.TeamId != teamId)
@@ -68,18 +68,18 @@ namespace SportsStats.Application.Matches
 
 			await _matchRepository.SaveChangesAsync();
 		}
-		public async Task FillGoalDetails(int matchId, int goalId, int? firstAssistId, int? secondAssistId,
+		public async Task FillGoalDetailsAsync(int matchId, int goalId, int? firstAssistId, int? secondAssistId,
 									GoalStrengthType strengthType, GoalNetType? netType = null)
 		{
-			Match match = await GetMatchOrThrow(matchId);
+			Match match = await GetMatchOrThrowAsync(matchId);
 
 			match.FillGoalDetails(goalId, firstAssistId, secondAssistId, strengthType, netType);
 
 			await _matchRepository.SaveChangesAsync();
 		}
-		private async Task<Match> GetMatchOrThrow(int matchId)
+		private async Task<Match> GetMatchOrThrowAsync(int matchId)
 		{
-			return await _matchRepository.FindById(matchId)
+			return await _matchRepository.GetAsync(matchId)
 				?? throw new ArgumentException($"Матч {matchId} не существует");
 		}
 	}
