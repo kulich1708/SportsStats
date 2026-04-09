@@ -15,7 +15,10 @@ namespace SportsStats.Application.Teams
 		public async Task<Team> Create(string name)
 		{
 			Team team = new(name);
-			return await _teamRepository.Save(team);
+
+			await _teamRepository.SaveChangesAsync();
+
+			return team;
 		}
 
 	}

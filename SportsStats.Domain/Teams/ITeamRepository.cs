@@ -7,6 +7,7 @@ namespace SportsStats.Domain.Teams
 	public interface ITeamRepository
 	{
 		public Task<Team?> FindById(int teamId);
-		public Task<Team> Save(Team team);
+		public Task SaveChangesAsync();
+		public Task AddAsync(Team team);
 	}
 }
