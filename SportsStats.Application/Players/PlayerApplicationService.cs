@@ -1,4 +1,5 @@
-﻿using SportsStats.Domain.Players;
+﻿using SportsStats.Application.Players.DTOs.Responses;
+using SportsStats.Domain.Players;
 using SportsStats.Domain.Teams;
 using System;
 using System.Collections.Generic;
@@ -11,14 +12,14 @@ namespace SportsStats.Application.Players
 		private readonly IPlayerRepository _playerRepository = playerRepository;
 		private readonly ITeamRepository _teamRepository = teamRepository;
 
-		public async Task<Player> CreateAsync(string name, string surname, PositionType position)
+		public async Task<int> CreateAsync(string name, string surname, PositionType position)
 		{
 			Player player = new(name, surname, position);
 
 			await _playerRepository.AddAsync(player);
 			await _playerRepository.SaveChangesAsync();
 
-			return player;
+			return player.Id;
 		}
 		public async Task ChangeTeamAsync(int playerId, int teamId)
 		{
@@ -28,6 +29,15 @@ namespace SportsStats.Application.Players
 			player.ChangeTeam(teamId);
 
 			await _playerRepository.SaveChangesAsync();
+		}
+		public async Task<PlayerDTO?> GetAsync(int playerId)
+		{
+			Player player = await _playerRepository.GetAsync(playerId);
+			return player == null ? null : PlayerMapper.ToDTO(player);
+		}
+		public async Task<List<PlayerDTO>> GetAllAsync(int? teamId = null)
+		{
+			return (await _playerRepository.GetAllAsync(teamId)).Select(PlayerMapper.ToDTO).ToList();
 		}
 
 		private async Task<Player> GetPlayerOrThrowAsync(int playerId)
@@ -40,5 +50,6 @@ namespace SportsStats.Application.Players
 			return await _teamRepository.GetAsync(teamId)
 				?? throw new ArgumentException("Команда с таким id не найдена");
 		}
+
 	}
 }

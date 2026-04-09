@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using SportsStats.Domain.Teams;
 
 namespace SportsStats.Infrastructure.Persistence.Repositories
 {
@@ -24,6 +25,14 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 		public async Task AddAsync(Player player)
 		{
 			await _context.Players.AddAsync(player);
+		}
+		public async Task<List<Player>> GetAllAsync(int? teamId = null)
+		{
+			if (teamId == null)
+				return await _context.Players.ToListAsync();
+
+			Team team = await _context.Teams.FirstOrDefaultAsync(t => t.Id == teamId);
+			return team == null ? [] : await _context.Players.Where(p => p.TeamId == teamId).ToListAsync();
 		}
 	}
 }
