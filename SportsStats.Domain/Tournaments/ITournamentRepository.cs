@@ -7,6 +7,7 @@ namespace SportsStats.Domain.Tournaments
 	public interface ITournamentRepository
 	{
 		public Task<Tournament?> FindById(int tournamentId);
-		public Task<Tournament> Save(Tournament tournament);
+		public Task SaveChangesAsync();
+		public Task AddAsync(Tournament tournament);
 	}
 }

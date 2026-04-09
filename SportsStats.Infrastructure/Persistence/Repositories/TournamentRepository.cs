@@ -21,14 +21,13 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 			return await _context.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId);
 		}
 
-		public async Task<Tournament> Save(Tournament tournament)
+		public async Task SaveChangesAsync()
 		{
-			if (tournament.Id == 0)
-				await _context.Tournaments.AddAsync(tournament);
-			else
-				_context.Tournaments.Update(tournament);
-			Console.WriteLine($"id созданного турнира: {tournament.Id}");
-			return tournament;
+			await _context.SaveChangesAsync();
+		}
+		public async Task AddAsync(Tournament tournament)
+		{
+			await _context.Tournaments.AddAsync(tournament);
 		}
 	}
 }
