@@ -4,6 +4,7 @@ using SportsStats.Domain.Tournaments;
 using SportsStats.Domain.Tournaments.Rules;
 using System;
 using System.Collections.Generic;
+using System.Net.NetworkInformation;
 using System.Text;
 
 namespace SportsStats.Application.Tournaments
@@ -30,13 +31,17 @@ namespace SportsStats.Application.Tournaments
 
 			action(tournament);
 
-			return await _tournamentRepository.Save(tournament);
+			await _tournamentRepository.SaveChangesAsync();
+			return tournament;
 		}
 		public async Task<Tournament> Create(string name)
 		{
 			Tournament tournament = new(name);
 
-			return await _tournamentRepository.Save(tournament);
+			await _tournamentRepository.AddAsync(tournament);
+			await _tournamentRepository.SaveChangesAsync();
+
+			return tournament;
 		}
 		public async Task Start(int tournamentId)
 		{
@@ -48,19 +53,14 @@ namespace SportsStats.Application.Tournaments
 		}
 		public async Task RegistrateTeam(int tournamentId, int teamId)
 		{
-			Tournament tournament = await GetTournamentOrThrow(tournamentId);
 			Team team = await _teamRepository.FindById(teamId)
 				?? throw new ArgumentException($"Не существует команды с id {teamId}");
 
-			tournament.RegistrateTeam(teamId);
-
-			await _tournamentRepository.Save(tournament);
+			await DoSomething(tournamentId, tournament => tournament.RegistrateTeam(teamId));
 		}
 		public async Task SetStatus(int tournamentId, TournamentStatus status)
 		{
-			Tournament tournament = await GetTournamentOrThrow(tournamentId);
-			tournament.SetStatus(status);
-			await _tournamentRepository.Save(tournament);
+			await DoSomething(tournamentId, tournament => tournament.SetStatus(status));
 		}
 
 		// Временно через фабрику
