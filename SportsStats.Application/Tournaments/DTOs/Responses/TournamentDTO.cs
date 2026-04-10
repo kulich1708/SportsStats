@@ -13,6 +13,6 @@ namespace SportsStats.Application.Tournaments.DTOs.Responses
 		DateTime FinishedAt,
 		TournamentStatus Status,
 		TournamentRules TournamentRules,
-		IReadOnlyList<int> TeamsId
+		HashSet<int> TeamsId
 	);
 }
