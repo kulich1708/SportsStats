@@ -19,6 +19,10 @@ namespace SportsStats.Domain.Tournaments.Rules
 			MatchRosterRules = matchRosterRules ?? throw new ArgumentNullException();
 			MatchPointsRules = matchPointsRules ?? throw new ArgumentNullException();
 		}
+
+		public bool HasRules() => MatchDurationRules != null
+							   && MatchPointsRules != null
+							   && MatchRosterRules != null;
 		public static TournamentRules CreateKHLRules()
 		{
 			var durationRules = MatchDurationRules.CreateKHLRules();
