@@ -10,8 +10,8 @@ namespace SportsStats.Application.Matches.DTOs.Responses
 	public record MatchDTO(
 		int HomeTeamId,
 		int AwayTeamId,
-		List<int> HomeTeamRoster,
-		List<int> AwayTeamRoster,
+		HashSet<int> HomeTeamRoster,
+		HashSet<int> AwayTeamRoster,
 		DateTime? StartedAt,
 		DateTime? FinishedAt,
 		int TournamentId,
