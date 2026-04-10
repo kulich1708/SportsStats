@@ -33,22 +33,21 @@ namespace SportsStats.Infrastructure.Persistence.DbContexts
 					  .HasField("_teamsId")
 					  .HasColumnType("jsonb")
 					  .HasConversion(
-							v => JsonSerializer.Serialize(v),
-							v => JsonSerializer.Deserialize<List<int>>(v),
-							new ValueComparer<IReadOnlyList<int>>(
-								(c1, c2) => (c1 == c2) || (c1 != null && c2 != null && c1.SequenceEqual(c2)),
+							v => JsonSerializer.Serialize(v.ToList()),
+							v => new HashSet<int>(JsonSerializer.Deserialize<List<int>>(v)),
+							new ValueComparer<IReadOnlySet<int>>(
+								(c1, c2) => (c1 == c2) ||
+					  					(c1 != null && c2 != null &&
+					  					 c1.SetEquals(c2)),
 								c => c.Aggregate(0, (hash, item) => HashCode.Combine(hash, item.GetHashCode())),
-								c => c.ToList()  // Для снимка создаём List, но он будет обёрнут в IReadOnlyList
+					  			c => new HashSet<int>(c)
 							)
 					  );
 
-				// Конфигурация корневого VO
 				entity.OwnsOne(t => t.TournamentRules, rulesBuilder =>
 				{
-					// Включаем JSON для PostgreSQL
 					rulesBuilder.ToJson();
 
-					// Настраиваем вложенные VO
 					rulesBuilder.OwnsOne(r => r.MatchDurationRules);
 					rulesBuilder.OwnsOne(r => r.MatchRosterRules);
 					rulesBuilder.OwnsOne(r => r.MatchPointsRules);
@@ -58,15 +57,42 @@ namespace SportsStats.Infrastructure.Persistence.DbContexts
 			modelBuilder.Entity<Match>(entity =>
 			{
 				entity.Property(match => match.HomeTeamRoster)
+					.HasField("_homeTeamRoster")
 					.HasColumnType("jsonb")
 					.HasConversion(
-						p => JsonSerializer.Serialize(p),
-						p => JsonSerializer.Deserialize<List<int>>(p));
+							v => JsonSerializer.Serialize(v.ToList()),
+							v => new HashSet<int>(JsonSerializer.Deserialize<List<int>>(v)),
+							new ValueComparer<IReadOnlySet<int>>(
+								(c1, c2) => (c1 == c2) ||
+					  					(c1 != null && c2 != null &&
+					  					 c1.SetEquals(c2)),
+								c => c.Aggregate(0, (hash, item) => HashCode.Combine(hash, item.GetHashCode())),
+					  			c => new HashSet<int>(c)
+							)
+					  );
 				entity.Property(match => match.AwayTeamRoster)
+					.HasField("_awayTeamRoster")
 					.HasColumnType("jsonb")
 					.HasConversion(
-						p => JsonSerializer.Serialize(p),
-						p => JsonSerializer.Deserialize<List<int>>(p));
+							v => JsonSerializer.Serialize(v.ToList()),
+							v => new HashSet<int>(JsonSerializer.Deserialize<List<int>>(v)),
+							new ValueComparer<IReadOnlySet<int>>(
+								(c1, c2) => (c1 == c2) ||
+					  					(c1 != null && c2 != null &&
+					  					 c1.SetEquals(c2)),
+								c => c.Aggregate(0, (hash, item) => HashCode.Combine(hash, item.GetHashCode())),
+					  			c => new HashSet<int>(c)
+							)
+					  );
+
+				entity.OwnsOne(m => m.Rules, rulesBuilder =>
+				{
+					rulesBuilder.ToJson();
+
+					rulesBuilder.OwnsOne(r => r.MatchDurationRules);
+					rulesBuilder.OwnsOne(r => r.MatchRosterRules);
+					rulesBuilder.OwnsOne(r => r.MatchPointsRules);
+				});
 			});
 		}
 		//protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

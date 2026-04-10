@@ -15,6 +15,7 @@ namespace SportsStats.Application.Tournaments
 				tournament.FinishedAt,
 				tournament.Status,
 				tournament.TournamentRules,
-				tournament.TeamsId);
+				tournament.TeamsId.ToHashSet()
+			);
 	}
 }

@@ -13,13 +13,13 @@ namespace SportsStats.Domain.Matches
 	public class Match : BaseEntity, IAggregateRoot
 	{
 		private readonly List<GoalEvent> _goals = new();
-		private List<int> _homeTeamRoster = new();
-		private List<int> _awayTeamRoster = new();
+		private readonly HashSet<int> _homeTeamRoster = new();
+		private readonly HashSet<int> _awayTeamRoster = new();
 		private readonly TournamentRules _rules;
 		public int HomeTeamId { get; private set; }
 		public int AwayTeamId { get; private set; }
-		public IReadOnlyList<int> HomeTeamRoster => _homeTeamRoster;
-		public IReadOnlyList<int> AwayTeamRoster => _awayTeamRoster;
+		public IReadOnlySet<int> HomeTeamRoster => _homeTeamRoster;
+		public IReadOnlySet<int> AwayTeamRoster => _awayTeamRoster;
 		public DateTime? StartedAt { get; private set; }
 		public DateTime? FinishedAt { get; private set; }
 		public int TournamentId { get; private set; }

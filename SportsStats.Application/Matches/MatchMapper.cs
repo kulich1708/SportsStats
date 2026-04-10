@@ -18,8 +18,8 @@ namespace SportsStats.Application.Matches
 		public static MatchDTO ToDTO(Match match) => new(
 			match.HomeTeamId,
 			match.AwayTeamId,
-			match.HomeTeamRoster.ToList(),
-			match.AwayTeamRoster.ToList(),
+			match.HomeTeamRoster.ToHashSet(),
+			match.AwayTeamRoster.ToHashSet(),
 			match.StartedAt,
 			match.FinishedAt,
 			match.TournamentId,
