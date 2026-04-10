@@ -4,9 +4,8 @@ using System.Text;
 
 namespace SportsStats.Application.Matches.DTOs.Requests
 {
-	public record CreateMatchDTO(
+	public record GetAllMatchesDTO(
 		int TournamentId,
-		int HomeTeamId,
-		int AwayTeamId
+		int? TeamId
 		);
 }
