@@ -1,18 +1,19 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
+using SportsStats.API.Middleware;
 using SportsStats.Application.Matches;
 using SportsStats.Application.Players;
 using SportsStats.Application.Teams;
 using SportsStats.Application.Tournaments;
 using SportsStats.Domain.Matches;
 using SportsStats.Domain.Players;
+using SportsStats.Domain.Services;
 using SportsStats.Domain.Shared;
 using SportsStats.Domain.Teams;
 using SportsStats.Domain.Tournaments;
 using SportsStats.Infrastructure.Persistence.DbContexts;
 using SportsStats.Infrastructure.Persistence.Repositories;
 using SportsStats.Infrastructure.Services;
-using SportsStats.API.Middleware;
 using System.Reflection;
 
 namespace SportsStats.API
@@ -47,6 +48,7 @@ namespace SportsStats.API
 			services.AddScoped<IMatchRepository, MatchRepository>();
 			services.AddScoped<IPlayerRepository, PlayerRepository>();
 			services.AddScoped<ITimeProvider, SystemTimeProvider>();
+			services.AddScoped<IMatchService, MatchService>();
 
 			services.AddScoped<TournamentApplicationService>();
 			services.AddScoped<MatchApplicationService>();
