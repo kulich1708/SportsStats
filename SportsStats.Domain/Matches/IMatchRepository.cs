@@ -8,7 +8,7 @@ namespace SportsStats.Domain.Matches
 	{
 		public Task<Match?> GetAsync(int id);
 		public Task SaveChangesAsync();
-		// Для добавления НОВОЙ сущности
 		public Task AddAsync(Match match);
+		public Task<List<Match>> GetAllAsync(int tournamentId, int? teamId = null);
 	}
 }
