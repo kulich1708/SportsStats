@@ -25,5 +25,13 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 		{
 			await _context.Matches.AddAsync(match);
 		}
+		public async Task<List<Match>> GetAllAsync(int tournamentId, int? teamId = null)
+		{
+			var mathces = _context.Matches.Where(m => m.TournamentId == tournamentId);
+			if (teamId == null)
+				return await mathces.ToListAsync();
+
+			return await mathces.Where(m => m.HomeTeamId == teamId || m.AwayTeamId == teamId).ToListAsync();
+		}
 	}
 }
