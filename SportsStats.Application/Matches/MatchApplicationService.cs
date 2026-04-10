@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using SportsStats.Domain.Services;
+using SportsStats.Application.Matches.DTOs.Responses;
 
 namespace SportsStats.Application.Matches
 {
@@ -19,7 +20,7 @@ namespace SportsStats.Application.Matches
 		private readonly IMatchRepository _matchRepository = matchRepository;
 		private readonly ITimeProvider _timeProvider = timeProvider;
 
-		public async Task<Match> CreateAsync(int tournamentId, int homeTeamId, int awayTeamId)
+		public async Task<int> CreateAsync(int tournamentId, int homeTeamId, int awayTeamId)
 		{
 			Tournament tournament = await _tournamentRepository.GetAsync(tournamentId)
 				?? throw new ArgumentException("Нет турнира с таким Id");
@@ -27,7 +28,7 @@ namespace SportsStats.Application.Matches
 			Match match = new MatchCreationService().CreateMatch(tournament, homeTeamId, awayTeamId);
 			await _matchRepository.AddAsync(match);
 			await _matchRepository.SaveChangesAsync();
-			return match;
+			return match.Id;
 		}
 		public async Task StartAsync(int matchId)
 		{
@@ -77,6 +78,17 @@ namespace SportsStats.Application.Matches
 
 			await _matchRepository.SaveChangesAsync();
 		}
+		public async Task<MatchDTO?> GetAsync(int matchId)
+		{
+			Match? match = await _matchRepository.GetAsync(matchId);
+			return match == null ? null : MatchMapper.ToDTO(match);
+		}
+		public async Task<List<MatchDTO>> GetAllAsync(int tournamentId, int? teamId = null)
+		{
+			return (await _matchRepository.GetAllAsync(tournamentId, teamId)).Select(MatchMapper.ToDTO).ToList();
+		}
+
+
 		private async Task<Match> GetMatchOrThrowAsync(int matchId)
 		{
 			return await _matchRepository.GetAsync(matchId)
