@@ -1,5 +1,6 @@
 ﻿using SportsStats.Application.Tournaments.DTOs.Responses;
 using SportsStats.Domain.Shared;
+using SportsStats.Domain.Statistics;
 using SportsStats.Domain.Teams;
 using SportsStats.Domain.Tournaments;
 using SportsStats.Domain.Tournaments.Rules;
@@ -13,11 +14,13 @@ namespace SportsStats.Application.Tournaments
 	public class TournamentApplicationService(
 		ITournamentRepository tournamentRepository,
 		ITimeProvider timeProvider,
-		ITeamRepository teamRepository)
+		ITeamRepository teamRepository,
+		ITeamStatsRepository teamStatsRepository)
 	{
 		private readonly ITournamentRepository _tournamentRepository = tournamentRepository;
 		private readonly ITimeProvider _timeProvider = timeProvider;
 		private readonly ITeamRepository _teamRepository = teamRepository;
+		private readonly ITeamStatsRepository _teamStatsRepository = teamStatsRepository;
 
 		private async Task<Tournament> GetTournamentOrThrowAsync(int tournamentId)
 		{
@@ -62,6 +65,10 @@ namespace SportsStats.Application.Tournaments
 				?? throw new ArgumentException($"Не существует команды с id {teamId}");
 
 			await UpdateAndSaveAsync(tournamentId, tournament => tournament.RegistrateTeam(teamId));
+
+			TeamStats teamStats = new(teamId, tournamentId);
+			await _teamStatsRepository.AddAsync(teamStats);
+			await _teamStatsRepository.SaveChangesAsync();
 		}
 
 		// Временно через фабрику
