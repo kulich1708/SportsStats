@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using SportsStats.Domain.Common;
 using SportsStats.Domain.Matches;
 using SportsStats.Domain.Players;
+using SportsStats.Domain.Statistics;
 using SportsStats.Domain.Teams;
 using SportsStats.Domain.Tournaments;
 using System;
@@ -24,6 +25,7 @@ namespace SportsStats.Infrastructure.Persistence.DbContexts
 		public DbSet<Team> Teams { get; set; }
 		public DbSet<Player> Players { get; set; }
 		public DbSet<Match> Matches { get; set; }
+		public DbSet<TeamStats> TeamsStats { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{

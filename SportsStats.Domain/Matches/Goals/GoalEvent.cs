@@ -16,6 +16,7 @@ namespace SportsStats.Domain.Matches.Goals
 		public int? SecondAssistId { get; private set; }
 		public GoalStrengthType? StrengthType { get; private set; }
 		public GoalNetType? NetType { get; private set; }
+		public bool IsWinning { get; private set; } = false;
 
 
 		public GoalEvent(int scoringTeamId, int goalScorerId, int period, int time)
@@ -55,6 +56,10 @@ namespace SportsStats.Domain.Matches.Goals
 		public void SetStrengthType(GoalStrengthType strengthType)
 		{
 			StrengthType = strengthType;
+		}
+		public void SetAsWinningGoal(bool asWinningGoal)
+		{
+			IsWinning = asWinningGoal;
 		}
 	}
 }

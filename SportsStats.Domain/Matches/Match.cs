@@ -26,8 +26,8 @@ namespace SportsStats.Domain.Matches
 		public MatchStatus Status { get; private set; } = MatchStatus.Waiting;
 		public int HomeTeamScore { get; private set; } = 0;
 		public int AwayTeamScore { get; private set; } = 0;
-		public MatchWinType? HomeTeamWinType { get; private set; }
-		public MatchWinType? AwayTeamWinType { get; private set; }
+		public MatchWinType HomeTeamWinType { get; private set; }
+		public MatchWinType AwayTeamWinType { get; private set; }
 		public bool IsOvertime { get; private set; }
 		public IReadOnlyList<GoalEvent> Goals => _goals;
 		public TournamentRules Rules => _rules;
@@ -146,7 +146,7 @@ namespace SportsStats.Domain.Matches
 				IsOvertime = true;
 
 			if (_rules.MatchDurationRules.DoesGoalEndMatch(period))
-				Finish(scoringMoment);
+				goal.SetAsWinningGoal(true);
 			return goal;
 		}
 

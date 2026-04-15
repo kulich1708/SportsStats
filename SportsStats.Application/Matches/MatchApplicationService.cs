@@ -9,12 +9,14 @@ using System.Text;
 using SportsStats.Domain.Services;
 using SportsStats.Application.Matches.DTOs.Responses;
 using SportsStats.Domain.Teams;
+using SportsStats.Domain.Statistics;
 
 namespace SportsStats.Application.Matches
 {
 	public class MatchApplicationService(IPlayerRepository playerRepository,
 		ITournamentRepository tournamentRepository, IMatchRepository matchRepository,
 		ITeamRepository teamRepository,
+		ITeamStatsRepository teamStatsRepository,
 		ITimeProvider timeProvider,
 		IMatchService matchService)
 	{
@@ -22,6 +24,7 @@ namespace SportsStats.Application.Matches
 		private readonly ITournamentRepository _tournamentRepository = tournamentRepository;
 		private readonly IMatchRepository _matchRepository = matchRepository;
 		private readonly ITeamRepository _teamRepository = teamRepository;
+		private readonly ITeamStatsRepository _teamStatsRepository = teamStatsRepository;
 		private readonly ITimeProvider _timeProvider = timeProvider;
 		private readonly IMatchService _matchService = matchService;
 
@@ -55,6 +58,16 @@ namespace SportsStats.Application.Matches
 			match.Finish(_timeProvider.GetCurrentTime());
 
 			await _matchRepository.SaveChangesAsync();
+
+			TeamStats homeTeamStats = await _teamStatsRepository.GetAsync(match.HomeTeamId, match.TournamentId);
+			TeamStats awayTeamStats = await _teamStatsRepository.GetAsync(match.AwayTeamId, match.TournamentId);
+			int homeTeamPoint = match.Rules.MatchPointsRules.GetPoints(match.HomeTeamWinType);
+			int awayTeamPoint = match.Rules.MatchPointsRules.GetPoints(match.AwayTeamWinType);
+
+			homeTeamStats.AddOutcome(match.HomeTeamWinType, homeTeamPoint);
+			awayTeamStats.AddOutcome(match.AwayTeamWinType, awayTeamPoint);
+
+			await _teamStatsRepository.SaveChangesAsync();
 		}
 
 		public async Task<int> AddGoalAsync(int matchId, int scoringTeamId, int goalScorerId, int period, int time)
@@ -64,6 +77,10 @@ namespace SportsStats.Application.Matches
 			GoalEvent goal = match.AddGoal(scoringTeamId, goalScorerId, period, time, _timeProvider.GetCurrentTime());
 
 			await _matchRepository.SaveChangesAsync();
+
+			if (goal.IsWinning)
+				await FinishAsync(matchId);
+
 			return goal.Id;
 		}
 		public async Task AddPlayerToRosterAsync(int matchId, int playerId, int teamId)

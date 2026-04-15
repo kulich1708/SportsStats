@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SportsStats.Infrastructure.Persistence.DbContexts;
@@ -11,9 +12,11 @@ using SportsStats.Infrastructure.Persistence.DbContexts;
 namespace SportsStats.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260415121341_AddTeamStats")]
+    partial class AddTeamStats
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -168,25 +171,22 @@ namespace SportsStats.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("Draws")
+                    b.Property<int>("Draw")
                         .HasColumnType("integer");
 
-                    b.Property<int>("Games")
+                    b.Property<int>("OTLoss")
                         .HasColumnType("integer");
 
-                    b.Property<int>("OTLosses")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("OTWins")
+                    b.Property<int>("OTWin")
                         .HasColumnType("integer");
 
                     b.Property<int>("Points")
                         .HasColumnType("integer");
 
-                    b.Property<int>("RegularLosses")
+                    b.Property<int>("RegularLoss")
                         .HasColumnType("integer");
 
-                    b.Property<int>("RegularWins")
+                    b.Property<int>("RegularWin")
                         .HasColumnType("integer");
 
                     b.Property<int>("TeamId")
@@ -197,7 +197,7 @@ namespace SportsStats.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TeamsStats");
+                    b.ToTable("TeamStats");
                 });
 
             modelBuilder.Entity("SportsStats.Domain.Teams.Team", b =>
