@@ -1,6 +1,6 @@
 ﻿using SportsStats.Application.Players.DTOs.Responses;
 using SportsStats.Application.Teams.DTOs.Responses;
-using SportsStats.Application.Tournaments.DTOs.Responses;
+using SportsStats.Application.Tournaments.DTOs.Shared;
 using SportsStats.Domain.Matches;
 using SportsStats.Domain.Shared.Enums;
 using SportsStats.Domain.Tournaments.Rules;
@@ -26,6 +26,6 @@ namespace SportsStats.Application.Matches.DTOs.Responses
 		string AwayTeamWinType,
 		bool IsOvertime,
 		List<GoalDTO> Goals,
-		TournamentRules Rules
+		TournamentRulesDTO Rules
 	);
 }
