@@ -54,10 +54,16 @@ namespace SportsStats.API
 			services.AddScoped<IMatchService, MatchService>();
 
 			services.AddScoped<TournamentApplicationService>();
-			services.AddScoped<MatchApplicationService>();
+
 			services.AddScoped<PlayerApplicationService>();
+
 			services.AddScoped<TeamApplicationService>();
 			services.AddScoped<TeamStatsApplicationService>();
+
+			services.AddScoped<MatchGoalService>();
+			services.AddScoped<MatchFinishService>();
+			services.AddScoped<MatchLifecycleService>();
+			services.AddScoped<MatchRosterService>();
 			services.AddScoped<MatchQueriesHandler>();
 
 			services.AddControllers();
