@@ -1,4 +1,6 @@
-﻿using SportsStats.Domain.Matches.Goals;
+﻿using SportsStats.Application.Players.DTOs.Responses;
+using SportsStats.Application.Teams.DTOs.Responses;
+using SportsStats.Domain.Matches.Goals;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -6,13 +8,13 @@ using System.Text;
 namespace SportsStats.Application.Matches.DTOs.Responses
 {
 	public record GoalDTO(
-		int ScoringTeamId,
-		int GoalScorerId,
+		TeamDTO ScoringTeamId,
+		PlayerDTO GoalScorerId,
 		int Period,
 		int Time,
-		int? FirstAssistId,
-		int? SecondAssistId,
-		GoalStrengthType? StrengthType,
-		GoalNetType? NetType
+		PlayerDTO? FirstAssistId,
+		PlayerDTO? SecondAssistId,
+		string StrengthType,
+		string NetType
 		);
 }

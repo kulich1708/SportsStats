@@ -15,7 +15,7 @@ namespace SportsStats.Domain.Matches.Goals
 		EmptyNet
 	}
 
-	public static class HockeyGoalTypeText
+	public static class GoalTypeText
 	{
 		private static readonly Dictionary<GoalStrengthType, string> StrengthDescription = new()
 		{
@@ -35,6 +35,5 @@ namespace SportsStats.Domain.Matches.Goals
 		{
 			return NetDescription.TryGetValue(netType, out var text) ? text : string.Empty;
 		}
-
 	}
 }

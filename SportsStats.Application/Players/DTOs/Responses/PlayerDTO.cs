@@ -5,5 +5,5 @@ using System.Text;
 
 namespace SportsStats.Application.Players.DTOs.Responses
 {
-	public record PlayerDTO(string Name, string Surname, int TeamId, PositionType Position);
+	public record PlayerDTO(int Id, string Name, string Surname, int TeamId, string TeamName, string Position);
 }

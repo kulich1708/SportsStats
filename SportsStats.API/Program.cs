@@ -58,6 +58,7 @@ namespace SportsStats.API
 			services.AddScoped<PlayerApplicationService>();
 			services.AddScoped<TeamApplicationService>();
 			services.AddScoped<TeamStatsApplicationService>();
+			services.AddScoped<MatchQueriesHandler>();
 
 			services.AddControllers();
 			services.AddEndpointsApiExplorer();

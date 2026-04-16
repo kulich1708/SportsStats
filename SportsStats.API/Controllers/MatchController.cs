@@ -8,19 +8,21 @@ namespace SportsStats.API.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
-	public class MatchController(MatchApplicationService matchApplicationService) : ControllerBase
+	public class MatchController(MatchApplicationService matchApplicationService,
+		MatchQueriesHandler matchQueriesHandler) : ControllerBase
 	{
 		MatchApplicationService _matchApplicationService = matchApplicationService;
+		MatchQueriesHandler _matchQueriesHandler = matchQueriesHandler;
 		[HttpGet]
-		public async Task<ActionResult<List<MatchDTO>>> GetAll([FromQuery] GetAllMatchesDTO dto)
+		public async Task<ActionResult<List<MatchShortDTO>>> GetAll([FromQuery] GetAllMatchesDTO dto)
 		{
-			List<MatchDTO> matches = await _matchApplicationService.GetAllAsync(dto.TournamentId, dto.TeamId);
+			List<MatchShortDTO> matches = await _matchQueriesHandler.GetAllAsync(dto.TournamentId, dto.TeamId);
 			return Ok(matches);
 		}
 		[HttpGet("{id}")]
 		public async Task<ActionResult<MatchDTO>> Get(int id)
 		{
-			MatchDTO? match = await _matchApplicationService.GetAsync(id);
+			MatchDTO? match = await _matchQueriesHandler.GetAsync(id);
 
 			if (match == null)
 				return NotFound();

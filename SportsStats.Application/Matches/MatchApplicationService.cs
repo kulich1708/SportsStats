@@ -105,15 +105,6 @@ namespace SportsStats.Application.Matches
 
 			await _matchRepository.SaveChangesAsync();
 		}
-		public async Task<MatchDTO?> GetAsync(int matchId)
-		{
-			Match? match = await _matchRepository.GetAsync(matchId);
-			return match == null ? null : MatchMapper.ToDTO(match);
-		}
-		public async Task<List<MatchDTO>> GetAllAsync(int tournamentId, int? teamId = null)
-		{
-			return (await _matchRepository.GetAllAsync(tournamentId, teamId)).Select(MatchMapper.ToDTO).ToList();
-		}
 
 
 		private async Task<Match> GetMatchOrThrowAsync(int matchId)

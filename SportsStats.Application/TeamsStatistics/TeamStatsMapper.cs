@@ -8,9 +8,11 @@ namespace SportsStats.Application.Statistics
 {
 	public static class TeamStatsMapper
 	{
-		public static TeamStatsDTO ToDTO(TeamStats stats) => new(
+		public static TeamStatsDTO ToDTO(TeamStats stats, string teamName, string tournamentName) => new(
 			stats.TeamId,
+			teamName,
 			stats.TournamentId,
+			tournamentName,
 			stats.Games,
 			stats.RegularWins,
 			stats.OTWins,
