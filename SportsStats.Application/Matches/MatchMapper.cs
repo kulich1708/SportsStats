@@ -1,4 +1,7 @@
 ﻿using SportsStats.Application.Matches.DTOs.Responses;
+using SportsStats.Application.Players.DTOs.Responses;
+using SportsStats.Application.Teams.DTOs.Responses;
+using SportsStats.Application.Tournaments.DTOs.Responses;
 using SportsStats.Domain.Matches;
 using SportsStats.Domain.Matches.Goals;
 using SportsStats.Domain.Shared.Enums;
@@ -15,33 +18,59 @@ namespace SportsStats.Application.Matches
 {
 	public static class MatchMapper
 	{
-		public static MatchDTO ToDTO(Match match) => new(
-			match.HomeTeamId,
-			match.AwayTeamId,
-			match.HomeTeamRoster.ToHashSet(),
-			match.AwayTeamRoster.ToHashSet(),
+		public static MatchDTO ToDTO(
+			Match match,
+			TeamDTO homeTeam,
+			TeamDTO awayTeam,
+			List<PlayerDTO> homeTeamRoster,
+			List<PlayerDTO> awayTeamRoster,
+			TournamentDTO tournament) => new(
+				homeTeam,
+				awayTeam,
+				homeTeamRoster,
+				awayTeamRoster,
+				match.StartedAt,
+				match.FinishedAt,
+				tournament.Id,
+				tournament.Name,
+				match.Status.GetDescription(),
+				match.HomeTeamScore,
+				match.AwayTeamScore,
+				match.HomeTeamWinType.GetDescription(),
+				match.AwayTeamWinType.GetDescription(),
+				match.IsOvertime,
+				match.Goals.Select(
+					g => MatchMapper.ToDTO(g, g.ScoringTeamId == match.HomeTeamId ? homeTeam : awayTeam,
+											g.ScoringTeamId == match.HomeTeamId ? homeTeamRoster : awayTeamRoster))
+					.ToList(),
+				match.Rules
+			);
+
+		public static GoalDTO ToDTO(
+			GoalEvent goal,
+			TeamDTO scoringTeam,
+			List<PlayerDTO> teamRoster
+			) => new(
+				scoringTeam,
+				teamRoster.First(p => p.Id == goal.GoalScorerId),
+				goal.Period,
+				goal.Time,
+				teamRoster.FirstOrDefault(p => p.Id == goal.FirstAssistId),
+				teamRoster.FirstOrDefault(p => p.Id == goal.SecondAssistId),
+				goal.StrengthType?.GetDescription() ?? string.Empty,
+				goal.NetType?.GetDescription() ?? string.Empty
+			);
+		public static MatchShortDTO ToDTO(Match match, TeamDTO homeTeam, TeamDTO awayTeam) => new(
+			homeTeam,
+			awayTeam,
 			match.StartedAt,
 			match.FinishedAt,
-			match.TournamentId,
-			match.Status,
+			match.Status.GetDescription(),
 			match.HomeTeamScore,
 			match.AwayTeamScore,
-			match.HomeTeamWinType,
-			match.AwayTeamWinType,
-			match.IsOvertime,
-			match.Goals.Select(MatchMapper.ToDTO).ToList(),
-			match.Rules
+			match.HomeTeamWinType.GetDescription(),
+			match.AwayTeamWinType.GetDescription(),
+			match.IsOvertime
 		);
-
-		public static GoalDTO ToDTO(GoalEvent goal) => new(
-			goal.ScoringTeamId,
-			goal.GoalScorerId,
-			goal.Period,
-			goal.Time,
-			goal.FirstAssistId,
-			goal.SecondAssistId,
-			goal.StrengthType,
-			goal.NetType
-			);
 	}
 }

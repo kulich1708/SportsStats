@@ -8,11 +8,16 @@ namespace SportsStats.Application.Tournaments.DTOs.Responses
 {
 	public record TournamentDTO
 	(
+		int Id,
 		string Name,
 		DateTime StartedAt,
 		DateTime FinishedAt,
-		TournamentStatus Status,
+		string Status,
 		TournamentRules TournamentRules,
-		HashSet<int> TeamsId
+		List<TeamInTournamentDTO> Teams
+	);
+	public record TeamInTournamentDTO(
+		int Id,
+		string Name
 	);
 }
