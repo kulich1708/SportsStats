@@ -80,12 +80,15 @@ namespace SportsStats.Application.Tournaments
 		public async Task<List<TournamentDTO>> GetAllAsync(bool onlyStarted = false)
 		{
 			var tournaments = await _tournamentRepository.GetAllAsync(onlyStarted);
-			return tournaments.Select(TournamentMapper.ToDTO).ToList();
+			var teamIds = tournaments.SelectMany(t => t.TeamsId).Distinct().ToList();
+			var teams = await _teamRepository.GetAsync(teamIds);
+			return tournaments.Select(t => TournamentMapper.ToDTO(t, teams.Where(team => t.TeamsId.Contains(team.Id)).ToList())).ToList();
 		}
 		public async Task<TournamentDTO?> GetAsync(int tournamentId)
 		{
 			var tournament = await _tournamentRepository.GetAsync(tournamentId);
-			return tournament == null ? null : TournamentMapper.ToDTO(tournament);
+			var teams = await _teamRepository.GetAllAsync(tournamentId);
+			return tournament == null ? null : TournamentMapper.ToDTO(tournament, teams);
 		}
 	}
 }

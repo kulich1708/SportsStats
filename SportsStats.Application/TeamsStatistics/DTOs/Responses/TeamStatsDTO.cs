@@ -8,7 +8,9 @@ namespace SportsStats.Application.Statistics.DTOs.Responses
 {
 	public record TeamStatsDTO(
 		int TeamId,
+		string TeamName,
 		int TournamentId,
+		string TournamentName,
 		int Games,
 		int RegularWins,
 		int OTWins,
