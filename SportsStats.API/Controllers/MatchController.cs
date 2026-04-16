@@ -8,11 +8,18 @@ namespace SportsStats.API.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
-	public class MatchController(MatchApplicationService matchApplicationService,
+	public class MatchController(
+		MatchGoalService matchGoalService,
+		MatchLifecycleService matchLifecycleService,
+		MatchFinishService matchFinishService,
+		MatchRosterService matchRosterService,
 		MatchQueriesHandler matchQueriesHandler) : ControllerBase
 	{
-		MatchApplicationService _matchApplicationService = matchApplicationService;
-		MatchQueriesHandler _matchQueriesHandler = matchQueriesHandler;
+		private readonly MatchGoalService _matchGoalService = matchGoalService;
+		private readonly MatchLifecycleService _matchLifecycleService = matchLifecycleService;
+		private readonly MatchFinishService _matchFinishService = matchFinishService;
+		private readonly MatchRosterService _matchRosterService = matchRosterService;
+		private readonly MatchQueriesHandler _matchQueriesHandler = matchQueriesHandler;
 		[HttpGet]
 		public async Task<ActionResult<List<MatchShortDTO>>> GetAll([FromQuery] GetAllMatchesDTO dto)
 		{
@@ -33,37 +40,37 @@ namespace SportsStats.API.Controllers
 		[HttpPost]
 		public async Task<ActionResult<int>> Create([FromBody] CreateMatchDTO dto)
 		{
-			int id = await _matchApplicationService.CreateAsync(dto.TournamentId, dto.HomeTeamId, dto.AwayTeamId);
+			int id = await _matchLifecycleService.CreateAsync(dto.TournamentId, dto.HomeTeamId, dto.AwayTeamId);
 			return Ok(id);
 		}
 		[HttpPost("{id}/goals")]
 		public async Task<ActionResult<int>> AddGoal(int id, [FromBody] AddGoalDTO dto)
 		{
-			int goalId = await _matchApplicationService.AddGoalAsync(id, dto.ScoringTeamId, dto.GoalScorerId, dto.Period, dto.Time);
+			int goalId = await _matchGoalService.AddGoalAsync(id, dto.ScoringTeamId, dto.GoalScorerId, dto.Period, dto.Time);
 			return Ok(goalId);
 		}
 		[HttpPost("{id}/roster")]
 		public async Task<ActionResult> AddPlayerToRoster(int id, [FromBody] AddPlayerToRosterDTO dto)
 		{
-			await _matchApplicationService.AddPlayerToRosterAsync(id, dto.PlayerId, dto.TeamId);
+			await _matchRosterService.AddPlayerToRosterAsync(id, dto.PlayerId, dto.TeamId);
 			return Ok();
 		}
 		[HttpPost("{id}/goals/{goalId}")]
 		public async Task<ActionResult> FillGoalDetaild(int id, int goalId, [FromBody] FillGoalDetailDTO dto)
 		{
-			await _matchApplicationService.FillGoalDetailsAsync(id, goalId, dto.FirstAssistId, dto.SecondAssistId, dto.StrengthType, dto.NetType);
+			await _matchGoalService.FillGoalDetailsAsync(id, goalId, dto.FirstAssistId, dto.SecondAssistId, dto.StrengthType, dto.NetType);
 			return Ok();
 		}
 		[HttpPost("{id}/start")]
 		public async Task<ActionResult> Start(int id)
 		{
-			await _matchApplicationService.StartAsync(id);
+			await _matchLifecycleService.StartAsync(id);
 			return Ok();
 		}
 		[HttpPost("{id}/finish")]
 		public async Task<ActionResult> Finish(int id)
 		{
-			await _matchApplicationService.FinishAsync(id);
+			await _matchFinishService.FinishAsync(id);
 			return Ok();
 		}
 	}
