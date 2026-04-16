@@ -1,5 +1,4 @@
-﻿using SportsStats.Domain.Tournaments;
-using SportsStats.Domain.Tournaments.Rules;
+﻿using SportsStats.Application.Tournaments.DTOs.Shared;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -13,7 +12,7 @@ namespace SportsStats.Application.Tournaments.DTOs.Responses
 		DateTime StartedAt,
 		DateTime FinishedAt,
 		string Status,
-		TournamentRules TournamentRules,
+		TournamentRulesDTO TournamentRules,
 		List<TeamInTournamentDTO> Teams
 	);
 	public record TeamInTournamentDTO(

@@ -2,6 +2,7 @@
 using SportsStats.Application.Players.DTOs.Responses;
 using SportsStats.Application.Teams.DTOs.Responses;
 using SportsStats.Application.Tournaments.DTOs.Responses;
+using SportsStats.Application.Tournaments;
 using SportsStats.Domain.Matches;
 using SportsStats.Domain.Matches.Goals;
 using SportsStats.Domain.Shared.Enums;
@@ -43,7 +44,7 @@ namespace SportsStats.Application.Matches
 					g => MatchMapper.ToDTO(g, g.ScoringTeamId == match.HomeTeamId ? homeTeam : awayTeam,
 											g.ScoringTeamId == match.HomeTeamId ? homeTeamRoster : awayTeamRoster))
 					.ToList(),
-				match.Rules
+				TournamentMapper.ToDTO(match.Rules)
 			);
 
 		public static GoalDTO ToDTO(

@@ -7,7 +7,6 @@ namespace SportsStats.Domain.Tournaments.Rules
 {
 	public record MatchDurationRules
 	{
-		public string Name { get; init; }
 		public int PeriodsCount { get; init; }               // Количество периодов
 		public int PeriodDurationSeconds { get; init; }      // Длительность одного периода
 		public bool HasOvertime { get; init; }               // Наличие овертайма
@@ -19,7 +18,6 @@ namespace SportsStats.Domain.Tournaments.Rules
 
 		private MatchDurationRules() { }
 		public MatchDurationRules(
-			string name,
 			int periodsCount,
 			int periodDurationSeconds,
 			bool hasOvertime,
@@ -29,7 +27,6 @@ namespace SportsStats.Domain.Tournaments.Rules
 			bool isDrawPossible = false,
 			int shootoutsCount = 0)
 		{
-			Name = name;
 			PeriodsCount = periodsCount;
 			PeriodDurationSeconds = periodDurationSeconds;
 			HasOvertime = hasOvertime;
@@ -99,7 +96,6 @@ namespace SportsStats.Domain.Tournaments.Rules
 		public static MatchDurationRules CreateKHLRules()
 		{
 			return new MatchDurationRules(
-				name: "IIHF",
 				periodsCount: 3,
 				periodDurationSeconds: 1200,
 				hasOvertime: true,
@@ -113,7 +109,6 @@ namespace SportsStats.Domain.Tournaments.Rules
 		public static MatchDurationRules CreatePlayoffRules()
 		{
 			return new MatchDurationRules(
-				name: "IIHF Playoffs",
 				periodsCount: 3,
 				periodDurationSeconds: 1200,
 				hasOvertime: true,
