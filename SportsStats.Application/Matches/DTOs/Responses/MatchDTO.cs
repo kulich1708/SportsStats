@@ -16,6 +16,7 @@ namespace SportsStats.Application.Matches.DTOs.Responses
 		TeamDTO AwayTeam,
 		List<PlayerDTO> HomeTeamRoster,
 		List<PlayerDTO> AwayTeamRoster,
+		DateTime ScheduleAt,
 		DateTime? StartedAt,
 		DateTime? FinishedAt,
 		int TournamentId,

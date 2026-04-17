@@ -41,8 +41,10 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 
 		public async Task<List<Tournament>> GetActiveByDateAsync(DateOnly date)
 		{
+			var startOfDay = DateTime.SpecifyKind(date.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc);
+			var endOfDay = DateTime.SpecifyKind(date.ToDateTime(TimeOnly.MaxValue), DateTimeKind.Utc);
 			return await _context.Tournaments
-				.Where(t => DateOnly.FromDateTime(t.StartedAt) <= date && date <= DateOnly.FromDateTime(t.FinishedAt))
+				.Where(t => t.StartedAt.HasValue && t.StartedAt.Value <= endOfDay && (!t.FinishedAt.HasValue || startOfDay <= t.FinishedAt.Value))
 				.ToListAsync();
 		}
 	}

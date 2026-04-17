@@ -35,8 +35,8 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 		}
 		public async Task<List<Match>> GetByDate(int tournamentId, DateOnly date)
 		{
-			var startOfDay = date.ToDateTime(TimeOnly.MinValue);
-			var endOfDay = date.ToDateTime(TimeOnly.MaxValue);
+			var startOfDay = DateTime.SpecifyKind(date.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc);
+			var endOfDay = DateTime.SpecifyKind(date.ToDateTime(TimeOnly.MaxValue), DateTimeKind.Utc);
 
 			return await _context.Matches
 				.Where(m => m.TournamentId == tournamentId && (

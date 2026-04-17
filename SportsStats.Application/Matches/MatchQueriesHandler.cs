@@ -15,7 +15,7 @@ namespace SportsStats.Application.Matches
 		TournamentApplicationService tournamentApplicationService,
 		TeamApplicationService teamApplicationService,
 		PlayerApplicationService playerApplicationService
-		)
+		) : MatchUseCaseBase(matchRepository)
 	{
 		private readonly IMatchRepository _matchRepository = matchRepository;
 		private readonly TournamentApplicationService _tournamentApplicationService = tournamentApplicationService;
@@ -50,6 +50,12 @@ namespace SportsStats.Application.Matches
 		{
 			List<TeamDTO> teams = await _teamApplicationService.GetAllAsync(tournamentId);
 			return matches.Select(m => MatchMapper.ToDTO(m, teams.First(t => t.Id == m.HomeTeamId), teams.First(t => t.Id == m.AwayTeamId))).ToList();
+		}
+
+		public async Task<bool> IsFinished(int matchId)
+		{
+			var match = await GetMatchOrThrowAsync(matchId);
+			return match.IsMatchFinished();
 		}
 	}
 }
