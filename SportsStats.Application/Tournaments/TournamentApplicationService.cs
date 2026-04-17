@@ -48,9 +48,9 @@ namespace SportsStats.Application.Tournaments
 
 			return tournament.Id;
 		}
-		public async Task StartAsync(int tournamentId)
+		public async Task StartAsync(int tournamentId, DateTime? startedAt = null)
 		{
-			await UpdateAndSaveAsync(tournamentId, tournament => tournament.Start(_timeProvider.GetCurrentTime()));
+			await UpdateAndSaveAsync(tournamentId, tournament => tournament.Start(startedAt ?? _timeProvider.GetCurrentTime()));
 		}
 		public async Task FinishAsync(int tournamentId)
 		{
