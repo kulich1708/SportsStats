@@ -38,5 +38,12 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 				return await _context.Tournaments.Where(t => t.Status == TournamentStatus.InProgress).ToListAsync();
 			return await _context.Tournaments.ToListAsync();
 		}
+
+		public async Task<List<Tournament>> GetActiveByDateAsync(DateOnly date)
+		{
+			return await _context.Tournaments
+				.Where(t => DateOnly.FromDateTime(t.StartedAt) <= date && date <= DateOnly.FromDateTime(t.FinishedAt))
+				.ToListAsync();
+		}
 	}
 }

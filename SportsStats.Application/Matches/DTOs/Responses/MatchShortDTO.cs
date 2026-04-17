@@ -7,6 +7,7 @@ using System.Text;
 namespace SportsStats.Application.Matches.DTOs.Responses
 {
 	public record MatchShortDTO(
+		int Id,
 		TeamDTO HomeTeam,
 		TeamDTO AwayTeam,
 		DateTime? StartedAt,

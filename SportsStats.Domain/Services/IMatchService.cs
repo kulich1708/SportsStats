@@ -10,7 +10,7 @@ namespace SportsStats.Domain.Services
 {
 	public interface IMatchService
 	{
-		public Match CreateMatch(Tournament tournament, int homeTeamId, int awayTeamId);
-		public void Start(Match match, List<Player> homeTeamRoster, List<Player> awayTeamRoster, Team homeTeam, Team awayTeam, DateTime startedAt);
+		public Match CreateMatch(Tournament tournament, int homeTeamId, int awayTeamId, DateTime scheduledAt);
+		public void Start(Match match, Tournament tournament, List<Player> homeTeamRoster, List<Player> awayTeamRoster, Team homeTeam, Team awayTeam, DateTime startedAt);
 	}
 }

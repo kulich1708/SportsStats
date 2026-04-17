@@ -6,9 +6,9 @@ namespace SportsStats.Application.Tournaments.DTOs.Shared
 {
 	public record MatchPointsRulesDTO(
 		int WinPoints,
-		int OtWinPoints,
+		int OTWinPoints,
 		int LossPoints,
-		int OtLossPoints,
+		int OTLossPoints,
 		int? DrawPoints
 	);
 }

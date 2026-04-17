@@ -11,6 +11,7 @@ using System.Text;
 namespace SportsStats.Application.Matches.DTOs.Responses
 {
 	public record MatchDTO(
+		int Id,
 		TeamDTO HomeTeam,
 		TeamDTO AwayTeam,
 		List<PlayerDTO> HomeTeamRoster,

@@ -12,7 +12,7 @@ namespace SportsStats.Domain.Services
 	public class MatchService : IMatchService
 	{
 
-		public Match CreateMatch(Tournament tournament, int homeTeamId, int awayTeamId)
+		public Match CreateMatch(Tournament tournament, int homeTeamId, int awayTeamId, DateTime scheduledAt)
 		{
 			if (!tournament.IsRegistration() && !tournament.IsStarted())
 				throw new ArgumentException("Нельзя создать матч в турнире, который ещё не открыт");
@@ -21,16 +21,17 @@ namespace SportsStats.Domain.Services
 			if (!IsTeamInTournament(tournament, awayTeamId))
 				throw new ArgumentException("Гостевая команда не заявлена на турнир");
 
-			Match match = new Match(tournament.Id, homeTeamId, awayTeamId, tournament.TournamentRules);
+			Match match = new Match(tournament.Id, homeTeamId, awayTeamId, tournament.TournamentRules, scheduledAt);
 
 			return match;
 
 		}
-		public void Start(Match match, List<Player> homeTeamRoster, List<Player> awayTeamRoster, Team homeTeam, Team awayTeam, DateTime startedAt)
+		public void Start(Match match, Tournament tournament, List<Player> homeTeamRoster, List<Player> awayTeamRoster, Team homeTeam, Team awayTeam, DateTime startedAt)
 		{
 			ValidateRoster(match, homeTeamRoster, homeTeam.Name);
 			ValidateRoster(match, awayTeamRoster, awayTeam.Name);
-
+			if (!tournament.IsStarted())
+				throw new ArgumentException("Нельзя начать матч в неначатом турнире");
 			match.Start(startedAt);
 		}
 		private void ValidateRoster(Match match, List<Player> roster, string teamName)

@@ -33,5 +33,18 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 
 			return await mathces.Where(m => m.HomeTeamId == teamId || m.AwayTeamId == teamId).ToListAsync();
 		}
+		public async Task<List<Match>> GetByDate(int tournamentId, DateOnly date)
+		{
+			var startOfDay = date.ToDateTime(TimeOnly.MinValue);
+			var endOfDay = date.ToDateTime(TimeOnly.MaxValue);
+
+			return await _context.Matches
+				.Where(m => m.TournamentId == tournamentId && (
+					m.ScheduledAt >= startOfDay && m.ScheduledAt <= endOfDay ||
+					(m.StartedAt.HasValue && m.StartedAt.Value >= startOfDay && m.StartedAt.Value <= endOfDay) ||
+					(m.FinishedAt.HasValue && m.FinishedAt.Value >= startOfDay && m.FinishedAt.Value <= endOfDay)
+				))
+				.ToListAsync();
+		}
 	}
 }

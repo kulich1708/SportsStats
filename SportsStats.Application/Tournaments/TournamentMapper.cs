@@ -22,14 +22,19 @@ namespace SportsStats.Application.Tournaments
 			teams.Select(ToDTO).ToList()
 		);
 		private static TeamInTournamentDTO ToDTO(Team team) => new(team.Id, team.Name);
-		public static MatchPointsRulesDTO ToDTO(MatchPointsRules rules) => new(
+
+		public static TournamentShortDTO ToDTO(Tournament tournament) => new(
+			tournament.Id,
+			tournament.Name
+		);
+		private static MatchPointsRulesDTO ToDTO(MatchPointsRules rules) => new(
 			rules.WinPoints,
 			rules.OTWinPoints,
 			rules.LossPoints,
 			rules.OTLossPoints,
 			rules.DrawPoints
 		);
-		public static MatchRosterRulesDTO ToDTO(MatchRosterRules rules) => new(
+		private static MatchRosterRulesDTO ToDTO(MatchRosterRules rules) => new(
 			rules.MaxPlayers,
 			rules.MinPlayers,
 			rules.MinForwards,
@@ -39,7 +44,7 @@ namespace SportsStats.Application.Tournaments
 			rules.MinGoalies,
 			rules.MaxGoalies
 		);
-		public static MatchDurationRulesDTO ToDTO(MatchDurationRules rules) => new(
+		private static MatchDurationRulesDTO ToDTO(MatchDurationRules rules) => new(
 			rules.PeriodsCount,
 			rules.PeriodDurationSeconds,
 			rules.HasOvertime,
@@ -53,6 +58,39 @@ namespace SportsStats.Application.Tournaments
 			ToDTO(rules.MatchDurationRules),
 			ToDTO(rules.MatchRosterRules),
 			ToDTO(rules.MatchPointsRules)
+		);
+		private static MatchPointsRules ToDomain(MatchPointsRulesDTO rules) => new(
+			rules.WinPoints,
+			rules.OTWinPoints,
+			rules.LossPoints,
+			rules.OTLossPoints,
+			rules.DrawPoints
+		);
+		private static MatchRosterRules ToDomain(MatchRosterRulesDTO rules) => new(
+			rules.MaxPlayers,
+			rules.MinPlayers,
+			rules.MinForwards,
+			rules.MaxForwards,
+			rules.MinDefensemans,
+			rules.MaxDefensemans,
+			rules.MinGoalies,
+			rules.MaxGoalies
+		);
+
+		private static MatchDurationRules ToDomain(MatchDurationRulesDTO rules) => new(
+			rules.PeriodsCount,
+			rules.PeriodDurationSeconds,
+			rules.HasOvertime,
+			rules.OvertimeDurationSeconds,
+			rules.OvertimesCount,
+			rules.SuddenDeathOvertime,
+			rules.IsDrawPossible,
+			rules.ShootoutsCount
+		);
+		public static TournamentRules ToDomain(TournamentRulesDTO rules) => new(
+			ToDomain(rules.MatchDurationRules),
+			ToDomain(rules.MatchRosterRules),
+			ToDomain(rules.MatchPointsRules)
 		);
 	}
 }
