@@ -25,12 +25,12 @@ namespace SportsStats.Application.Matches
 		private readonly IMatchService _matchService = matchService;
 
 
-		public async Task<int> CreateAsync(int tournamentId, int homeTeamId, int awayTeamId)
+		public async Task<int> CreateAsync(int tournamentId, int homeTeamId, int awayTeamId, DateTime scheduledAt)
 		{
 			Tournament tournament = await _tournamentRepository.GetAsync(tournamentId)
 				?? throw new ArgumentException("Нет турнира с таким Id");
 
-			Match match = _matchService.CreateMatch(tournament, homeTeamId, awayTeamId);
+			Match match = _matchService.CreateMatch(tournament, homeTeamId, awayTeamId, scheduledAt);
 			await _matchRepository.AddAsync(match);
 			await _matchRepository.SaveChangesAsync();
 			return match.Id;
@@ -38,13 +38,14 @@ namespace SportsStats.Application.Matches
 		public async Task StartAsync(int matchId)
 		{
 			Match match = await GetMatchOrThrowAsync(matchId);
+			Tournament tournament = await _tournamentRepository.GetAsync(match.TournamentId);
 			Team homeTeam = await _teamRepository.GetAsync(match.HomeTeamId);
 			Team awayTeam = await _teamRepository.GetAsync(match.AwayTeamId);
 
 			List<Player> homeTeamRoster = await _playerRepository.GetAsync(match.HomeTeamRoster.ToList());
 			List<Player> awayTeamRoster = await _playerRepository.GetAsync(match.AwayTeamRoster.ToList());
 
-			_matchService.Start(match, homeTeamRoster, awayTeamRoster, homeTeam, awayTeam, _timeProvider.GetCurrentTime());
+			_matchService.Start(match, tournament, homeTeamRoster, awayTeamRoster, homeTeam, awayTeam, _timeProvider.GetCurrentTime());
 
 			await _matchRepository.SaveChangesAsync();
 		}

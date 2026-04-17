@@ -2,6 +2,7 @@
 using SportsStats.Application.Tournaments;
 using SportsStats.Application.Tournaments.DTOs.Requests;
 using SportsStats.Application.Tournaments.DTOs.Responses;
+using SportsStats.Application.Tournaments.DTOs.Shared;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -9,13 +10,10 @@ namespace SportsStats.API.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
-	public class TournamentsController : ControllerBase
+	public class TournamentsController(TournamentApplicationService tournamentApplicationService) : ControllerBase
 	{
-		private readonly TournamentApplicationService _tournamentApplicationService;
-		public TournamentsController(TournamentApplicationService tournamentApplicationService)
-		{
-			_tournamentApplicationService = tournamentApplicationService;
-		}
+		private readonly TournamentApplicationService _tournamentApplicationService = tournamentApplicationService;
+
 		// GET: api/<Tournaments?onlyStarted=true>
 		[HttpGet]
 		public async Task<ActionResult<List<TournamentDTO>>> GetTournaments([FromQuery] bool onlyStarted = false)
@@ -28,6 +26,12 @@ namespace SportsStats.API.Controllers
 		{
 			var tournament = await _tournamentApplicationService.GetAsync(id);
 			return Ok(tournament);
+		}
+		[HttpGet]
+		public async Task<ActionResult<List<TournamentShortDTO>>> GetTournamentsByDate([FromQuery] DateOnly date)
+		{
+			var tournaments = await _tournamentApplicationService.GetActiveByDateAsync(date);
+			return Ok(tournaments);
 		}
 
 		[HttpPost]
@@ -65,10 +69,10 @@ namespace SportsStats.API.Controllers
 			return Ok();
 		}
 
-		[HttpPost("{id}/rules")]
-		public async Task<ActionResult> SetRules(int id)
+		[HttpPost("{id}/rules/set")]
+		public async Task<ActionResult> SetRules(int id, [FromBody] TournamentRulesDTO rules)
 		{
-			await _tournamentApplicationService.SetRulesAsync(id);
+			await _tournamentApplicationService.SetRulesAsync(id, rules);
 			return Ok();
 		}
 	}

@@ -10,5 +10,7 @@ namespace SportsStats.Domain.Matches
 		public Task SaveChangesAsync();
 		public Task AddAsync(Match match);
 		public Task<List<Match>> GetAllAsync(int tournamentId, int? teamId = null);
+
+		public Task<List<Match>> GetByDate(int tournamentId, DateOnly date);
 	}
 }

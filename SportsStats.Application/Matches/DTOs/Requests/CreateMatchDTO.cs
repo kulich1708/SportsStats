@@ -5,8 +5,8 @@ using System.Text;
 namespace SportsStats.Application.Matches.DTOs.Requests
 {
 	public record CreateMatchDTO(
-		int TournamentId,
 		int HomeTeamId,
-		int AwayTeamId
-		);
+		int AwayTeamId,
+		DateTime ScheduledAt
+	);
 }
