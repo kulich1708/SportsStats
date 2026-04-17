@@ -17,11 +17,11 @@ namespace SportsStats.Application.Matches
 		private readonly ITimeProvider _timeProvider = timeProvider;
 
 
-		public async Task FinishAsync(int matchId)
+		public async Task FinishAsync(int matchId, DateTime? finishedAt = null)
 		{
 			Match match = await GetMatchOrThrowAsync(matchId);
 
-			match.Finish(_timeProvider.GetCurrentTime());
+			match.Finish(finishedAt ?? _timeProvider.GetCurrentTime());
 
 			await _matchRepository.SaveChangesAsync();
 

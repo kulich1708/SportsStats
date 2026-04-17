@@ -50,15 +50,15 @@ namespace SportsStats.API.Controllers
 			return Ok();
 		}
 		[HttpPost("{id}/start")]
-		public async Task<ActionResult> Start(int id)
+		public async Task<ActionResult> Start(int id, [FromBody] DateTime? startedAt)
 		{
-			await _matchLifecycleService.StartAsync(id);
+			await _matchLifecycleService.StartAsync(id, startedAt);
 			return Ok();
 		}
 		[HttpPost("{id}/finish")]
-		public async Task<ActionResult> Finish(int id)
+		public async Task<ActionResult> Finish(int id, [FromBody] DateTime? finishedAt)
 		{
-			await _matchFinishService.FinishAsync(id);
+			await _matchFinishService.FinishAsync(id, finishedAt);
 			return Ok();
 		}
 	}
