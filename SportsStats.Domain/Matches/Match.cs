@@ -20,6 +20,7 @@ namespace SportsStats.Domain.Matches
 		public int AwayTeamId { get; private set; }
 		public IReadOnlySet<int> HomeTeamRoster => _homeTeamRoster;
 		public IReadOnlySet<int> AwayTeamRoster => _awayTeamRoster;
+		public DateTime ScheduledAt { get; private set; }
 		public DateTime? StartedAt { get; private set; }
 		public DateTime? FinishedAt { get; private set; }
 		public int TournamentId { get; private set; }
@@ -32,7 +33,7 @@ namespace SportsStats.Domain.Matches
 		public IReadOnlyList<GoalEvent> Goals => _goals;
 		public TournamentRules Rules => _rules;
 		private Match() { }
-		public Match(int tournamentId, int homeTeamId, int awayTeamId, TournamentRules rules)
+		public Match(int tournamentId, int homeTeamId, int awayTeamId, TournamentRules rules, DateTime scheduledAt)
 		{
 			if (homeTeamId == awayTeamId)
 				throw new ArgumentException("Команда не может играть сама с собой");
@@ -42,6 +43,7 @@ namespace SportsStats.Domain.Matches
 			AwayTeamId = awayTeamId;
 
 			_rules = rules ?? throw new ArgumentNullException();
+			ScheduledAt = scheduledAt;
 		}
 		public void Start(DateTime startedAt)
 		{

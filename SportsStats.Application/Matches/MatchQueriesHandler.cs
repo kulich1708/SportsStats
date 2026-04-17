@@ -4,12 +4,6 @@ using SportsStats.Application.Teams;
 using SportsStats.Application.Teams.DTOs.Responses;
 using SportsStats.Application.Tournaments;
 using SportsStats.Domain.Matches;
-using SportsStats.Domain.Players;
-using SportsStats.Domain.Services;
-using SportsStats.Domain.Shared;
-using SportsStats.Domain.Statistics;
-using SportsStats.Domain.Teams;
-using SportsStats.Domain.Tournaments;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -45,9 +39,17 @@ namespace SportsStats.Application.Matches
 		public async Task<List<MatchShortDTO>> GetAllAsync(int tournamentId, int? teamId = null)
 		{
 			List<Match> matches = await _matchRepository.GetAllAsync(tournamentId, teamId);
+			return await GetMatchDTOsByMatchesAsync(tournamentId, matches);
+		}
+		public async Task<List<MatchShortDTO>> GetByDateAsync(int tournamentId, DateOnly date)
+		{
+			var matches = await _matchRepository.GetByDate(tournamentId, date);
+			return await GetMatchDTOsByMatchesAsync(tournamentId, matches);
+		}
+		private async Task<List<MatchShortDTO>> GetMatchDTOsByMatchesAsync(int tournamentId, List<Match> matches)
+		{
 			List<TeamDTO> teams = await _teamApplicationService.GetAllAsync(tournamentId);
 			return matches.Select(m => MatchMapper.ToDTO(m, teams.First(t => t.Id == m.HomeTeamId), teams.First(t => t.Id == m.AwayTeamId))).ToList();
 		}
-
 	}
 }

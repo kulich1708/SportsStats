@@ -8,7 +8,7 @@ namespace SportsStats.API.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
-	public class MatchController(
+	public class MatchesController(
 		MatchGoalService matchGoalService,
 		MatchLifecycleService matchLifecycleService,
 		MatchFinishService matchFinishService,
@@ -20,12 +20,7 @@ namespace SportsStats.API.Controllers
 		private readonly MatchFinishService _matchFinishService = matchFinishService;
 		private readonly MatchRosterService _matchRosterService = matchRosterService;
 		private readonly MatchQueriesHandler _matchQueriesHandler = matchQueriesHandler;
-		[HttpGet]
-		public async Task<ActionResult<List<MatchShortDTO>>> GetAll([FromQuery] GetAllMatchesDTO dto)
-		{
-			List<MatchShortDTO> matches = await _matchQueriesHandler.GetAllAsync(dto.TournamentId, dto.TeamId);
-			return Ok(matches);
-		}
+
 		[HttpGet("{id}")]
 		public async Task<ActionResult<MatchDTO>> Get(int id)
 		{
@@ -35,13 +30,6 @@ namespace SportsStats.API.Controllers
 				return NotFound();
 
 			return Ok(match);
-		}
-
-		[HttpPost]
-		public async Task<ActionResult<int>> Create([FromBody] CreateMatchDTO dto)
-		{
-			int id = await _matchLifecycleService.CreateAsync(dto.TournamentId, dto.HomeTeamId, dto.AwayTeamId);
-			return Ok(id);
 		}
 		[HttpPost("{id}/goals")]
 		public async Task<ActionResult<int>> AddGoal(int id, [FromBody] AddGoalDTO dto)
