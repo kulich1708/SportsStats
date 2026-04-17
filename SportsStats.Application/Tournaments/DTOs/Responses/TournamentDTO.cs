@@ -9,8 +9,8 @@ namespace SportsStats.Application.Tournaments.DTOs.Responses
 	(
 		int Id,
 		string Name,
-		DateTime StartedAt,
-		DateTime FinishedAt,
+		DateTime? StartedAt,
+		DateTime? FinishedAt,
 		string Status,
 		TournamentRulesDTO TournamentRules,
 		List<TeamInTournamentDTO> Teams

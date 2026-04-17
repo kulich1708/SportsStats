@@ -12,15 +12,19 @@ namespace SportsStats.Application.Tournaments
 {
 	public static class TournamentMapper
 	{
-		public static TournamentDTO ToDTO(Tournament tournament, List<Team> teams) => new(
+		public static TournamentDTO ToDTO(Tournament tournament, List<Team> teams)
+		{
+			Console.WriteLine(tournament.TournamentRules == null);
+			return new(
 			tournament.Id,
 			tournament.Name,
 			tournament.StartedAt,
 			tournament.FinishedAt,
 			tournament.Status.GetDescription(),
-			ToDTO(tournament.TournamentRules),
+			tournament.TournamentRules == null ? null : ToDTO(tournament.TournamentRules),
 			teams.Select(ToDTO).ToList()
 		);
+		}
 		private static TeamInTournamentDTO ToDTO(Team team) => new(team.Id, team.Name);
 
 		public static TournamentShortDTO ToDTO(Tournament tournament) => new(
@@ -55,9 +59,9 @@ namespace SportsStats.Application.Tournaments
 			rules.ShootoutsCount
 		);
 		public static TournamentRulesDTO ToDTO(TournamentRules rules) => new(
-			ToDTO(rules.MatchDurationRules),
-			ToDTO(rules.MatchRosterRules),
-			ToDTO(rules.MatchPointsRules)
+			rules.MatchDurationRules == null ? null : ToDTO(rules.MatchDurationRules),
+			rules.MatchRosterRules == null ? null : ToDTO(rules.MatchRosterRules),
+			rules.MatchPointsRules == null ? null : ToDTO(rules.MatchPointsRules)
 		);
 		private static MatchPointsRules ToDomain(MatchPointsRulesDTO rules) => new(
 			rules.WinPoints,

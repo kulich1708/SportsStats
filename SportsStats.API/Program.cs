@@ -17,6 +17,7 @@ using SportsStats.Infrastructure.Persistence.DbContexts;
 using SportsStats.Infrastructure.Persistence.Repositories;
 using SportsStats.Infrastructure.Services;
 using System.Reflection;
+using System.Text.Json.Serialization;
 
 namespace SportsStats.API
 {
@@ -44,6 +45,11 @@ namespace SportsStats.API
 		private static void ConfigureServices(WebApplicationBuilder builder)
 		{
 			var services = builder.Services;
+			services.AddControllers()
+				.AddJsonOptions(options =>
+				{
+					options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+				});
 
 			services.AddScoped<ITournamentRepository, TournamentRepository>();
 			services.AddScoped<ITeamRepository, TeamRepository>();

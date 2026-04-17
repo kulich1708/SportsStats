@@ -10,6 +10,7 @@ namespace SportsStats.Application.Matches.DTOs.Responses
 		int Id,
 		TeamDTO HomeTeam,
 		TeamDTO AwayTeam,
+		DateTime ScheduleAt,
 		DateTime? StartedAt,
 		DateTime? FinishedAt,
 		string Status,

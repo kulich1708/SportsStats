@@ -11,8 +11,8 @@ namespace SportsStats.Domain.Tournaments
 	{
 		private readonly HashSet<int> _teamsId = [];
 		public string Name { get; private set; }
-		public DateTime StartedAt { get; private set; }
-		public DateTime FinishedAt { get; private set; }
+		public DateTime? StartedAt { get; private set; }
+		public DateTime? FinishedAt { get; private set; }
 		public TournamentStatus Status { get; private set; } = TournamentStatus.Draft;
 
 		public TournamentRules TournamentRules { get; private set; }

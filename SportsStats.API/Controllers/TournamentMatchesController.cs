@@ -20,8 +20,8 @@ namespace SportsStats.API.Controllers
 			List<MatchShortDTO> matches = await _matchQueriesHandler.GetAllAsync(tournamentId, dto.TeamId);
 			return Ok(matches);
 		}
-		[HttpGet]
-		public async Task<ActionResult<List<MatchShortDTO>>> GetByTournamentAndDate(int tournamentId, [FromQuery] DateOnly date)
+		[HttpGet("by-date/{date}")]
+		public async Task<ActionResult<List<MatchShortDTO>>> GetByTournamentAndDate(int tournamentId, DateOnly date)
 		{
 			List<MatchShortDTO> matches = await _matchQueriesHandler.GetByDateAsync(tournamentId, date);
 			return Ok(matches);

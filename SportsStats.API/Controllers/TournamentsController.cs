@@ -27,8 +27,8 @@ namespace SportsStats.API.Controllers
 			var tournament = await _tournamentApplicationService.GetAsync(id);
 			return Ok(tournament);
 		}
-		[HttpGet]
-		public async Task<ActionResult<List<TournamentShortDTO>>> GetTournamentsByDate([FromQuery] DateOnly date)
+		[HttpGet("by-date/{date}")]
+		public async Task<ActionResult<List<TournamentShortDTO>>> GetTournamentsByDate(DateOnly date)
 		{
 			var tournaments = await _tournamentApplicationService.GetActiveByDateAsync(date);
 			return Ok(tournaments);
