@@ -1,253 +1,247 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ConsoleApp;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using SportsStats.Application.Matches;
 using SportsStats.Application.Players;
+using SportsStats.Application.Players.DTOs.Responses;
 using SportsStats.Application.Teams;
+using SportsStats.Application.Teams.DTOs.Responses;
 using SportsStats.Application.Tournaments;
 using SportsStats.Domain.Common;
 using SportsStats.Domain.Matches;
 using SportsStats.Domain.Matches.Goals;
 using SportsStats.Domain.Players;
+using SportsStats.Domain.Services;
 using SportsStats.Domain.Shared;
 using SportsStats.Domain.Teams;
 using SportsStats.Domain.Tournaments;
+using SportsStats.Domain.Tournaments.Rules;
 using SportsStats.Infrastructure.Persistence.DbContexts;
 using SportsStats.Infrastructure.Persistence.Repositories;
+using SportsStats.Infrastructure.Services;
 using System.Numerics;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Timers;
 
 namespace SportsStats.ConsoleApp
 {
-	//public static class PrintExtension
-	//{
-	//	public static string Print(this Player player)
-	//	{
-	//		string result = $"{player.Name} {player.Surname}, id: {player.Id}\nКоманда: {player.TeamId}\nПозиция: {player.Position}";
-	//		return result;
-	//	}
-	//	public static string Print(this Team team)
-	//	{
-	//		string result = $"{team.Name}, id: {team.Id}";
-	//		return result;
-	//	}
-	//	public static string Print(this Tournament tournament)
-	//	{
-	//		string result = $"{tournament.Name}, id: {tournament.Id}";
-	//		return result;
-	//	}
-	//	public async static Task<string> Print(this Match match, ITeamRepository teamRepository, IPlayerRepository playerRepository)
-	//	{
-	//		var stringBuilder = new StringBuilder();
-	//		stringBuilder.AppendLine($"Match ID: {match.Id}");
-	//		stringBuilder.AppendLine($"{(await teamRepository.FindById(match.HomeTeamId)).Name}    {match.HomeTeamScore}:{match.AwayTeamScore}    {(await teamRepository.FindById(match.AwayTeamId)).Name}");
-	//		stringBuilder.AppendLine($"tournament ID: {match.TournamentId}");
-	//		stringBuilder.AppendLine($"Status: {match.Status}");
-	//		stringBuilder.AppendLine($"Home team roster: {string.Join(" ", match.HomeTeamRoster)}");
-	//		stringBuilder.AppendLine($"Away team roster: {string.Join(" ", match.AwayTeamRoster)}");
-	//		stringBuilder.AppendLine($"Home team win type: {match.HomeTeamWinType}");
-	//		stringBuilder.AppendLine($"Away team win type: {match.AwayTeamWinType}");
-	//		stringBuilder.AppendLine($"Is overtime: {match.IsOvertime}");
+	public class DataGenerator
+	{
+		private readonly SystemTimeProvider _timeProvider = new SystemTimeProvider();
+		private readonly Random _random = new();
+		private readonly DbContextOptionsBuilder<AppDbContext> _options;
+		private readonly AppDbContext _context;
+		private readonly PlayerRepository _playerRepository;
+		private readonly TeamRepository _teamRepository;
+		private readonly TournamentRepository _tournamentRepository;
+		private readonly MatchRepository _matchRepository;
+		private readonly TeamStatsRepository _teamStatsRepository;
 
-	//		foreach (var goal in match.Goals)
-	//			stringBuilder.AppendLine(await goal.Print(teamRepository, playerRepository));
+		private readonly MatchService _matchService;
 
-	//		return stringBuilder.ToString();
-	//	}
-	//	public async static Task<string> Print(this GoalEvent goal, ITeamRepository teamRepository, IPlayerRepository playerRepository)
-	//	{
-	//		var stringBuilder = new StringBuilder();
-	//		stringBuilder.AppendLine($"Гол команды {(await teamRepository.FindById(goal.ScoringTeamId)).Name}");
-	//		stringBuilder.Append($"{(await playerRepository.FindById(goal.GoalScorerId)).Surname}");
-	//		if (goal.FirstAssistId.HasValue)
-	//		{
-	//			stringBuilder.Append($" ({(await playerRepository.FindById(goal.FirstAssistId.Value)).Surname}");
-	//			if (goal.SecondAssistId.HasValue)
-	//				stringBuilder.Append($", {(await playerRepository.FindById(goal.SecondAssistId.Value)).Surname}");
-	//			stringBuilder.Append(")");
-	//		}
-	//		if (goal.StrengthType.HasValue)
-	//			stringBuilder.Append($" {goal.StrengthType.Value.GetDescription()}");
-	//		if (goal.NetType.HasValue)
-	//			stringBuilder.Append(goal.NetType.Value.GetDescription());
-	//		stringBuilder.AppendLine();
-	//		stringBuilder.AppendLine($"{goal.Period} период, {goal.Time / 60} минута {goal.Time % 60} секунда");
+		private readonly PlayerApplicationService _playerApplicationService;
+		private readonly TeamApplicationService _teamApplicationService;
+		private readonly TournamentApplicationService _tournamentApplicationService;
 
-	//		return stringBuilder.ToString();
-	//	}
-	//}
-	//public class Test
-	//{
-	//	public TimeProvider timeProvider = new();
-	//	public Random Random = new();
-	//	public DbContextOptionsBuilder<AppDbContext> Options { get; private set; }
-	//	public AppDbContext Context { get; private set; }
-	//	public PlayerRepository PlayerRepository { get; private set; }
-	//	public TeamRepository TeamRepository { get; private set; }
-	//	public TournamentRepository TournamentRepository { get; private set; }
-	//	public MatchRepository MatchRepository { get; private set; }
+		private readonly MatchGoalService _matchGoalService;
+		private readonly MatchLifecycleService _matchLifecycleService;
+		private readonly MatchFinishService _matchFinishService;
+		private readonly MatchRosterService _matchRosterService;
+		private readonly MatchQueriesHandler _matchQueriesHandle;
 
-	//	public PlayerApplicationService PlayerApplicationService { get; private set; }
-	//	public TeamApplicationService TeamApplicationService { get; private set; }
-	//	public TournamentApplicationService TournamentApplicationService { get; private set; }
-	//	public MatchApplicationService MatchApplicationService { get; private set; }
-
-	//	public Test()
-	//	{
-	//		Options = new DbContextOptionsBuilder<AppDbContext>()
-	//				.UseNpgsql("Host=localhost;Database=SportsStats;Username=VladislavKulichkov;Password=qw06062013?");
-	//		Context = new(Options.Options);
+		public DataGenerator()
+		{
+			_options = new DbContextOptionsBuilder<AppDbContext>()
+					.UseNpgsql("Host=localhost;Database=SportsStats;Username=VladislavKulichkov;Password=qw06062013?");
+			_context = new(_options.Options);
 
 
-	//		TeamRepository = new(Context);
-	//		TournamentRepository = new(Context);
-	//		PlayerRepository = new(Context);
-	//		MatchRepository = new(Context);
+			_teamRepository = new(_context);
+			_tournamentRepository = new(_context);
+			_playerRepository = new(_context);
+			_matchRepository = new(_context);
+			_matchRepository = new(_context);
+			_teamStatsRepository = new(_context);
 
-	//		TeamApplicationService = new(TeamRepository);
-	//		TournamentApplicationService = new(TournamentRepository, timeProvider, TeamRepository);
-	//		MatchApplicationService = new(PlayerRepository, TournamentRepository, MatchRepository, timeProvider);
-	//		PlayerApplicationService = new(PlayerRepository, TeamRepository);
-	//	}
+			_matchService = new();
 
-	//	public async Task<List<int>> CreateTeams()
-	//	{
-	//		List<int> ids = new List<int>();
-	//		var team1 = await TeamApplicationService.Create("АВАНГАРД");
-	//		var team2 = await TeamApplicationService.Create("Ска");
-	//		ids.Add(team1.Id);
-	//		ids.Add(team2.Id);
-	//		Console.WriteLine("teams created");
-	//		return ids;
-	//	}
-
-	//	public async Task<List<Player>> CreatePlayers(int count, PositionType position, List<int> teamsId)
-	//	{
-	//		// Список из 40 имён
-	//		List<string> firstNames = new List<string>
-	//	{
-	//		"Александр", "Дмитрий", "Максим", "Сергей", "Андрей", "Алексей", "Иван", "Егор",
-	//		"Никита", "Михаил", "Владимир", "Павел", "Роман", "Олег", "Кирилл", "Денис",
-	//		"Артём", "Илья", "Глеб", "Матвей", "Тимофей", "Юрий", "Василий", "Григорий",
-	//		"Евгений", "Николай", "Пётр", "Степан", "Фёдор", "Ярослав", "Антон", "Вячеслав",
-	//		"Константин", "Леонид", "Руслан", "Станислав", "Виктор", "Валентин", "Семён", "Даниил"
-	//	};
-
-	//		// Список из 40 фамилий
-	//		List<string> lastNames = new List<string>
-	//	{
-	//		"Иванов", "Петров", "Сидоров", "Кузнецов", "Смирнов", "Васильев", "Михайлов", "Новиков",
-	//		"Фёдоров", "Морозов", "Волков", "Алексеев", "Лебедев", "Семёнов", "Егоров", "Павлов",
-	//		"Козлов", "Степанов", "Николаев", "Орлов", "Андреев", "Макаров", "Никитин", "Захаров",
-	//		"Соловьёв", "Борисов", "Яковлев", "Григорьев", "Романов", "Воробьёв", "Сергеев", "Кузьмин",
-	//		"Фролов", "Александров", "Дмитриев", "Королёв", "Гусев", "Киселёв", "Ильин", "Максимов"
-	//	};
-
-	//		List<Player> players = new();
-
-	//		for (int i = 1; i <= count; i++)
-	//		{
-	//			int firstNameIndex = Random.Next(firstNames.Count);
-	//			int lastNameIndex = Random.Next(lastNames.Count);
-
-	//			Player player = await PlayerApplicationService.Create(firstNames[firstNameIndex], lastNames[lastNameIndex], position);
-	//			players.Add(player);
-	//		}
-	//		return players;
-	//	}
-	//	public async Task<int> CreateTournament(List<int> teamsId)
-	//	{
-	//		Tournament tournament = await TournamentApplicationService.Create("Кубок открытия");
-
-	//		await Context.SaveChangesAsync();
-	//		await TournamentApplicationService.SetRules(tournament.Id);
-	//		await TournamentApplicationService.SetStatus(tournament.Id, TournamentStatus.Registration);
-
-	//		foreach (int teamId in teamsId)
-	//			await TournamentApplicationService.RegistrateTeam(tournament.Id, teamId);
-
-	//		return tournament.Id;
-	//	}
-	//	public async Task Start()
-	//	{
-	//		Console.WriteLine("Тест запущен, проверка соединения");
-	//		if (!Context.Database.CanConnect())
-	//			Console.WriteLine("Не удалось подключиться");
-
-	//		List<int> teamsId = await CreateTeams();
-	//		int tournamentId = await CreateTournament(teamsId);
-
-	//		//int tournamentId = Context.Tournaments.Where(t => t.Status == TournamentStatus.Registration).FirstOrDefault()?.Id ?? 0;
-	//		//List<int> teamsId = Context.Tournaments.Where(t => t.Status == TournamentStatus.Registration).FirstOrDefault()?.TeamsId.ToList() ?? [];
-
-	//		IEnumerable<Player> newPlayers = [];
-	//		newPlayers = newPlayers.Concat(await CreatePlayers(8, PositionType.LeftWinger, teamsId));
-	//		newPlayers = newPlayers.Concat(await CreatePlayers(8, PositionType.RightWinger, teamsId));
-	//		newPlayers = newPlayers.Concat(await CreatePlayers(8, PositionType.Center, teamsId));
-	//		newPlayers = newPlayers.Concat(await CreatePlayers(6, PositionType.LeftDefenseman, teamsId));
-	//		newPlayers = newPlayers.Concat(await CreatePlayers(6, PositionType.RightDefenseman, teamsId));
-	//		newPlayers = newPlayers.Concat(await CreatePlayers(4, PositionType.Goalie, teamsId));
-	//		List<Player> newPlayersList = newPlayers.ToList();
-
-	//		Console.WriteLine(string.Join(" ", newPlayersList.Select(p => p.Id)));
-
-	//		for (int i = 0; i < newPlayersList.Count; i++)
-	//			await PlayerApplicationService.ChangeTeam(newPlayersList[i].Id, teamsId[(i) % teamsId.Count]);
-
-	//		Console.WriteLine("Список всех игроков:");
-	//		await Context.Players.ForEachAsync(player => Console.WriteLine(player.Print()));
-	//		Console.WriteLine();
-	//		Console.WriteLine();
+			_teamApplicationService = new(_teamRepository);
+			_playerApplicationService = new(_playerRepository, _teamRepository);
+			_tournamentApplicationService = new(_tournamentRepository, _timeProvider, _teamRepository, _teamStatsRepository);
+			_matchLifecycleService = new(_playerRepository, _tournamentRepository, _matchRepository, _teamRepository, _timeProvider, _matchService);
+			_matchFinishService = new(_teamStatsRepository, _matchRepository, _timeProvider);
+			_matchGoalService = new(_matchRepository, _timeProvider, _matchFinishService);
+			_matchRosterService = new(_matchRepository, _playerRepository);
+			_matchQueriesHandle = new(_matchRepository, _tournamentApplicationService, _teamApplicationService, _playerApplicationService);
+		}
 
 
-	//		Match match = await MatchApplicationService.CreateMatch(tournamentId, teamsId[0], teamsId[1]);
+		public async Task<List<int>> GenerateTeamsAsync(ITeamNames teamNames, INamesData namesData)
+		{
+			var names = teamNames.Names;
 
-	//		int matchId = match.Id;
-	//		foreach (var player in newPlayersList)
-	//			await MatchApplicationService.AddPlayerToRoster(matchId, player.Id, player.TeamId);
+			List<int> ids = new List<int>();
+			foreach (var name in names)
+			{
+				var teamId = await _teamApplicationService.CreateAsync(name);
+				ids.Add(teamId);
 
-	//		await MatchApplicationService.StartMatch(matchId);
+				await GeneratePlayersInTeamAsync(namesData, 4, PositionType.LeftWinger, teamId);
+				await GeneratePlayersInTeamAsync(namesData, 4, PositionType.RightWinger, teamId);
+				await GeneratePlayersInTeamAsync(namesData, 4, PositionType.Center, teamId);
+				await GeneratePlayersInTeamAsync(namesData, 3, PositionType.LeftDefenseman, teamId);
+				await GeneratePlayersInTeamAsync(namesData, 3, PositionType.RightDefenseman, teamId);
+				await GeneratePlayersInTeamAsync(namesData, 2, PositionType.Goalie, teamId);
+			}
+			return ids;
+		}
+		public async Task<List<int>> GeneratePlayersInTeamAsync(INamesData namesData, int count, PositionType position, int teamId)
+		{
+			var firstNames = namesData.FirstNames;
+			var lastNames = namesData.LastNames;
 
-	//		List<Player> HomeTeamPlayers = await Context.Players.Where(player => player.TeamId == match.HomeTeamId).ToListAsync();
-	//		List<Player> AwayTeamPlayers = await Context.Players.Where(player => player.TeamId == match.AwayTeamId).ToListAsync();
+			List<int> players = new();
 
-	//		Console.WriteLine(await match.Print(TeamRepository, PlayerRepository));
-	//		Console.WriteLine();
-	//		Console.WriteLine();
+			for (int i = 1; i <= count; i++)
+			{
+				int firstNameIndex = _random.Next(firstNames.Count);
+				int lastNameIndex = _random.Next(lastNames.Count);
 
-	//		GoalEvent firstGoal = await MatchApplicationService.AddGoal(matchId, teamsId[0], HomeTeamPlayers[0].Id, 1, 20);
+				int playerId = await _playerApplicationService.CreateAsync(firstNames[firstNameIndex], lastNames[lastNameIndex], position);
+				await _playerApplicationService.ChangeTeamAsync(playerId, teamId);
+				players.Add(playerId);
+			}
+			return players;
+		}
+		public async Task<int> GenerateTournamentAsync(string name, ITeamNames teamNames, INamesData namesData, DateTime? startedAt = null)
+		{
+			int tournamentId = await _tournamentApplicationService.CreateAsync(name);
 
-	//		Console.WriteLine(await match.Print(TeamRepository, PlayerRepository));
-	//		Console.WriteLine();
-	//		Console.WriteLine();
-	//		await MatchApplicationService.AddGoal(matchId, teamsId[0], HomeTeamPlayers[0].Id, 1, 1199);
-	//		await MatchApplicationService.AddGoal(matchId, teamsId[1], AwayTeamPlayers[0].Id, 2, 20);
-	//		await MatchApplicationService.AddGoal(matchId, teamsId[1], AwayTeamPlayers[1].Id, 3, 1199);
-	//		await MatchApplicationService.AddGoal(matchId, teamsId[0], HomeTeamPlayers[0].Id, 4, 299);
+			await _tournamentApplicationService.SetRulesAsync(tournamentId, TournamentMapper.ToDTO(TournamentRules.CreateKHLRules()));
+			await _tournamentApplicationService.RegistrationAsync(tournamentId);
+			var teamIds = await GenerateTeamsAsync(teamNames, namesData);
 
-	//		Console.WriteLine(await match.Print(TeamRepository, PlayerRepository));
-	//		Console.WriteLine();
-	//		Console.WriteLine();
-	//		await MatchApplicationService.FillGoalDetails(matchId, firstGoal.Id, HomeTeamPlayers[1].Id, HomeTeamPlayers[2].Id, GoalStrengthType.EvenStrength);
+			foreach (var teamId in teamIds)
+				await _tournamentApplicationService.RegistrateTeamAsync(tournamentId, teamId);
 
-	//		Match matchInDb = await MatchRepository.FindById(matchId);
-	//		Console.WriteLine(await match.Print(TeamRepository, PlayerRepository));
-	//		Console.WriteLine(await matchInDb.Print(TeamRepository, PlayerRepository));
-	//	}
-	//}
+			await _tournamentApplicationService.StartAsync(tournamentId, startedAt);
+
+			startedAt = (await _tournamentApplicationService.GetAsync(tournamentId))?.StartedAt;
+			DateOnly currentDate = DateOnly.FromDateTime(startedAt.Value);
+			var schedule = GenerateSchedule(teamIds);
+
+			foreach (var day in schedule)
+			{
+				foreach (var match in day)
+					await GenerateMatchAsync(match.Item1, match.Item2, tournamentId, DateTime.SpecifyKind(currentDate.ToDateTime(new TimeOnly(19, 30, 0)), DateTimeKind.Utc));
+				currentDate = currentDate.AddDays(1);
+			}
+			return tournamentId;
+		}
+		public List<List<(int, int)>> GenerateSchedule(List<int> teamIds)
+		{
+			List<List<(int, int)>> schedule = new();
+			List<int> teams = new(teamIds);
+			if (teams.Count % 2 == 1)
+				teams.Add(0);
+			int n = teams.Count;
+			for (int i = 0; i < n - 1; i++)
+			{
+				schedule.Add(new List<(int, int)>());
+				schedule.Add(new List<(int, int)>());
+
+				for (int j = 0; j < n / 4; j++)
+					if (teams[j] != 0 && teams[n - j - 1] != 0)
+						schedule[2 * i].Add((teams[j], teams[n - j - 1]));
+				for (int j = n / 4; j < n / 2; j++)
+					if (teams[j] != 0 && teams[n - j - 1] != 0)
+						schedule[2 * i + 1].Add((teams[j], teams[n - j - 1]));
+
+				var last = teams[n - 1];
+				for (int j = n - 1; j > 0; j--)
+					teams[j] = teams[j - 1];
+				teams[1] = last;
+
+			}
+			schedule = schedule.Concat(schedule.Select(d => d.Select(m => (m.Item2, m.Item1)).ToList())).OrderBy(s => _random.Next()).ToList();
+			return schedule;
+		}
+		public async Task<int> GenerateMatchAsync(int homeTeamId, int awayTeamId, int tournamentId, DateTime scheduleAt)
+		{
+			int matchId = await _matchLifecycleService.CreateAsync(tournamentId, homeTeamId, awayTeamId, scheduleAt);
+
+			await GenerateMatchRosterAsync(matchId, homeTeamId, awayTeamId);
+			await _matchLifecycleService.StartAsync(matchId);
+			await GenerateGoalsAsync(matchId);
+			if (!await _matchQueriesHandle.IsFinished(matchId))
+				await _matchFinishService.FinishAsync(matchId);
+
+			return matchId;
+		}
+		public async Task GenerateMatchRosterAsync(int matchId, int homeTeamId, int awayTeamId)
+		{
+			var homeTeamPlayers = await _playerApplicationService.GetAllAsync(homeTeamId);
+			var awayTeamPlayers = await _playerApplicationService.GetAllAsync(awayTeamId);
+
+			foreach (var homeTeamPlayer in homeTeamPlayers)
+				await _matchRosterService.AddPlayerToRosterAsync(matchId, homeTeamPlayer.Id, homeTeamId);
+
+			foreach (var awayTeamPlayer in awayTeamPlayers)
+				await _matchRosterService.AddPlayerToRosterAsync(matchId, awayTeamPlayer.Id, awayTeamId);
+		}
+		public async Task GenerateGoalsAsync(int matchId)
+		{
+			var match = await _matchQueriesHandle.GetAsync(matchId);
+
+			List<TeamDTO> teams = [match.HomeTeam, match.AwayTeam];
+			List<List<PlayerDTO>> rosters = [match.HomeTeamRoster, match.AwayTeamRoster];
+
+			int difference = 0;
+
+			for (int period = 1; period < match.Rules.MatchDurationRules.PeriodsCount + 1; period++)
+			{
+				int goalsCount = _random.Next(1, 4);
+				int lastTime = 0;
+				for (int i = 0; i <= goalsCount; i++)
+					lastTime = await GenerateGoalAsync(period, lastTime, match.Rules.MatchDurationRules.PeriodDurationSeconds);
+			}
+
+			if (difference == 0 && !match.Rules.MatchDurationRules.IsDrawPossible)
+			{
+				await GenerateGoalAsync(match.Rules.MatchDurationRules.PeriodsCount + 1, 0, match.Rules.MatchDurationRules.OvertimeDurationSeconds ?? 2400);
+			}
+
+
+			async Task<int> GenerateGoalAsync(int period, int startTime, int endTime)
+			{
+				int scoringTeamIndex = _random.Next(0, 2);
+				difference += scoringTeamIndex == 0 ? 1 : -1;
+				int goalScorerIndex = _random.Next(0, rosters[scoringTeamIndex].Count);
+				int goalScorerId = rosters[scoringTeamIndex][goalScorerIndex].Id;
+				int time = _random.Next(startTime, endTime);
+
+				await _matchGoalService.AddGoalAsync(matchId, teams[scoringTeamIndex].Id, goalScorerId, period, time);
+				return time;
+			}
+		}
+		public async Task Start()
+		{
+			Console.WriteLine("Генерация данных запущена");
+			if (!_context.Database.CanConnect())
+				Console.WriteLine("Не удалось подключиться");
+
+			int nhlTournamentId = await GenerateTournamentAsync("NHL", new NHLTeamsNames(), new ForeignNamesData());
+			int khlTournamentId = await GenerateTournamentAsync("KHL", new KHLTeamNames(), new RussianNamesData());
+		}
+	}
 	public static class Program
 	{
 		public static async Task Main()
 		{
-			//var test = new Test();
+			var test = new DataGenerator();
 			//await test.Start();
 		}
 
 	}
-	//public class TimeProvider : ITimeProvider
-	//{
-	//	public DateTime GetCurrentTime()
-	//	{
-	//		return DateTime.UtcNow;
-	//	}
-	//}
 }
