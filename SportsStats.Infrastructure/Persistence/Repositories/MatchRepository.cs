@@ -46,5 +46,20 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 				))
 				.ToListAsync();
 		}
+		public async Task<int> GetUnfinishedMatchCountAsync(int tournamentId)
+		{
+			return (await _context.Matches
+				.Where(m => m.TournamentId == tournamentId && m.Status != MatchStatus.Finished)
+				.ToListAsync()).Count;
+		}
+		public async Task<DateTime> GetLastMatchFinishedAtAsync(int tournamentId)
+		{
+			var lastMatch = await _context.Matches
+				.Where(m => m.TournamentId == tournamentId && m.FinishedAt != null)
+				.OrderByDescending(m => m.FinishedAt)
+				.FirstOrDefaultAsync();
+
+			return lastMatch?.FinishedAt ?? DateTime.MinValue;
+		}
 	}
 }

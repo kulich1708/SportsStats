@@ -1,5 +1,6 @@
 ﻿using SportsStats.Application.Tournaments.DTOs.Responses;
 using SportsStats.Application.Tournaments.DTOs.Shared;
+using SportsStats.Domain.Matches;
 using SportsStats.Domain.Shared;
 using SportsStats.Domain.Statistics;
 using SportsStats.Domain.Teams;
@@ -16,12 +17,14 @@ namespace SportsStats.Application.Tournaments
 		ITournamentRepository tournamentRepository,
 		ITimeProvider timeProvider,
 		ITeamRepository teamRepository,
-		ITeamStatsRepository teamStatsRepository)
+		ITeamStatsRepository teamStatsRepository,
+		IMatchRepository matchRepository)
 	{
 		private readonly ITournamentRepository _tournamentRepository = tournamentRepository;
 		private readonly ITimeProvider _timeProvider = timeProvider;
 		private readonly ITeamRepository _teamRepository = teamRepository;
 		private readonly ITeamStatsRepository _teamStatsRepository = teamStatsRepository;
+		private readonly IMatchRepository _matchRepository = matchRepository;
 
 		private async Task<Tournament> GetTournamentOrThrowAsync(int tournamentId)
 		{
@@ -52,9 +55,13 @@ namespace SportsStats.Application.Tournaments
 		{
 			await UpdateAndSaveAsync(tournamentId, tournament => tournament.Start(startedAt ?? _timeProvider.GetCurrentTime()));
 		}
-		public async Task FinishAsync(int tournamentId)
+		public async Task FinishAsync(int tournamentId, DateTime? finishedAt = null)
 		{
-			await UpdateAndSaveAsync(tournamentId, tournament => tournament.Finish(_timeProvider.GetCurrentTime()));
+			int unfinishedMatchCount = await _matchRepository.GetUnfinishedMatchCountAsync(tournamentId);
+			DateTime lastMatchFinishedAt = await _matchRepository.GetLastMatchFinishedAtAsync(tournamentId);
+			await UpdateAndSaveAsync(
+				tournamentId,
+				tournament => tournament.Finish(finishedAt ?? _timeProvider.GetCurrentTime(), unfinishedMatchCount, lastMatchFinishedAt));
 		}
 		public async Task RegistrationAsync(int tournamentId)
 		{

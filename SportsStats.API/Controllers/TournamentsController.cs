@@ -44,9 +44,9 @@ namespace SportsStats.API.Controllers
 			return Ok(await _tournamentApplicationService.CreateAsync(name));
 		}
 		[HttpPost("{id}/start")]
-		public async Task<ActionResult> Start(int id)
+		public async Task<ActionResult> Start(int id, [FromBody] DateTime? startedAt)
 		{
-			await _tournamentApplicationService.StartAsync(id);
+			await _tournamentApplicationService.StartAsync(id, startedAt);
 			return Ok();
 		}
 		[HttpPost("{id}/registration")]
@@ -56,9 +56,9 @@ namespace SportsStats.API.Controllers
 			return Ok();
 		}
 		[HttpPost("{id}/finish")]
-		public async Task<ActionResult> Finish(int id)
+		public async Task<ActionResult> Finish(int id, [FromBody] DateTime? finishedAt)
 		{
-			await _tournamentApplicationService.FinishAsync(id);
+			await _tournamentApplicationService.FinishAsync(id, finishedAt);
 			return Ok();
 		}
 

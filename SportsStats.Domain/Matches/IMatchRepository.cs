@@ -12,5 +12,8 @@ namespace SportsStats.Domain.Matches
 		public Task<List<Match>> GetAllAsync(int tournamentId, int? teamId = null);
 
 		public Task<List<Match>> GetByDate(int tournamentId, DateOnly date);
+
+		public Task<int> GetUnfinishedMatchCountAsync(int tournamentId);
+		public Task<DateTime> GetLastMatchFinishedAtAsync(int tournamentId);
 	}
 }

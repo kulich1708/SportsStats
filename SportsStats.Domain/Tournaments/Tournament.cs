@@ -40,12 +40,18 @@ namespace SportsStats.Domain.Tournaments
 			Status = TournamentStatus.InProgress;
 			StartedAt = startedAt;
 		}
-		public void Finish(DateTime finishAt)
+		public void Finish(DateTime finishAt, int unfinishedMatchesCount, DateTime lastMatchFinishedAt)
 		{
 			if (IsFinished())
-				throw new AggregateException("Туринр уже завершён");
+				throw new AggregateException("Турнир уже завершён");
 			if (!IsStarted())
 				throw new ArgumentException("Турнир можно завершить только после того, как он начался");
+			if (StartedAt > finishAt)
+				throw new ArgumentException($"Нельзя завершить турнир {finishAt}, так как ещё он был начат позже ({StartedAt})");
+			if (unfinishedMatchesCount > 0)
+				throw new ArgumentException($"Нельзя завершить турнир, так как ещё {unfinishedMatchesCount} матча(ей) не закончены");
+			if (finishAt < lastMatchFinishedAt)
+				throw new ArgumentException($"Нельзя завершить турнир {finishAt}, так как в последний матч закончился позже ({lastMatchFinishedAt})");
 
 			Status = TournamentStatus.Finished;
 			FinishedAt = finishAt;
