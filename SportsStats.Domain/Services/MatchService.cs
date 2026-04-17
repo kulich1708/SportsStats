@@ -16,10 +16,13 @@ namespace SportsStats.Domain.Services
 		{
 			if (!tournament.IsRegistration() && !tournament.IsStarted())
 				throw new ArgumentException("Нельзя создать матч в турнире, который ещё не открыт");
+			if (tournament.StartedAt > scheduledAt)
+				throw new ArgumentException($"Нельзя создать матч по расписанию на {scheduledAt}, так как турнир был открыт только {tournament.StartedAt}");
 			if (!IsTeamInTournament(tournament, homeTeamId))
 				throw new ArgumentException("Домашняя команда не заявлена на турнир");
 			if (!IsTeamInTournament(tournament, awayTeamId))
 				throw new ArgumentException("Гостевая команда не заявлена на турнир");
+
 
 			Match match = new Match(tournament.Id, homeTeamId, awayTeamId, rules, scheduledAt);
 
@@ -32,6 +35,8 @@ namespace SportsStats.Domain.Services
 			ValidateRoster(match, awayTeamRoster, awayTeam.Name);
 			if (!tournament.IsStarted())
 				throw new ArgumentException("Нельзя начать матч в неначатом турнире");
+			if (tournament.StartedAt > startedAt)
+				throw new ArgumentException($"Нельзя начать матч {startedAt}, так как данный турнир начался {tournament.StartedAt}");
 			match.Start(startedAt);
 		}
 		private void ValidateRoster(Match match, List<Player> roster, string teamName)
@@ -57,5 +62,6 @@ namespace SportsStats.Domain.Services
 
 		}
 		private bool IsTeamInTournament(Tournament tournament, int teamId) => tournament.TeamsId.Contains(teamId);
+
 	}
 }

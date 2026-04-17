@@ -36,7 +36,7 @@ namespace SportsStats.Application.Matches
 			await _matchRepository.SaveChangesAsync();
 			return match.Id;
 		}
-		public async Task StartAsync(int matchId)
+		public async Task StartAsync(int matchId, DateTime? startedAt = null)
 		{
 			Match match = await GetMatchOrThrowAsync(matchId);
 			Tournament tournament = await _tournamentRepository.GetAsync(match.TournamentId);
@@ -46,7 +46,7 @@ namespace SportsStats.Application.Matches
 			List<Player> homeTeamRoster = await _playerRepository.GetAsync(match.HomeTeamRoster.ToList());
 			List<Player> awayTeamRoster = await _playerRepository.GetAsync(match.AwayTeamRoster.ToList());
 
-			_matchService.Start(match, tournament, homeTeamRoster, awayTeamRoster, homeTeam, awayTeam, _timeProvider.GetCurrentTime());
+			_matchService.Start(match, tournament, homeTeamRoster, awayTeamRoster, homeTeam, awayTeam, startedAt ?? _timeProvider.GetCurrentTime());
 
 			await _matchRepository.SaveChangesAsync();
 		}

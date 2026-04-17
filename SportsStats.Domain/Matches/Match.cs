@@ -58,6 +58,9 @@ namespace SportsStats.Domain.Matches
 		{
 			if (Status != MatchStatus.InProgress)
 				throw new ArgumentException("Нельзя завершить матч, который ещё не начат или уже закончен");
+			if (StartedAt > finishedAt)
+				throw new ArgumentException($"Нельзя завершить матч {finishedAt}, так как он был начат лишь {StartedAt}");
+
 			if (HomeTeamScore == AwayTeamScore && !_rules.MatchDurationRules.IsDrawPossible)
 				throw new ArgumentException("Нельзя завершить матч с ничейным счётом, когда ничья запрещена правилами");
 
