@@ -1,5 +1,23 @@
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
+using SportsStats.API.Middleware;
+using SportsStats.Application.Matches;
+using SportsStats.Application.Players;
+using SportsStats.Application.Statistics;
+using SportsStats.Application.Teams;
+using SportsStats.Application.Tournaments;
+using SportsStats.Domain.Matches;
+using SportsStats.Domain.Players;
+using SportsStats.Domain.Services;
+using SportsStats.Domain.Shared;
+using SportsStats.Domain.Statistics;
+using SportsStats.Domain.Teams;
+using SportsStats.Domain.Tournaments;
+using SportsStats.Infrastructure.Persistence.DbContexts;
+using SportsStats.Infrastructure.Persistence.Repositories;
+using SportsStats.Infrastructure.Services;
 using System.Reflection;
+using System.Text.Json.Serialization;
 
 namespace SportsStats.API
 {
@@ -9,6 +27,11 @@ namespace SportsStats.API
 		{
 			var builder = WebApplication.CreateBuilder(args);
 
+
+			// ГЇВїВЅГЇВїВЅГЇВїВЅГЇВїВЅГЇВїВЅГЇВїВЅ ГЇВїВЅГЇВїВЅГЇВїВЅ ГЇВїВЅГЇВїВЅГЇВїВЅГЇВїВЅГЇВїВЅГЇВїВЅГЇВїВЅ ГЇВїВЅГЇВїВЅГЇВїВЅ ГЇВїВЅГЇВїВЅ
+			builder.Services.AddDbContext<AppDbContext>(options =>
+				options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+			);
 			ConfigureServices(builder);
 
 			var app = builder.Build();
@@ -21,6 +44,33 @@ namespace SportsStats.API
 		private static void ConfigureServices(WebApplicationBuilder builder)
 		{
 			var services = builder.Services;
+
+			services.AddControllers()
+				.AddJsonOptions(options =>
+				{
+					options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+				});
+
+			services.AddScoped<ITournamentRepository, TournamentRepository>();
+			services.AddScoped<ITeamRepository, TeamRepository>();
+			services.AddScoped<IMatchRepository, MatchRepository>();
+			services.AddScoped<IPlayerRepository, PlayerRepository>();
+			services.AddScoped<ITeamStatsRepository, TeamStatsRepository>();
+			services.AddScoped<ITimeProvider, SystemTimeProvider>();
+			services.AddScoped<IMatchService, MatchService>();
+
+			services.AddScoped<TournamentApplicationService>();
+
+			services.AddScoped<PlayerApplicationService>();
+
+			services.AddScoped<TeamApplicationService>();
+			services.AddScoped<TeamStatsApplicationService>();
+
+			services.AddScoped<MatchGoalService>();
+			services.AddScoped<MatchFinishService>();
+			services.AddScoped<MatchLifecycleService>();
+			services.AddScoped<MatchRosterService>();
+			services.AddScoped<MatchQueriesHandler>();
 
 			services.AddControllers();
 			services.AddEndpointsApiExplorer();
@@ -36,10 +86,10 @@ namespace SportsStats.API
 				{
 					Title = "Sports Stats API",
 					Version = version,
-					Description = "API ��� ������ �� ���������� �����������"
+
+					Description = "API ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"
 				});
 
-				// XML �����������
 				var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
 				var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
 
@@ -52,6 +102,7 @@ namespace SportsStats.API
 
 		private static void ConfigureMiddleware(WebApplication app)
 		{
+			app.UseMiddleware<GlobalExceptionHandler>();
 			if (app.Environment.IsDevelopment())
 			{
 				var version = Assembly.GetExecutingAssembly()
