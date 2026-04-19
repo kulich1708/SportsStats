@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SportsStats.Infrastructure.Persistence.DbContexts;
@@ -12,9 +13,11 @@ using SportsStats.Infrastructure.Persistence.DbContexts;
 namespace SportsStats.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260419195603_AddPhotos")]
+    partial class AddPhotos
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -150,6 +153,7 @@ namespace SportsStats.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<byte[]>("Photo")
+                        .IsRequired()
                         .HasColumnType("bytea");
 
                     b.Property<int>("Position")
@@ -164,12 +168,15 @@ namespace SportsStats.Infrastructure.Migrations
 
                     b.ComplexProperty(typeof(Dictionary<string, object>), "Citizenship", "SportsStats.Domain.Players.Player.Citizenship#Citizenship", b1 =>
                         {
+                            b1.IsRequired();
+
                             b1.Property<string>("Name")
                                 .IsRequired()
                                 .HasColumnType("text")
                                 .HasColumnName("CitizenshipName");
 
                             b1.Property<byte[]>("Photo")
+                                .IsRequired()
                                 .HasColumnType("bytea")
                                 .HasColumnName("CitizenshipPhoto");
                         });
@@ -248,6 +255,7 @@ namespace SportsStats.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<byte[]>("Photo")
+                        .IsRequired()
                         .HasColumnType("bytea");
 
                     b.HasKey("Id");
@@ -274,6 +282,7 @@ namespace SportsStats.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<byte[]>("Photo")
+                        .IsRequired()
                         .HasColumnType("bytea");
 
                     b.Property<DateTime?>("StartedAt")
