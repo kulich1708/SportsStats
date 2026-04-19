@@ -7,12 +7,12 @@ namespace SportsStats.Domain.Players
 	public record Citizenship
 	{
 		public string Name { get; private set; }
-		private byte[]? _photo;
-		public IReadOnlyCollection<byte>? Photo => _photo?.AsReadOnly();
+		public byte[]? Photo { get; private set; }
+		private Citizenship() { }
 		public Citizenship(string name, byte[]? photo = null)
 		{
 			Name = name;
-			_photo = photo;
+			Photo = photo;
 		}
 	}
 }
