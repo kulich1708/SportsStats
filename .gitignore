@@ -62,3 +62,6 @@ node_modules/
 # Build outputs
 bin/
 obj/
+
+appsettings.*.json
+!appsettings.template.json
