@@ -13,9 +13,8 @@ namespace SportsStats.Domain.Players
 		public PositionType Position { get; init; }
 		public PlayerNumber? Number { get; private set; }
 		public DateOnly? Birthday { get; private set; }
-		public Citizenship Citizenship { get; private set; }
-		private byte[]? _photo;
-		public IReadOnlyCollection<byte>? Photo => _photo?.AsReadOnly();
+		public Citizenship? Citizenship { get; private set; }
+		public byte[]? Photo { get; private set; }
 		public Player(string name, string surname, PositionType position)
 		{
 			ValidateNameAndSurname(name, surname);
@@ -38,6 +37,6 @@ namespace SportsStats.Domain.Players
 		public void SetNumber(int number) => Number = new(number);
 		public void SetBirthday(DateOnly birthday) => Birthday = birthday;
 		public void SetCitizenship(string name, byte[]? photo = null) => Citizenship = new(name, photo);
-		public void SetPhoto(byte[] photo) => _photo = photo;
+		public void SetPhoto(byte[] photo) => Photo = photo;
 	}
 }

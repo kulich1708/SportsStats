@@ -14,11 +14,9 @@ namespace SportsStats.Domain.Tournaments
 		public DateTime? StartedAt { get; private set; }
 		public DateTime? FinishedAt { get; private set; }
 		public TournamentStatus Status { get; private set; } = TournamentStatus.Draft;
-
-		private byte[]? _photo;
+		public byte[]? Photo { get; private set; }
 		public TournamentRules TournamentRules { get; private set; }
 		public IReadOnlySet<int> TeamsId => _teamsId;
-		public IReadOnlyCollection<byte>? Photo => _photo?.AsReadOnly();
 
 		public Tournament(string name)
 		{
@@ -85,6 +83,6 @@ namespace SportsStats.Domain.Tournaments
 			_teamsId.Add(teamId);
 		}
 
-		public void SetPhoto(byte[] photo) => _photo = photo;
+		public void SetPhoto(byte[] photo) => Photo = photo;
 	}
 }
