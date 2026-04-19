@@ -4,7 +4,8 @@ using System.Text;
 
 namespace SportsStats.Application.Matches.DTOs.Requests
 {
-	public record GetAllMatchesDTO(
-		int? TeamId
-		);
+	public record MatchPaginationDTO(
+		int Page,
+		int PageSize
+	);
 }

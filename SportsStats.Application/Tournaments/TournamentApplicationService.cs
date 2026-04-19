@@ -1,4 +1,7 @@
-﻿using SportsStats.Application.Tournaments.DTOs.Responses;
+﻿using SportsStats.Application.Matches;
+using SportsStats.Application.Matches.DTOs.Responses;
+using SportsStats.Application.Teams;
+using SportsStats.Application.Tournaments.DTOs.Responses;
 using SportsStats.Application.Tournaments.DTOs.Shared;
 using SportsStats.Domain.Matches;
 using SportsStats.Domain.Shared;
@@ -18,13 +21,15 @@ namespace SportsStats.Application.Tournaments
 		ITimeProvider timeProvider,
 		ITeamRepository teamRepository,
 		ITeamStatsRepository teamStatsRepository,
-		IMatchRepository matchRepository)
+		IMatchRepository matchRepository,
+		MatchQueriesHandler matchQueriesHandler)
 	{
 		private readonly ITournamentRepository _tournamentRepository = tournamentRepository;
 		private readonly ITimeProvider _timeProvider = timeProvider;
 		private readonly ITeamRepository _teamRepository = teamRepository;
 		private readonly ITeamStatsRepository _teamStatsRepository = teamStatsRepository;
 		private readonly IMatchRepository _matchRepository = matchRepository;
+		private readonly MatchQueriesHandler _matchQueriesHandler = matchQueriesHandler;
 
 		private async Task<Tournament> GetTournamentOrThrowAsync(int tournamentId)
 		{
@@ -101,6 +106,49 @@ namespace SportsStats.Application.Tournaments
 		{
 			var tournaments = await _tournamentRepository.GetActiveByDateAsync(date);
 			return tournaments.Select(TournamentMapper.ToDTO).ToList();
+		}
+		public async Task<List<TournamentWithMatchesDTO>> GetActiveByDateWithMatchesAsync(DateOnly date)
+		{
+			var matches = await _matchQueriesHandler.GetByDateAsync(date);
+
+			var matchesInTournaments = matches.ToLookup(m => m.TournamentId);
+			var tournamentIds = matchesInTournaments.Select(g => g.Key).ToList();
+			var tournaments = await _tournamentRepository.GetAsync(tournamentIds);
+			var tournamentsLookup = tournaments.ToDictionary(t => t.Id);
+
+			return matchesInTournaments
+				.Select(g => TournamentMapper.ToDTO(tournamentsLookup[g.Key], g.ToList()))
+				.ToList();
+		}
+		public async Task<List<TournamentWithMatchesDTO>> GetByTeamWithFinishedMatchesAsync(int teamId, int page, int pageSize)
+		{
+			var matches = await _matchQueriesHandler.GetFinishedByTeamAsync(teamId, page, pageSize);
+			return await GetTournamentWithMatchesDTOsByMatchesAsync(matches);
+		}
+		public async Task<List<TournamentWithMatchesDTO>> GetByTeamWithScheduleMatchesAsync(int teamId, int page, int pageSize)
+		{
+			var matches = await _matchQueriesHandler.GetScheduleByTeamAsync(teamId, page, pageSize);
+			return await GetTournamentWithMatchesDTOsByMatchesAsync(matches);
+		}
+		public async Task<List<TournamentWithMatchesDTO>> GetTournamentWithMatchesDTOsByMatchesAsync(List<MatchShortDTO> matches)
+		{
+			List<List<MatchShortDTO>> matchesInTournaments = new();
+			matchesInTournaments.Add([matches[0]]);
+			for (int i = 1; i < matches.Count; i++)
+			{
+				if (matches[i].TournamentId == matches[i - 1].TournamentId)
+					matchesInTournaments[^1].Add(matches[i]);
+				else
+					matchesInTournaments.Add([matches[i]]);
+			}
+
+			var tournamentIds = matches.Select(m => m.TournamentId).Distinct().ToList();
+			var tournaments = await _tournamentRepository.GetAsync(tournamentIds);
+			var tournamentsLookup = tournaments.ToDictionary(t => t.Id);
+
+			return matchesInTournaments
+				.Select(g => TournamentMapper.ToDTO(tournamentsLookup[g[0].TournamentId], g))
+				.ToList();
 		}
 	}
 }

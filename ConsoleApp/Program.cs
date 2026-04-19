@@ -68,12 +68,12 @@ namespace SportsStats.ConsoleApp
 
 			_teamApplicationService = new(_teamRepository);
 			_playerApplicationService = new(_playerRepository, _teamRepository);
-			_tournamentApplicationService = new(_tournamentRepository, _timeProvider, _teamRepository, _teamStatsRepository);
+			_matchQueriesHandle = new(_matchRepository, _teamRepository, _tournamentRepository, _teamApplicationService, _playerApplicationService);
+			_tournamentApplicationService = new(_tournamentRepository, _timeProvider, _teamRepository, _teamStatsRepository, _matchRepository, _matchQueriesHandle);
 			_matchLifecycleService = new(_playerRepository, _tournamentRepository, _matchRepository, _teamRepository, _timeProvider, _matchService);
 			_matchFinishService = new(_teamStatsRepository, _matchRepository, _timeProvider);
 			_matchGoalService = new(_matchRepository, _timeProvider, _matchFinishService);
 			_matchRosterService = new(_matchRepository, _playerRepository);
-			_matchQueriesHandle = new(_matchRepository, _tournamentApplicationService, _teamApplicationService, _playerApplicationService);
 		}
 
 
