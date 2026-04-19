@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using SportsStats.API.Middleware;
 using SportsStats.Application.Matches;
@@ -28,7 +28,7 @@ namespace SportsStats.API
 			var builder = WebApplication.CreateBuilder(args);
 
 
-			// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½
+			// ГЇВїВЅГЇВїВЅГЇВїВЅГЇВїВЅГЇВїВЅГЇВїВЅ ГЇВїВЅГЇВїВЅГЇВїВЅ ГЇВїВЅГЇВїВЅГЇВїВЅГЇВїВЅГЇВїВЅГЇВїВЅГЇВїВЅ ГЇВїВЅГЇВїВЅГЇВїВЅ ГЇВїВЅГЇВїВЅ
 			builder.Services.AddDbContext<AppDbContext>(options =>
 				options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 			);
@@ -89,8 +89,6 @@ namespace SportsStats.API
 
 					Description = "API ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"
 				});
-
-				// XML ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 				var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
 				var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
