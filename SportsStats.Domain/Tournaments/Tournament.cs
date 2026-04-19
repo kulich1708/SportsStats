@@ -15,8 +15,10 @@ namespace SportsStats.Domain.Tournaments
 		public DateTime? FinishedAt { get; private set; }
 		public TournamentStatus Status { get; private set; } = TournamentStatus.Draft;
 
+		private byte[]? _photo;
 		public TournamentRules TournamentRules { get; private set; }
 		public IReadOnlySet<int> TeamsId => _teamsId;
+		public IReadOnlyCollection<byte>? Photo => _photo?.AsReadOnly();
 
 		public Tournament(string name)
 		{
@@ -82,5 +84,7 @@ namespace SportsStats.Domain.Tournaments
 				throw new ArgumentException("Команда уже заявлена на этот турнир");
 			_teamsId.Add(teamId);
 		}
+
+		public void SetPhoto(byte[] photo) => _photo = photo;
 	}
 }
