@@ -24,12 +24,13 @@ namespace SportsStats.Application.Teams
 		}
 		public async Task<TeamDTO?> GetAsync(int id)
 		{
-			Team team = await _teamRepository.GetAsync(id);
+			Team? team = await _teamRepository.GetAsync(id);
 			return team == null ? null : TeamMapper.ToDTO(team);
 		}
 		public async Task<List<TeamDTO>> GetAllAsync(int? tournamentId = null)
 		{
-			return (await _teamRepository.GetAllAsync(tournamentId)).Select(TeamMapper.ToDTO).ToList();
+			var teams = await _teamRepository.GetAllAsync(tournamentId);
+			return teams.Select(TeamMapper.ToDTO).ToList();
 		}
 
 	}

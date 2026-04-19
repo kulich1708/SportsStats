@@ -31,6 +31,8 @@ namespace SportsStats.API.Controllers
 
 			return Ok(match);
 		}
+
+
 		[HttpPost("{id}/goals")]
 		public async Task<ActionResult<int>> AddGoal(int id, [FromBody] AddGoalDTO dto)
 		{

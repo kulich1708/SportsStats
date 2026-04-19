@@ -25,7 +25,7 @@ namespace SportsStats.Application.Matches
 			TeamDTO awayTeam,
 			List<PlayerDTO> homeTeamRoster,
 			List<PlayerDTO> awayTeamRoster,
-			TournamentDTO tournament) => new(
+			TournamentShortDTO tournament) => new(
 				match.Id,
 				homeTeam,
 				awayTeam,
@@ -34,8 +34,7 @@ namespace SportsStats.Application.Matches
 				match.ScheduledAt,
 				match.StartedAt,
 				match.FinishedAt,
-				tournament.Id,
-				tournament.Name,
+				tournament,
 				match.Status.GetDescription(),
 				match.HomeTeamScore,
 				match.AwayTeamScore,
@@ -65,6 +64,7 @@ namespace SportsStats.Application.Matches
 			);
 		public static MatchShortDTO ToDTO(Match match, TeamDTO homeTeam, TeamDTO awayTeam) => new(
 			match.Id,
+			match.TournamentId,
 			homeTeam,
 			awayTeam,
 			match.ScheduledAt,

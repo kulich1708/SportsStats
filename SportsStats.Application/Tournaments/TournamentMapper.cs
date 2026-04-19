@@ -1,6 +1,9 @@
-﻿using SportsStats.Application.Tournaments.DTOs.Requests;
+﻿using SportsStats.Application.Matches;
+using SportsStats.Application.Matches.DTOs.Responses;
+using SportsStats.Application.Tournaments.DTOs.Requests;
 using SportsStats.Application.Tournaments.DTOs.Responses;
 using SportsStats.Application.Tournaments.DTOs.Shared;
+using SportsStats.Domain.Matches;
 using SportsStats.Domain.Teams;
 using SportsStats.Domain.Tournaments;
 using SportsStats.Domain.Tournaments.Rules;
@@ -30,6 +33,14 @@ namespace SportsStats.Application.Tournaments
 		public static TournamentShortDTO ToDTO(Tournament tournament) => new(
 			tournament.Id,
 			tournament.Name
+		);
+		public static TournamentWithMatchesDTO ToDTO(Tournament tournament, List<MatchShortDTO> matches) => new(
+			tournament.Id,
+			tournament.Name,
+			tournament.StartedAt,
+			tournament.FinishedAt,
+			tournament.Status.GetDescription(),
+			matches
 		);
 		private static MatchPointsRulesDTO ToDTO(MatchPointsRules rules) => new(
 			rules.WinPoints,
