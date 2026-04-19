@@ -118,13 +118,17 @@ namespace SportsStats.API
 						$"/swagger/{version}/swagger.json",
 						$"Sports Stats API {version}");
 
-					options.RoutePrefix = string.Empty;
+					options.RoutePrefix = "swagger";
 				});
 			}
+
+			app.UseDefaultFiles();
+			app.UseStaticFiles();
 
 			app.UseHttpsRedirection();
 			app.UseAuthorization();
 			app.MapControllers();
+			app.MapFallbackToFile("index.html");
 		}
 	}
 }
