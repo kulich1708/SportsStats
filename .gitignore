@@ -63,5 +63,6 @@ node_modules/
 bin/
 obj/
 
-appsettings.*.json
-!appsettings.template.json
+**/appsettings.json
+**/appsettings.*.json
+!**/appsettings.template.json
