@@ -8,6 +8,7 @@ namespace SportsStats.Application.Matches.DTOs.Responses
 {
 	public record MatchShortDTO(
 		int Id,
+		int TournamentId,
 		TeamDTO HomeTeam,
 		TeamDTO AwayTeam,
 		DateTime ScheduleAt,

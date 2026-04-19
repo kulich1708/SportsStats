@@ -6,7 +6,7 @@ using SportsStats.Application.Matches.DTOs.Responses;
 
 namespace SportsStats.API.Controllers
 {
-	[Route("api/tournaments/{tournamentId}/[controller]")]
+	[Route("api/tournaments/{tournamentId}/matches")]
 	[ApiController]
 	public class TournamentMatchesController(
 		MatchLifecycleService matchLifecycleService,
@@ -14,16 +14,22 @@ namespace SportsStats.API.Controllers
 	{
 		private readonly MatchLifecycleService _matchLifecycleService = matchLifecycleService;
 		private readonly MatchQueriesHandler _matchQueriesHandler = matchQueriesHandler;
-		[HttpGet]
-		public async Task<ActionResult<List<MatchShortDTO>>> GetAll(int tournamentId, [FromQuery] GetAllMatchesDTO dto)
+		[HttpGet("calendar")]
+		public async Task<ActionResult<List<MatchShortDTO>>> GetScheduleByTournament(int tournamentId, [FromQuery] MatchPaginationDTO dto)
 		{
-			List<MatchShortDTO> matches = await _matchQueriesHandler.GetAllAsync(tournamentId, dto.TeamId);
+			List<MatchShortDTO> matches = await _matchQueriesHandler.GetScheduleByTournamentAsync(tournamentId, dto.Page, dto.PageSize);
+			return Ok(matches);
+		}
+		[HttpGet("result")]
+		public async Task<ActionResult<List<MatchShortDTO>>> GetFinishedByTournament(int tournamentId, [FromQuery] MatchPaginationDTO dto)
+		{
+			List<MatchShortDTO> matches = await _matchQueriesHandler.GetFinishedByTournamentAsync(tournamentId, dto.Page, dto.PageSize);
 			return Ok(matches);
 		}
 		[HttpGet("by-date/{date}")]
 		public async Task<ActionResult<List<MatchShortDTO>>> GetByTournamentAndDate(int tournamentId, DateOnly date)
 		{
-			List<MatchShortDTO> matches = await _matchQueriesHandler.GetByDateAsync(tournamentId, date);
+			List<MatchShortDTO> matches = await _matchQueriesHandler.GetByDateAsync(date, tournamentId);
 			return Ok(matches);
 		}
 

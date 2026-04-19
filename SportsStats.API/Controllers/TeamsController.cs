@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using SportsStats.Application.Teams;
 using SportsStats.Application.Teams.DTOs.Requests;
 using SportsStats.Application.Teams.DTOs.Responses;
+using SportsStats.Application.Tournaments;
 using SportsStats.Domain.Teams;
 using SportsStats.Infrastructure.Persistence.DbContexts;
 
@@ -15,9 +16,13 @@ namespace SportsStats.API.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
-	public class TeamsController(TeamApplicationService teamApplicationService) : ControllerBase
+	public class TeamsController(
+		TeamApplicationService teamApplicationService,
+		TournamentApplicationService tournamentApplicationService
+		) : ControllerBase
 	{
 		private readonly TeamApplicationService _teamApplicationService = teamApplicationService;
+		private readonly TournamentApplicationService _tournamentApplicationService = tournamentApplicationService;
 
 		// GET: api/Teams
 		[HttpGet]
@@ -29,6 +34,16 @@ namespace SportsStats.API.Controllers
 		public async Task<ActionResult<TeamDTO>> Get(int id)
 		{
 			return Ok(await _teamApplicationService.GetAsync(id));
+		}
+		[HttpGet("{id}/results")]
+		public async Task<ActionResult<TeamDTO>> GetFinishedMatches(int id, int page, int pageSize)
+		{
+			return Ok(await _tournamentApplicationService.GetByTeamWithFinishedMatchesAsync(id, page, pageSize));
+		}
+		[HttpGet("{id}/calendar")]
+		public async Task<ActionResult<TeamDTO>> GetCalendar(int id, int page, int pageSize)
+		{
+			return Ok(await _tournamentApplicationService.GetByTeamWithScheduleMatchesAsync(id, page, pageSize));
 		}
 		[HttpPost]
 		public async Task<ActionResult<int>> Create([FromBody] CreateTeamDTO dto)
