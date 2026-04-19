@@ -11,6 +11,11 @@ namespace SportsStats.Domain.Players
 		public string Surname { get; private set; }
 		public int TeamId { get; private set; }
 		public PositionType Position { get; init; }
+		public PlayerNumber? Number { get; private set; }
+		public DateOnly? Birthday { get; private set; }
+		public Citizenship Citizenship { get; private set; }
+		private byte[]? _photo;
+		public IReadOnlyCollection<byte>? Photo => _photo?.AsReadOnly();
 		public Player(string name, string surname, PositionType position)
 		{
 			ValidateNameAndSurname(name, surname);
@@ -29,9 +34,10 @@ namespace SportsStats.Domain.Players
 			if (surname.Count() > 20)
 				throw new ArgumentException("Фамилия не может быть длинее 20 символов");
 		}
-		public void ChangeTeam(int teamId)
-		{
-			TeamId = teamId;
-		}
+		public void ChangeTeam(int teamId) => TeamId = teamId;
+		public void SetNumber(int number) => Number = new(number);
+		public void SetBirthday(DateOnly birthday) => Birthday = birthday;
+		public void SetCitizenship(string name, byte[]? photo = null) => Citizenship = new(name, photo);
+		public void SetPhoto(byte[] photo) => _photo = photo;
 	}
 }
