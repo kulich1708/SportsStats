@@ -28,11 +28,10 @@ namespace SportsStats.API
 			var builder = WebApplication.CreateBuilder(args);
 
 
-			// ������ ��� ������� ��� ��
+			// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½
 			builder.Services.AddDbContext<AppDbContext>(options =>
 				options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 			);
-
 			ConfigureServices(builder);
 
 			var app = builder.Build();
@@ -45,6 +44,7 @@ namespace SportsStats.API
 		private static void ConfigureServices(WebApplicationBuilder builder)
 		{
 			var services = builder.Services;
+
 			services.AddControllers()
 				.AddJsonOptions(options =>
 				{
@@ -86,10 +86,12 @@ namespace SportsStats.API
 				{
 					Title = "Sports Stats API",
 					Version = version,
-					Description = "API ��� ������ �� ���������� �����������"
+
+					Description = "API ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"
 				});
 
-				// XML �����������
+				// XML ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+
 				var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
 				var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
 
