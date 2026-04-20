@@ -181,8 +181,8 @@ namespace SportsStats.ConsoleApp
 		}
 		public async Task GenerateMatchRosterAsync(int matchId, int homeTeamId, int awayTeamId)
 		{
-			var homeTeamPlayers = await _playerApplicationService.GetAllAsync(homeTeamId);
-			var awayTeamPlayers = await _playerApplicationService.GetAllAsync(awayTeamId);
+			var homeTeamPlayers = await _playerApplicationService.GetByteamAsync(homeTeamId);
+			var awayTeamPlayers = await _playerApplicationService.GetByteamAsync(awayTeamId);
 
 			foreach (var homeTeamPlayer in homeTeamPlayers)
 				await _matchRosterService.AddPlayerToRosterAsync(matchId, homeTeamPlayer.Id, homeTeamId);
@@ -239,8 +239,10 @@ namespace SportsStats.ConsoleApp
 	{
 		public static async Task Main()
 		{
-			var test = new DataGenerator();
+			//var test = new DataGenerator();
 			//await test.Start();
+			var playerPhotoHelper = new PhotoHelper();
+			playerPhotoHelper.FillPhoto();
 		}
 
 	}

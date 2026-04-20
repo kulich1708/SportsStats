@@ -89,9 +89,9 @@ namespace SportsStats.Application.Tournaments
 			await UpdateAndSaveAsync(tournamentId, tournament => tournament.SetRules(TournamentMapper.ToDomain(rules)));
 		}
 
-		public async Task<List<TournamentShortDTO>> GetAllAsync()
+		public async Task<List<TournamentShortDTO>> GetAllAsync(int page, int pageSize)
 		{
-			var tournaments = await _tournamentRepository.GetAllAsync();
+			var tournaments = await _tournamentRepository.GetAllAsync(page, pageSize);
 			var teamIds = tournaments.SelectMany(t => t.TeamsId).Distinct().ToList();
 			var teams = await _teamRepository.GetAsync(teamIds);
 
@@ -100,7 +100,7 @@ namespace SportsStats.Application.Tournaments
 		public async Task<TournamentDTO?> GetAsync(int tournamentId)
 		{
 			var tournament = await _tournamentRepository.GetAsync(tournamentId);
-			var teams = await _teamRepository.GetAllAsync(tournamentId);
+			var teams = await _teamRepository.GetByTournamentAsync(tournamentId);
 			return tournament == null ? null : TournamentMapper.ToDTO(tournament, teams);
 		}
 		public async Task<List<TournamentShortDTO>> GetActiveByDateAsync(DateOnly date)
