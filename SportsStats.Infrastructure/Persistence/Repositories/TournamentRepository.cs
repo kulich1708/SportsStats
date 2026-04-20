@@ -29,13 +29,8 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 			await _context.Tournaments.AddAsync(tournament);
 		}
 
-		/// <summary>
-		/// NOTE: Логика фильтрации должна совпадать с методом Tournament.IsStarted()
-		/// </summary>
-		public async Task<List<Tournament>> GetAllAsync(bool onlyStarted)
+		public async Task<List<Tournament>> GetAllAsync()
 		{
-			if (onlyStarted)
-				return await _context.Tournaments.Where(t => t.Status == TournamentStatus.InProgress).ToListAsync();
 			return await _context.Tournaments.ToListAsync();
 		}
 
