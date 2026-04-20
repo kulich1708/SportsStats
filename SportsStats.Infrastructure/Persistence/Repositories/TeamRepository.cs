@@ -28,9 +28,10 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 		{
 			await _context.Teams.AddAsync(team);
 		}
-		public async Task<List<Team>> GetAllAsync(int page, int pageSize)
+		public async Task<List<Team>> GetAllAsync(int page, int pageSize, string? search = null)
 		{
 			return await _context.Teams
+				.Where(t => search == null ? true : t.Name.ToLower().Contains(search.ToLower()))
 				.OrderBy(t => t.Name)
 				.ThenBy(t => t.City)
 				.Skip((page - 1) * pageSize)

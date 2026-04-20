@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SportsStats.Application.Matches.DTOs.Requests
+namespace SportsStats.Application.Shared
 {
-	public record MatchPaginationDTO(
+	public record PaginationDTO(
 		int Page,
 		int PageSize
 	);
