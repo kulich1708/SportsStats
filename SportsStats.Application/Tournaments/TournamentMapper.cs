@@ -36,7 +36,8 @@ namespace SportsStats.Application.Tournaments
 			tournament.Id,
 			tournament.Name,
 			tournament.Photo,
-			tournament.PhotoMime
+			tournament.PhotoMime,
+			tournament.Status.GetDescription()
 		);
 		public static TournamentWithMatchesDTO ToDTO(Tournament tournament, List<MatchShortDTO> matches) => new(
 			tournament.Id,
