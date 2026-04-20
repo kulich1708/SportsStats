@@ -24,5 +24,15 @@ namespace SportsStats.Domain.Matches
 		{
 			return StatusDescription.TryGetValue(statusType, out var text) ? text : string.Empty;
 		}
+
+		private static readonly Dictionary<MatchStatus, string> NextStatusActionDescription = new()
+		{
+			[MatchStatus.Waiting] = "Начать матч",
+			[MatchStatus.InProgress] = "Закончить матч",
+		};
+		public static string GetNextActionDescription(this MatchStatus statusType)
+		{
+			return NextStatusActionDescription.TryGetValue(statusType, out var text) ? text : string.Empty;
+		}
 	}
 }

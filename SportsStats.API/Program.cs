@@ -45,11 +45,11 @@ namespace SportsStats.API
 		{
 			var services = builder.Services;
 
-			services.AddControllers()
-				.AddJsonOptions(options =>
-				{
-					options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-				});
+			//services.AddControllers()
+			//	.AddJsonOptions(options =>
+			//	{
+			//		options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+			//	});
 
 			services.AddScoped<ITournamentRepository, TournamentRepository>();
 			services.AddScoped<ITeamRepository, TeamRepository>();

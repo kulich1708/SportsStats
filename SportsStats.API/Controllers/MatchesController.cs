@@ -40,9 +40,9 @@ namespace SportsStats.API.Controllers
 			return Ok(goalId);
 		}
 		[HttpPost("{id}/roster")]
-		public async Task<ActionResult> AddPlayerToRoster(int id, [FromBody] AddPlayerToRosterDTO dto)
+		public async Task<ActionResult> AddPlayersToRoster(int id, [FromBody] AddPlayersToRosterDTO dto)
 		{
-			await _matchRosterService.AddPlayerToRosterAsync(id, dto.PlayerId, dto.TeamId);
+			await _matchRosterService.AddPlayersToRosterAsync(id, dto.PlayerIds, dto.TeamId);
 			return Ok();
 		}
 		[HttpPost("{id}/goals/{goalId}")]

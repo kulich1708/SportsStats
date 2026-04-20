@@ -26,13 +26,19 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 		{
 			await _context.Players.AddAsync(player);
 		}
-		public async Task<List<Player>> GetAllAsync(int? teamId = null)
+		public async Task<List<Player>> GetByTeamAsync(int teamId)
 		{
-			if (teamId == null)
-				return await _context.Players.ToListAsync();
-
-			Team team = await _context.Teams.FirstOrDefaultAsync(t => t.Id == teamId);
+			Team? team = await _context.Teams.FirstOrDefaultAsync(t => t.Id == teamId);
 			return team == null ? [] : await _context.Players.Where(p => p.TeamId == teamId).ToListAsync();
+		}
+		public async Task<List<Player>> GetAllAsync(int page, int pageSize)
+		{
+			return await _context.Players
+				.OrderBy(p => p.Surname)
+				.ThenBy(p => p.Name)
+				.Skip((page - 1) * pageSize)
+				.Take(pageSize)
+				.ToListAsync();
 		}
 		public async Task<List<Player>> GetAsync(List<int> playersId)
 		{

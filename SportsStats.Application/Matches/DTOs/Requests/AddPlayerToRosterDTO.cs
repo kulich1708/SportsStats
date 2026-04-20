@@ -4,8 +4,8 @@ using System.Text;
 
 namespace SportsStats.Application.Matches.DTOs.Requests
 {
-	public record AddPlayerToRosterDTO(
-		int PlayerId,
+	public record AddPlayersToRosterDTO(
+		List<int> PlayerIds,
 		int TeamId
 		);
 }

@@ -221,15 +221,14 @@ namespace SportsStats.Domain.Matches
 				throw new ArgumentException("Нельзя добавить игрока, после начала матча");
 
 			if (teamId == HomeTeamId)
-			{
 				_homeTeamRoster.Add(playerId);
-			}
 			else
-			{
 				_awayTeamRoster.Add(playerId);
-			}
-
 		}
-
+		public void AddPlayersToRoster(List<int> playerIds, int teamId)
+		{
+			foreach (int playerId in playerIds)
+				AddPlayerToRoster(playerId, teamId);
+		}
 	}
 }
