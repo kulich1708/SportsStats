@@ -89,12 +89,13 @@ namespace SportsStats.Application.Tournaments
 			await UpdateAndSaveAsync(tournamentId, tournament => tournament.SetRules(TournamentMapper.ToDomain(rules)));
 		}
 
-		public async Task<List<TournamentDTO>> GetAllAsync(bool onlyStarted = false)
+		public async Task<List<TournamentShortDTO>> GetAllAsync()
 		{
-			var tournaments = await _tournamentRepository.GetAllAsync(onlyStarted);
+			var tournaments = await _tournamentRepository.GetAllAsync();
 			var teamIds = tournaments.SelectMany(t => t.TeamsId).Distinct().ToList();
 			var teams = await _teamRepository.GetAsync(teamIds);
-			return tournaments.Select(t => TournamentMapper.ToDTO(t, teams.Where(team => t.TeamsId.Contains(team.Id)).ToList())).ToList();
+
+			return tournaments.Select(TournamentMapper.ToDTO).ToList();
 		}
 		public async Task<TournamentDTO?> GetAsync(int tournamentId)
 		{
