@@ -103,11 +103,6 @@ namespace SportsStats.Application.Tournaments
 			var teams = await _teamRepository.GetByTournamentAsync(tournamentId);
 			return tournament == null ? null : TournamentMapper.ToDTO(tournament, teams);
 		}
-		public async Task<List<TournamentShortDTO>> GetActiveByDateAsync(DateOnly date)
-		{
-			var tournaments = await _tournamentRepository.GetActiveByDateAsync(date);
-			return tournaments.Select(TournamentMapper.ToDTO).ToList();
-		}
 		public async Task<List<TournamentWithMatchesDTO>> GetActiveByDateWithMatchesAsync(DateOnly date)
 		{
 			var matches = await _matchQueriesHandler.GetByDateAsync(date);
@@ -150,6 +145,15 @@ namespace SportsStats.Application.Tournaments
 			return matchesInTournaments
 				.Select(g => TournamentMapper.ToDTO(tournamentsLookup[g[0].TournamentId], g))
 				.ToList();
+		}
+		public async Task ChangeGeneralInfoAsync(int id, string name, byte[]? photo, string? photoMime)
+		{
+			Tournament tournament = await GetTournamentOrThrowAsync(id);
+			tournament.SetName(name);
+			if (photo != null)
+				tournament.SetPhoto(photo, photoMime);
+
+			await _tournamentRepository.SaveChangesAsync();
 		}
 	}
 }

@@ -21,7 +21,7 @@ namespace SportsStats.Domain.Tournaments
 
 		public Tournament(string name)
 		{
-			Name = name;
+			SetName(name);
 		}
 		public void SetRules(TournamentRules tournamentRules)
 		{
@@ -88,6 +88,13 @@ namespace SportsStats.Domain.Tournaments
 		{
 			Photo = photo;
 			PhotoMime = photoMime;
+		}
+		public void SetName(string name)
+		{
+			if (string.IsNullOrWhiteSpace(name))
+				throw new ArgumentException("Имя турнира не может быть пустым");
+
+			Name = name;
 		}
 	}
 }

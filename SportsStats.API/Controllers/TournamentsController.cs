@@ -82,5 +82,11 @@ namespace SportsStats.API.Controllers
 			await _tournamentApplicationService.SetRulesAsync(id, rules);
 			return NoContent();
 		}
+		[HttpPost("{id}/general/change")]
+		public async Task<ActionResult> ChangeGeneralInfo(int id, [FromBody] TournamentGeneralInfoDTO dto)
+		{
+			await _tournamentApplicationService.ChangeGeneralInfoAsync(id, dto.Name, dto.Photo, dto.PhotoMime);
+			return NoContent();
+		}
 	}
 }
