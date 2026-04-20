@@ -89,9 +89,9 @@ namespace SportsStats.Application.Tournaments
 			await UpdateAndSaveAsync(tournamentId, tournament => tournament.SetRules(TournamentMapper.ToDomain(rules)));
 		}
 
-		public async Task<List<TournamentShortDTO>> GetAllAsync(int page, int pageSize)
+		public async Task<List<TournamentShortDTO>> GetAllAsync(int page, int pageSize, string? search = null)
 		{
-			var tournaments = await _tournamentRepository.GetAllAsync(page, pageSize);
+			var tournaments = await _tournamentRepository.GetAllAsync(page, pageSize, search);
 			var teamIds = tournaments.SelectMany(t => t.TeamsId).Distinct().ToList();
 			var teams = await _teamRepository.GetAsync(teamIds);
 
