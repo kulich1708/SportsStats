@@ -184,11 +184,11 @@ namespace SportsStats.ConsoleApp
 			var homeTeamPlayers = await _playerApplicationService.GetByteamAsync(homeTeamId);
 			var awayTeamPlayers = await _playerApplicationService.GetByteamAsync(awayTeamId);
 
-			foreach (var homeTeamPlayer in homeTeamPlayers)
-				await _matchRosterService.AddPlayerToRosterAsync(matchId, homeTeamPlayer.Id, homeTeamId);
+			var homeTeamPlayerIds = homeTeamPlayers.Select(p => p.Id).ToList();
+			var awayTeamPlayerIds = awayTeamPlayers.Select(p => p.Id).ToList();
 
-			foreach (var awayTeamPlayer in awayTeamPlayers)
-				await _matchRosterService.AddPlayerToRosterAsync(matchId, awayTeamPlayer.Id, awayTeamId);
+			await _matchRosterService.SetPlayersToRosterAsync(matchId, homeTeamPlayerIds, homeTeamId);
+			await _matchRosterService.SetPlayersToRosterAsync(matchId, awayTeamPlayerIds, awayTeamId);
 		}
 		public async Task GenerateGoalsAsync(int matchId)
 		{

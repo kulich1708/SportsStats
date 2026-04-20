@@ -40,28 +40,28 @@ namespace SportsStats.API.Controllers
 			return Ok(goalId);
 		}
 		[HttpPost("{id}/roster")]
-		public async Task<ActionResult> AddPlayersToRoster(int id, [FromBody] AddPlayersToRosterDTO dto)
+		public async Task<ActionResult> SetPlayersToRoster(int id, [FromBody] AddPlayersToRosterDTO dto)
 		{
-			await _matchRosterService.AddPlayersToRosterAsync(id, dto.PlayerIds, dto.TeamId);
-			return Ok();
+			await _matchRosterService.SetPlayersToRosterAsync(id, dto.PlayerIds, dto.TeamId);
+			return NoContent();
 		}
 		[HttpPost("{id}/goals/{goalId}")]
 		public async Task<ActionResult> FillGoalDetaild(int id, int goalId, [FromBody] FillGoalDetailDTO dto)
 		{
 			await _matchGoalService.FillGoalDetailsAsync(id, goalId, dto.FirstAssistId, dto.SecondAssistId, dto.StrengthType, dto.NetType);
-			return Ok();
+			return NoContent();
 		}
 		[HttpPost("{id}/start")]
 		public async Task<ActionResult> Start(int id, [FromBody] DateTime? startedAt)
 		{
 			await _matchLifecycleService.StartAsync(id, startedAt);
-			return Ok();
+			return NoContent();
 		}
 		[HttpPost("{id}/finish")]
 		public async Task<ActionResult> Finish(int id, [FromBody] DateTime? finishedAt)
 		{
 			await _matchFinishService.FinishAsync(id, finishedAt);
-			return Ok();
+			return NoContent();
 		}
 	}
 }

@@ -54,33 +54,33 @@ namespace SportsStats.API.Controllers
 		public async Task<ActionResult> Start(int id, [FromBody] DateTime? startedAt)
 		{
 			await _tournamentApplicationService.StartAsync(id, startedAt);
-			return Ok();
+			return NoContent();
 		}
 		[HttpPost("{id}/registration")]
 		public async Task<ActionResult> Registration(int id)
 		{
 			await _tournamentApplicationService.RegistrationAsync(id);
-			return Ok();
+			return NoContent();
 		}
 		[HttpPost("{id}/finish")]
 		public async Task<ActionResult> Finish(int id, [FromBody] DateTime? finishedAt)
 		{
 			await _tournamentApplicationService.FinishAsync(id, finishedAt);
-			return Ok();
+			return NoContent();
 		}
 
 		[HttpPost("{tournamentId}/teams/{teamId}")]
 		public async Task<ActionResult> RegistrateTeam(int tournamentId, int teamId)
 		{
 			await _tournamentApplicationService.RegistrateTeamAsync(tournamentId, teamId);
-			return Ok();
+			return NoContent();
 		}
 
 		[HttpPost("{id}/rules/set")]
 		public async Task<ActionResult> SetRules(int id, [FromBody] TournamentRulesDTO rules)
 		{
 			await _tournamentApplicationService.SetRulesAsync(id, rules);
-			return Ok();
+			return NoContent();
 		}
 	}
 }
