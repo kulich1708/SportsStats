@@ -10,6 +10,7 @@ namespace SportsStats.Application.Tournaments.DTOs.Responses
 		int Id,
 		string Name,
 		byte[]? Photo,
+		string? PhotoMime,
 		DateTime? StartedAt,
 		DateTime? FinishedAt,
 		string Status,

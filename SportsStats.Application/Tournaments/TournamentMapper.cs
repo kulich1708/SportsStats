@@ -22,6 +22,7 @@ namespace SportsStats.Application.Tournaments
 			tournament.Id,
 			tournament.Name,
 			tournament.Photo,
+			tournament.PhotoMime,
 			tournament.StartedAt,
 			tournament.FinishedAt,
 			tournament.Status.GetDescription(),
@@ -34,12 +35,14 @@ namespace SportsStats.Application.Tournaments
 		public static TournamentShortDTO ToDTO(Tournament tournament) => new(
 			tournament.Id,
 			tournament.Name,
-			tournament.Photo
+			tournament.Photo,
+			tournament.PhotoMime
 		);
 		public static TournamentWithMatchesDTO ToDTO(Tournament tournament, List<MatchShortDTO> matches) => new(
 			tournament.Id,
 			tournament.Name,
 			tournament.Photo,
+			tournament.PhotoMime,
 			tournament.StartedAt,
 			tournament.FinishedAt,
 			tournament.Status.GetDescription(),
