@@ -14,9 +14,8 @@ namespace SportsStats.API.Controllers
 	{
 		private readonly TournamentApplicationService _tournamentApplicationService = tournamentApplicationService;
 
-		// GET: api/<Tournaments?onlyStarted=true>
 		[HttpGet]
-		public async Task<ActionResult<List<TournamentDTO>>> GetTournaments()
+		public async Task<ActionResult<List<TournamentShortDTO>>> GetTournaments()
 		{
 			var tournaments = await _tournamentApplicationService.GetAllAsync();
 			return Ok(tournaments);
