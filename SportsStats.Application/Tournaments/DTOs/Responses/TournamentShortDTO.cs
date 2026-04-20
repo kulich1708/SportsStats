@@ -7,6 +7,7 @@ namespace SportsStats.Application.Tournaments.DTOs.Responses
 	public record TournamentShortDTO(
 		int Id,
 		string Name,
-		byte[]? Photo
+		byte[]? Photo,
+		string? PhotoMime
 	);
 }
