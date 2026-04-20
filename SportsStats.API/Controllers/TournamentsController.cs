@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SportsStats.Application.Matches.DTOs.Requests;
 using SportsStats.Application.Tournaments;
 using SportsStats.Application.Tournaments.DTOs.Requests;
 using SportsStats.Application.Tournaments.DTOs.Responses;
@@ -14,11 +15,10 @@ namespace SportsStats.API.Controllers
 	{
 		private readonly TournamentApplicationService _tournamentApplicationService = tournamentApplicationService;
 
-		// GET: api/<Tournaments?onlyStarted=true>
 		[HttpGet]
-		public async Task<ActionResult<List<TournamentDTO>>> GetTournaments()
+		public async Task<ActionResult<List<TournamentShortDTO>>> GetTournaments([FromQuery] MatchPaginationDTO dto)
 		{
-			var tournaments = await _tournamentApplicationService.GetAllAsync();
+			var tournaments = await _tournamentApplicationService.GetAllAsync(dto.Page, dto.PageSize);
 			return Ok(tournaments);
 		}
 		[HttpGet("{id}")]

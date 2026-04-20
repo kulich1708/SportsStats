@@ -19,6 +19,8 @@ namespace SportsStats.Application.Matches
 {
 	public static class MatchMapper
 	{
+		public static MatchStatusDTO ToDTO(MatchStatus status)
+			=> new(status, status.GetDescription(), status.GetNextActionDescription());
 		public static MatchDTO ToDTO(
 			Match match,
 			TeamDTO homeTeam,
@@ -35,7 +37,7 @@ namespace SportsStats.Application.Matches
 				match.StartedAt,
 				match.FinishedAt,
 				tournament,
-				match.Status.GetDescription(),
+				ToDTO(match.Status),
 				match.HomeTeamScore,
 				match.AwayTeamScore,
 				match.HomeTeamWinType.GetDescription(),
@@ -70,7 +72,7 @@ namespace SportsStats.Application.Matches
 			match.ScheduledAt,
 			match.StartedAt,
 			match.FinishedAt,
-			match.Status.GetDescription(),
+			ToDTO(match.Status),
 			match.HomeTeamScore,
 			match.AwayTeamScore,
 			match.HomeTeamWinType.GetDescription(),

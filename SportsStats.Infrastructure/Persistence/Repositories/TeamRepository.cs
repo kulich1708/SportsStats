@@ -28,11 +28,17 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 		{
 			await _context.Teams.AddAsync(team);
 		}
-		public async Task<List<Team>> GetAllAsync(int? tournamentId = null)
+		public async Task<List<Team>> GetAllAsync(int page, int pageSize)
 		{
-			if (tournamentId == null)
-				return await _context.Teams.ToListAsync();
-
+			return await _context.Teams
+				.OrderBy(t => t.Name)
+				.ThenBy(t => t.City)
+				.Skip((page - 1) * pageSize)
+				.Take(pageSize)
+				.ToListAsync();
+		}
+		public async Task<List<Team>> GetByTournamentAsync(int tournamentId)
+		{
 			var tournament = await _context.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId);
 			return tournament == null ? [] : await _context.Teams.Where(t => tournament.TeamsId.Contains(t.Id)).ToListAsync();
 		}
