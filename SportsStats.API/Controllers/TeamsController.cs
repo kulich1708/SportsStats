@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SportsStats.Application.Matches.DTOs.Requests;
+using SportsStats.Application.Shared;
 using SportsStats.Application.Teams;
 using SportsStats.Application.Teams.DTOs.Requests;
 using SportsStats.Application.Teams.DTOs.Responses;
@@ -28,9 +28,9 @@ namespace SportsStats.API.Controllers
 
 		// GET: api/Teams
 		[HttpGet]
-		public async Task<ActionResult<List<TeamDTO>>> GetAll([FromQuery] MatchPaginationDTO dto)
+		public async Task<ActionResult<List<TeamDTO>>> GetAll([FromQuery] PaginationDTO dto, string? search = null)
 		{
-			return Ok(await _teamApplicationService.GetAllAsync(dto.Page, dto.PageSize));
+			return Ok(await _teamApplicationService.GetAllAsync(dto.Page, dto.PageSize, search));
 		}
 		[HttpGet("by-tournament")]
 		public async Task<ActionResult<List<TeamDTO>>> GetByTournament([FromQuery] int tournamentId)
@@ -43,12 +43,12 @@ namespace SportsStats.API.Controllers
 			return Ok(await _teamApplicationService.GetAsync(id));
 		}
 		[HttpGet("{id}/results")]
-		public async Task<ActionResult<TeamDTO>> GetFinishedMatches(int id, [FromQuery] MatchPaginationDTO dto)
+		public async Task<ActionResult<TeamDTO>> GetFinishedMatches(int id, [FromQuery] PaginationDTO dto)
 		{
 			return Ok(await _tournamentApplicationService.GetByTeamWithFinishedMatchesAsync(id, dto.Page, dto.PageSize));
 		}
 		[HttpGet("{id}/calendar")]
-		public async Task<ActionResult<TeamDTO>> GetCalendar(int id, [FromQuery] MatchPaginationDTO dto)
+		public async Task<ActionResult<TeamDTO>> GetCalendar(int id, [FromQuery] PaginationDTO dto)
 		{
 			return Ok(await _tournamentApplicationService.GetByTeamWithScheduleMatchesAsync(id, dto.Page, dto.PageSize));
 		}
