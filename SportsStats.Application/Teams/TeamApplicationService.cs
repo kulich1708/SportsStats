@@ -37,6 +37,15 @@ namespace SportsStats.Application.Teams
 			var teams = await _teamRepository.GetByTournamentAsync(tournamentId);
 			return teams.Select(TeamMapper.ToDTO).ToList();
 		}
-
+		public async Task ChangeGeneralInfo(int id, string name, string? city, byte[]? photo, string? photoMime)
+		{
+			var team = await _teamRepository.GetAsync(id)
+				?? throw new ArgumentException("Команда с таким id не найдена");
+			team.SetName(name);
+			if (city != null)
+				team.SetCity(city);
+			if (photo != null)
+				team.SetPhoto(photo, photoMime);
+		}
 	}
 }

@@ -61,5 +61,11 @@ namespace SportsStats.API.Controllers
 
 			return Ok(await _teamApplicationService.CreateAsync(name));
 		}
+		[HttpPost("{id}/general/change")]
+		public async Task<ActionResult> ChangeGeneralInfo(int id, [FromBody] TeamGeneralInfoDTO dto)
+		{
+			await _teamApplicationService.ChangeGeneralInfo(id, dto.Name, dto.City, dto.Photo, dto.PhotoMime);
+			return NoContent();
+		}
 	}
 }
