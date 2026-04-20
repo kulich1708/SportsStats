@@ -4,5 +4,5 @@ using System.Text;
 
 namespace SportsStats.Application.Teams.DTOs.Responses
 {
-	public record TeamDTO(int Id, string Name);
+	public record TeamDTO(int Id, string Name, string? City, byte[]? Photo);
 }

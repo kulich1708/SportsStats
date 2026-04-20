@@ -9,6 +9,6 @@ namespace SportsStats.Application.Players
 	public static class PlayerMapper
 	{
 		public static PlayerDTO ToDTO(Player player, string teamName, string position)
-			=> new(player.Id, player.Name, player.Surname, player.TeamId, teamName, position);
+			=> new(player.Id, player.Name, player.Surname, player.TeamId, teamName, position, player.Photo);
 	}
 }
