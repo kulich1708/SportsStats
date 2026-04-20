@@ -31,9 +31,10 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 			Team? team = await _context.Teams.FirstOrDefaultAsync(t => t.Id == teamId);
 			return team == null ? [] : await _context.Players.Where(p => p.TeamId == teamId).ToListAsync();
 		}
-		public async Task<List<Player>> GetAllAsync(int page, int pageSize)
+		public async Task<List<Player>> GetAllAsync(int page, int pageSize, string? search = null)
 		{
 			return await _context.Players
+				.Where(p => search == null ? true : p.Surname.ToLower().Contains(search.ToLower()))
 				.OrderBy(p => p.Surname)
 				.ThenBy(p => p.Name)
 				.Skip((page - 1) * pageSize)

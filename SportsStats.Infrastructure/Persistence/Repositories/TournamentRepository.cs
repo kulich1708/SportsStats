@@ -29,9 +29,10 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 			await _context.Tournaments.AddAsync(tournament);
 		}
 
-		public async Task<List<Tournament>> GetAllAsync(int page, int pageSize)
+		public async Task<List<Tournament>> GetAllAsync(int page, int pageSize, string? search = null)
 		{
 			return await _context.Tournaments
+				.Where(t => search == null ? true : t.Name.ToLower().Contains(search.ToLower()))
 				.OrderBy(t => t.FinishedAt == null ? 0 : 1)
 				.ThenByDescending(t => t.FinishedAt)
 				.Skip((page - 1) * pageSize)

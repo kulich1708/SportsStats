@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using SportsStats.Application.Matches.DTOs.Requests;
 using SportsStats.Application.Players;
 using SportsStats.Application.Players.DTOs.Requests;
 using SportsStats.Application.Players.DTOs.Responses;
+using SportsStats.Application.Shared;
 using SportsStats.Application.Teams.DTOs.Responses;
 
 namespace SportsStats.API.Controllers
@@ -20,9 +20,9 @@ namespace SportsStats.API.Controllers
 			return Ok(await _playerApplicationService.GetByteamAsync(teamId));
 		}
 		[HttpGet]
-		public async Task<ActionResult<List<PlayerDTO>>> GetAll([FromQuery] MatchPaginationDTO dto)
+		public async Task<ActionResult<List<PlayerDTO>>> GetAll([FromQuery] PaginationDTO dto, [FromQuery] string? search)
 		{
-			return Ok(await _playerApplicationService.GetAllAsync(dto.Page, dto.PageSize));
+			return Ok(await _playerApplicationService.GetAllAsync(dto.Page, dto.PageSize, search));
 		}
 		[HttpGet("{id}")]
 		public async Task<ActionResult<PlayerDTO>> Get(int id)
