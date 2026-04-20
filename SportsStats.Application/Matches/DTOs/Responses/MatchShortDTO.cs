@@ -14,7 +14,7 @@ namespace SportsStats.Application.Matches.DTOs.Responses
 		DateTime ScheduleAt,
 		DateTime? StartedAt,
 		DateTime? FinishedAt,
-		string Status,
+		MatchStatusDTO Status,
 		int HomeTeamScore,
 		int AwayTeamScore,
 		string HomeTeamWinType,
