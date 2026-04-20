@@ -9,8 +9,8 @@ namespace SportsStats.Domain.Players
 	{
 		public string Name { get; private set; }
 		public string Surname { get; private set; }
-		public int TeamId { get; private set; }
-		public PositionType Position { get; init; }
+		public int? TeamId { get; private set; }
+		public PositionType Position { get; private set; }
 		public PlayerNumber? Number { get; private set; }
 		public DateOnly? Birthday { get; private set; }
 		public Citizenship? Citizenship { get; private set; }
@@ -18,12 +18,10 @@ namespace SportsStats.Domain.Players
 		public string? PhotoMime { get; private set; }
 		public Player(string name, string surname, PositionType position)
 		{
-			ValidateNameAndSurname(name, surname);
-			Name = name;
-			Surname = surname;
-			Position = position;
+			SetNameAndSurname(name, surname);
+			SetPosition(position);
 		}
-		private void ValidateNameAndSurname(string name, string surname)
+		public void SetNameAndSurname(string name, string surname)
 		{
 			if (string.IsNullOrWhiteSpace(name))
 				throw new ArgumentException("Имя не может быть пустым");
@@ -33,6 +31,9 @@ namespace SportsStats.Domain.Players
 				throw new ArgumentException("Имя не может быть длинее 20 символов");
 			if (surname.Count() > 20)
 				throw new ArgumentException("Фамилия не может быть длинее 20 символов");
+
+			Name = name;
+			Surname = surname;
 		}
 		public void ChangeTeam(int teamId) => TeamId = teamId;
 		public void SetNumber(int number) => Number = new(number);
@@ -43,5 +44,6 @@ namespace SportsStats.Domain.Players
 			Photo = photo;
 			PhotoMime = photoMime;
 		}
+		public void SetPosition(PositionType position) => Position = position;
 	}
 }
