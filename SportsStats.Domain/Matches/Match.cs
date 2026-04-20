@@ -213,8 +213,8 @@ namespace SportsStats.Domain.Matches
 
 		public void AddPlayerToRoster(int playerId, int teamId)
 		{
-			if (!IsTeamInMatch(teamId))
-				throw new ArgumentException("Нельзя заявить игрока за команду, которая не учавствует в матче");
+			ValidateTeamInMatch(teamId);
+
 			if (IsPlayerOnRoster(playerId))
 				throw new ArgumentException("Нельзя добавить игрока дважды");
 			if (!IsMatchWaiting())
@@ -227,8 +227,25 @@ namespace SportsStats.Domain.Matches
 		}
 		public void AddPlayersToRoster(List<int> playerIds, int teamId)
 		{
+			ValidateTeamInMatch(teamId);
 			foreach (int playerId in playerIds)
 				AddPlayerToRoster(playerId, teamId);
+		}
+		public void SetPlayersToRoster(List<int> playerIds, int teamId)
+		{
+			ValidateTeamInMatch(teamId);
+
+			if (teamId == HomeTeamId)
+				_homeTeamRoster.Clear();
+			else
+				_awayTeamRoster.Clear();
+
+			AddPlayersToRoster(playerIds, teamId);
+		}
+		private void ValidateTeamInMatch(int teamId)
+		{
+			if (!IsTeamInMatch(teamId))
+				throw new ArgumentException("Команда не учавствует в матче");
 		}
 	}
 }

@@ -44,7 +44,7 @@ namespace SportsStats.API.Controllers
 		public async Task<ActionResult> ChangeTeam(int playerId, [FromBody] ChangeTeamDTO dto)
 		{
 			await _playerApplicationService.ChangeTeamAsync(playerId, dto.TeamId);
-			return Ok();
+			return NoContent();
 		}
 	}
 }
