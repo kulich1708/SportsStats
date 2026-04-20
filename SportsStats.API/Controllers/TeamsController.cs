@@ -32,7 +32,7 @@ namespace SportsStats.API.Controllers
 		{
 			return Ok(await _teamApplicationService.GetAllAsync(dto.Page, dto.PageSize));
 		}
-		[HttpGet("/by-tournament")]
+		[HttpGet("by-tournament")]
 		public async Task<ActionResult<List<TeamDTO>>> GetByTournament([FromQuery] int tournamentId)
 		{
 			return Ok(await _teamApplicationService.GetByTournamentAsync(tournamentId));
