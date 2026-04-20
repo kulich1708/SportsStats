@@ -8,11 +8,13 @@ namespace SportsStats.Domain.Players
 	{
 		public string Name { get; private set; }
 		public byte[]? Photo { get; private set; }
+		public string? PhotoMime { get; private set; }
 		private Citizenship() { }
-		public Citizenship(string name, byte[]? photo = null)
+		public Citizenship(string name, byte[]? photo = null, string? photoMime = null)
 		{
 			Name = name;
 			Photo = photo;
+			PhotoMime = photoMime;
 		}
 	}
 }

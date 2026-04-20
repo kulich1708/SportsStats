@@ -15,6 +15,7 @@ namespace SportsStats.Domain.Players
 		public DateOnly? Birthday { get; private set; }
 		public Citizenship? Citizenship { get; private set; }
 		public byte[]? Photo { get; private set; }
+		public string? PhotoMime { get; private set; }
 		public Player(string name, string surname, PositionType position)
 		{
 			ValidateNameAndSurname(name, surname);
@@ -36,7 +37,11 @@ namespace SportsStats.Domain.Players
 		public void ChangeTeam(int teamId) => TeamId = teamId;
 		public void SetNumber(int number) => Number = new(number);
 		public void SetBirthday(DateOnly birthday) => Birthday = birthday;
-		public void SetCitizenship(string name, byte[]? photo = null) => Citizenship = new(name, photo);
-		public void SetPhoto(byte[] photo) => Photo = photo;
+		public void SetCitizenship(string name, byte[]? photo = null, string? photoMime = null) => Citizenship = new(name, photo, photoMime);
+		public void SetPhoto(byte[] photo, string photoMime)
+		{
+			Photo = photo;
+			PhotoMime = photoMime;
+		}
 	}
 }
