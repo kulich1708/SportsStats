@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SportsStats.Application.Matches.DTOs.Requests;
 using SportsStats.Application.Players;
 using SportsStats.Application.Players.DTOs.Requests;
 using SportsStats.Application.Players.DTOs.Responses;
@@ -12,10 +13,16 @@ namespace SportsStats.API.Controllers
 	public class PlayersController(PlayerApplicationService playerApplicationService) : ControllerBase
 	{
 		PlayerApplicationService _playerApplicationService = playerApplicationService;
-		[HttpGet]
-		public async Task<ActionResult<List<PlayerDTO>>> GetAll([FromQuery] int? teamId = null)
+
+		[HttpGet("/by-team")]
+		public async Task<ActionResult<List<PlayerDTO>>> GetByTeam([FromQuery] int teamId)
 		{
-			return Ok(await _playerApplicationService.GetAllAsync(teamId));
+			return Ok(await _playerApplicationService.GetByteamAsync(teamId));
+		}
+		[HttpGet]
+		public async Task<ActionResult<List<PlayerDTO>>> GetAll([FromQuery] MatchPaginationDTO dto)
+		{
+			return Ok(await _playerApplicationService.GetAllAsync(dto.Page, dto.PageSize));
 		}
 		[HttpGet("{id}")]
 		public async Task<ActionResult<PlayerDTO>> Get(int id)
