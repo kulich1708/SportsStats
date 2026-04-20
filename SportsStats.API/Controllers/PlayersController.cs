@@ -14,7 +14,7 @@ namespace SportsStats.API.Controllers
 	{
 		PlayerApplicationService _playerApplicationService = playerApplicationService;
 
-		[HttpGet("/by-team")]
+		[HttpGet("by-team")]
 		public async Task<ActionResult<List<PlayerDTO>>> GetByTeam([FromQuery] int teamId)
 		{
 			return Ok(await _playerApplicationService.GetByteamAsync(teamId));
