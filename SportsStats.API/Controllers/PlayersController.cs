@@ -40,10 +40,10 @@ namespace SportsStats.API.Controllers
 
 			return Ok(await _playerApplicationService.CreateAsync(dto.Name, dto.Surname, dto.Position));
 		}
-		[HttpPost("{playerId}/change-team")]
-		public async Task<ActionResult> ChangeTeam(int playerId, [FromBody] ChangeTeamDTO dto)
+		[HttpPost("{id}/general/change")]
+		public async Task<ActionResult> ChangeGeneralInfo(int id, [FromBody] PlayerGeneralInfoDTO dto)
 		{
-			await _playerApplicationService.ChangeTeamAsync(playerId, dto.TeamId);
+			await _playerApplicationService.ChangeGeneralInfoAsync(id, dto);
 			return NoContent();
 		}
 	}
