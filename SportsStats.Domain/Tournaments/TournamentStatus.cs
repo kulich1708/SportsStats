@@ -24,5 +24,15 @@ namespace SportsStats.Domain.Tournaments
 		{
 			return StatusDescription.TryGetValue(statusType, out var text) ? text : string.Empty;
 		}
+		private static readonly Dictionary<TournamentStatus, string> NextActionStatusDescription = new()
+		{
+			[TournamentStatus.Draft] = "Открыть регистрацию команд",
+			[TournamentStatus.Registration] = "Начать турнир",
+			[TournamentStatus.InProgress] = "Закончить турнир",
+		};
+		public static string GetNextActionStatusDescription(this TournamentStatus statusType)
+		{
+			return NextActionStatusDescription.TryGetValue(statusType, out var text) ? text : string.Empty;
+		}
 	}
 }

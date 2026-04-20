@@ -25,7 +25,7 @@ namespace SportsStats.Application.Tournaments
 			tournament.PhotoMime,
 			tournament.StartedAt,
 			tournament.FinishedAt,
-			tournament.Status.GetDescription(),
+			ToDTO(tournament.Status),
 			tournament.TournamentRules == null ? null : ToDTO(tournament.TournamentRules),
 			teams.Select(ToDTO).ToList()
 		);
@@ -37,7 +37,7 @@ namespace SportsStats.Application.Tournaments
 			tournament.Name,
 			tournament.Photo,
 			tournament.PhotoMime,
-			tournament.Status.GetDescription()
+			ToDTO(tournament.Status)
 		);
 		public static TournamentWithMatchesDTO ToDTO(Tournament tournament, List<MatchShortDTO> matches) => new(
 			tournament.Id,
@@ -46,7 +46,7 @@ namespace SportsStats.Application.Tournaments
 			tournament.PhotoMime,
 			tournament.StartedAt,
 			tournament.FinishedAt,
-			tournament.Status.GetDescription(),
+			ToDTO(tournament.Status),
 			matches
 		);
 		private static MatchPointsRulesDTO ToDTO(MatchPointsRules rules) => new(
@@ -113,6 +113,11 @@ namespace SportsStats.Application.Tournaments
 			ToDomain(rules.MatchDurationRules),
 			ToDomain(rules.MatchRosterRules),
 			ToDomain(rules.MatchPointsRules)
+		);
+		public static TournamentStatusDTO ToDTO(TournamentStatus status) => new(
+			status,
+			status.GetDescription(),
+			status.GetNextActionStatusDescription()
 		);
 	}
 }

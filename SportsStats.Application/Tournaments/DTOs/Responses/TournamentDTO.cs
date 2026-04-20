@@ -13,7 +13,7 @@ namespace SportsStats.Application.Tournaments.DTOs.Responses
 		string? PhotoMime,
 		DateTime? StartedAt,
 		DateTime? FinishedAt,
-		string Status,
+		TournamentStatusDTO Status,
 		TournamentRulesDTO TournamentRules,
 		List<TeamInTournamentDTO> Teams
 	);
