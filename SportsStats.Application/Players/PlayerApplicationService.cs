@@ -43,9 +43,14 @@ namespace SportsStats.Application.Players
 			var players = await _playerRepository.GetAsync(playerIds);
 			return await GetDTOAsync(players);
 		}
-		public async Task<List<PlayerDTO>> GetAllAsync(int? teamId = null)
+		public async Task<List<PlayerDTO>> GetByteamAsync(int teamId)
 		{
-			var players = await _playerRepository.GetAllAsync(teamId);
+			var players = await _playerRepository.GetByTeamAsync(teamId);
+			return await GetDTOAsync(players);
+		}
+		public async Task<List<PlayerDTO>> GetAllAsync(int page, int pageSize)
+		{
+			var players = await _playerRepository.GetAllAsync(page, pageSize);
 			return await GetDTOAsync(players);
 		}
 		private async Task<List<PlayerDTO>> GetDTOAsync(List<Player> players)

@@ -1,16 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Humanizer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SportsStats.Application.Matches.DTOs.Requests;
 using SportsStats.Application.Teams;
 using SportsStats.Application.Teams.DTOs.Requests;
 using SportsStats.Application.Teams.DTOs.Responses;
 using SportsStats.Application.Tournaments;
 using SportsStats.Domain.Teams;
 using SportsStats.Infrastructure.Persistence.DbContexts;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SportsStats.API.Controllers
 {
@@ -26,9 +28,14 @@ namespace SportsStats.API.Controllers
 
 		// GET: api/Teams
 		[HttpGet]
-		public async Task<ActionResult<List<TeamDTO>>> GetAll([FromQuery] int? tournamentId = null)
+		public async Task<ActionResult<List<TeamDTO>>> GetAll([FromQuery] MatchPaginationDTO dto)
 		{
-			return Ok(await _teamApplicationService.GetAllAsync(tournamentId));
+			return Ok(await _teamApplicationService.GetAllAsync(dto.Page, dto.PageSize));
+		}
+		[HttpGet("/by-tournament")]
+		public async Task<ActionResult<List<TeamDTO>>> GetByTournament([FromQuery] int tournamentId)
+		{
+			return Ok(await _teamApplicationService.GetByTournamentAsync(tournamentId));
 		}
 		[HttpGet("{id}")]
 		public async Task<ActionResult<TeamDTO>> Get(int id)
@@ -36,14 +43,14 @@ namespace SportsStats.API.Controllers
 			return Ok(await _teamApplicationService.GetAsync(id));
 		}
 		[HttpGet("{id}/results")]
-		public async Task<ActionResult<TeamDTO>> GetFinishedMatches(int id, int page, int pageSize)
+		public async Task<ActionResult<TeamDTO>> GetFinishedMatches(int id, [FromQuery] MatchPaginationDTO dto)
 		{
-			return Ok(await _tournamentApplicationService.GetByTeamWithFinishedMatchesAsync(id, page, pageSize));
+			return Ok(await _tournamentApplicationService.GetByTeamWithFinishedMatchesAsync(id, dto.Page, dto.PageSize));
 		}
 		[HttpGet("{id}/calendar")]
-		public async Task<ActionResult<TeamDTO>> GetCalendar(int id, int page, int pageSize)
+		public async Task<ActionResult<TeamDTO>> GetCalendar(int id, [FromQuery] MatchPaginationDTO dto)
 		{
-			return Ok(await _tournamentApplicationService.GetByTeamWithScheduleMatchesAsync(id, page, pageSize));
+			return Ok(await _tournamentApplicationService.GetByTeamWithScheduleMatchesAsync(id, dto.Page, dto.PageSize));
 		}
 		[HttpPost]
 		public async Task<ActionResult<int>> Create([FromBody] CreateTeamDTO dto)

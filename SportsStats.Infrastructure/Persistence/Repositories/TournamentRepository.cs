@@ -29,9 +29,14 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 			await _context.Tournaments.AddAsync(tournament);
 		}
 
-		public async Task<List<Tournament>> GetAllAsync()
+		public async Task<List<Tournament>> GetAllAsync(int page, int pageSize)
 		{
-			return await _context.Tournaments.ToListAsync();
+			return await _context.Tournaments
+				.OrderBy(t => t.FinishedAt == null ? 0 : 1)
+				.ThenByDescending(t => t.FinishedAt)
+				.Skip((page - 1) * pageSize)
+				.Take(pageSize)
+				.ToListAsync();
 		}
 
 		public async Task<List<Tournament>> GetActiveByDateAsync(DateOnly date)
