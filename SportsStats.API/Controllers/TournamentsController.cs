@@ -16,9 +16,9 @@ namespace SportsStats.API.Controllers
 
 		// GET: api/<Tournaments?onlyStarted=true>
 		[HttpGet]
-		public async Task<ActionResult<List<TournamentDTO>>> GetTournaments([FromQuery] bool onlyStarted = false)
+		public async Task<ActionResult<List<TournamentDTO>>> GetTournaments()
 		{
-			var tournaments = await _tournamentApplicationService.GetAllAsync(onlyStarted);
+			var tournaments = await _tournamentApplicationService.GetAllAsync();
 			return Ok(tournaments);
 		}
 		[HttpGet("{id}")]

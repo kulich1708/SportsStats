@@ -31,6 +31,9 @@ namespace SportsStats.Infrastructure.Persistence.DbContexts
 		{
 			modelBuilder.Entity<Tournament>(entity =>
 			{
+				entity.Property(e => e.Photo)
+					  .HasColumnType("bytea");
+
 				entity.Property(t => t.TeamsId)
 					  .HasField("_teamsId")
 					  .HasColumnType("jsonb")
@@ -94,6 +97,32 @@ namespace SportsStats.Infrastructure.Persistence.DbContexts
 					rulesBuilder.OwnsOne(r => r.MatchDurationRules);
 					rulesBuilder.OwnsOne(r => r.MatchRosterRules);
 					rulesBuilder.OwnsOne(r => r.MatchPointsRules);
+				});
+			});
+
+			modelBuilder.Entity<Team>(entity =>
+			{
+				entity.Property(e => e.Photo)
+					  .HasColumnType("bytea");
+			});
+
+			modelBuilder.Entity<Player>(entity =>
+			{
+				entity.Property(e => e.Photo)
+					  .HasColumnType("bytea");
+
+				entity.ComplexProperty(p => p.Citizenship, citizenship =>
+				{
+					citizenship.Property(c => c.Name)
+							   .HasColumnName("CitizenshipName");
+					citizenship.Property(c => c.Photo)
+							   .HasColumnName("CitizenshipPhoto")
+							   .HasColumnType("bytea");
+				});
+				entity.ComplexProperty(p => p.Number, number =>
+				{
+					number.Property(n => n.Number)
+						  .HasColumnName("Number");
 				});
 			});
 		}
