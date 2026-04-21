@@ -1,4 +1,4 @@
-﻿using SportsStats.Domain.Common;
+using SportsStats.Domain.Common;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -35,11 +35,12 @@ namespace SportsStats.Domain.Players
 			Name = name;
 			Surname = surname;
 		}
-		public void ChangeTeam(int teamId) => TeamId = teamId;
-		public void SetNumber(int number) => Number = new(number);
-		public void SetBirthday(DateOnly birthday) => Birthday = birthday;
-		public void SetCitizenship(string name, byte[]? photo = null, string? photoMime = null) => Citizenship = new(name, photo, photoMime);
-		public void SetPhoto(byte[] photo, string photoMime)
+		public void ChangeTeam(int? teamId) => TeamId = teamId;
+		public void SetNumber(int? number) => Number = number.HasValue ? new(number.Value) : null;
+		public void SetBirthday(DateOnly? birthday) => Birthday = birthday;
+		public void SetCitizenship(string? name, byte[]? photo = null, string? photoMime = null)
+			=> Citizenship = name == null ? null : new(name, photo, photoMime);
+		public void SetPhoto(byte[]? photo, string? photoMime)
 		{
 			Photo = photo;
 			PhotoMime = photoMime;
