@@ -1,4 +1,4 @@
-﻿using SportsStats.Application.Teams.DTOs.Responses;
+using SportsStats.Application.Teams.DTOs.Responses;
 using SportsStats.Domain.Shared;
 using SportsStats.Domain.Teams;
 using SportsStats.Domain.Tournaments;
@@ -42,10 +42,10 @@ namespace SportsStats.Application.Teams
 			var team = await _teamRepository.GetAsync(id)
 				?? throw new ArgumentException("Команда с таким id не найдена");
 			team.SetName(name);
-			if (city != null)
-				team.SetCity(city);
-			if (photo != null)
-				team.SetPhoto(photo, photoMime);
+			team.SetCity(city);
+			team.SetPhoto(photo, photoMime);
+
+			await _teamRepository.SaveChangesAsync();
 		}
 	}
 }

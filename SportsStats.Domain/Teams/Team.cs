@@ -1,4 +1,4 @@
-﻿using SportsStats.Domain.Common;
+using SportsStats.Domain.Common;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -17,7 +17,7 @@ namespace SportsStats.Domain.Teams
 			SetCity(city);
 		}
 
-		public void SetPhoto(byte[] photo, string photoMime)
+		public void SetPhoto(byte[]? photo, string? photoMime)
 		{
 			Photo = photo;
 			PhotoMime = photoMime;
