@@ -1,4 +1,4 @@
-﻿using SportsStats.Application.Players.DTOs.Requests;
+using SportsStats.Application.Players.DTOs.Requests;
 using SportsStats.Application.Players.DTOs.Responses;
 using SportsStats.Domain.Players;
 using SportsStats.Domain.Teams;
@@ -35,9 +35,8 @@ namespace SportsStats.Application.Players
 		{
 			Player player = await GetPlayerOrThrowAsync(playerId);
 			string? teamName = player.TeamId.HasValue ? (await GetTeamOrThrowAsync(player.TeamId.Value)).Name : null;
-			string position = player.Position.GetDescription();
 
-			return player == null ? null : PlayerMapper.ToDTO(player, teamName, position);
+			return player == null ? null : PlayerMapper.ToDTO(player, teamName);
 		}
 		public async Task<List<PlayerDTO>> GetAsync(List<int> playerIds)
 		{
@@ -60,30 +59,24 @@ namespace SportsStats.Application.Players
 			var teamNames = (await _teamRepository.GetAsync(teamIds)).ToDictionary(t => t.Id, t => t.Name);
 
 			return players
-				.Select(p => PlayerMapper.ToDTO(p, p.TeamId.HasValue ? teamNames.GetValueOrDefault(p.TeamId.Value) : null, p.Position.GetDescription()))
+				.Select(p => PlayerMapper.ToDTO(p, p.TeamId.HasValue ? teamNames.GetValueOrDefault(p.TeamId.Value) : null))
 				.ToList();
 		}
 		public async Task ChangeGeneralInfoAsync(int id, PlayerGeneralInfoDTO dto)
 		{
 			var player = await GetPlayerOrThrowAsync(id);
+
 			player.SetNameAndSurname(dto.Name, dto.Surname);
 			player.SetPosition(dto.Position);
+			player.SetBirthday(dto.Birthday);
+			player.SetNumber(dto.Number);
+			player.SetPhoto(dto.Photo, dto.PhotoMime);
+			player.SetCitizenship(dto.Citizenship?.Name, dto.Citizenship?.Photo, dto.Citizenship?.PhotoMime);
+			player.ChangeTeam(dto.TeamId);
 
-			if (dto.Birthday.HasValue)
-				player.SetBirthday(dto.Birthday.Value);
-
-			if (dto.Number.HasValue)
-				player.SetNumber(dto.Number.Value);
-
-			if (dto.Photo != null)
-				player.SetPhoto(dto.Photo, dto.PhotoMime);
-
-			if (dto.Citizenship != null && string.IsNullOrWhiteSpace(dto.Citizenship.Name))
-				player.SetCitizenship(dto.Citizenship.Name, dto.Citizenship.Photo, dto.Citizenship.PhotoMime);
-
-			if (dto.TeamId.HasValue)
-				player.ChangeTeam(dto.TeamId.Value);
+			await _playerRepository.SaveChangesAsync();
 		}
+		public IReadOnlyDictionary<PositionType, string> GetAllPlayerPositions() => PositionTypeText.PositionDescription;
 		private async Task<Player> GetPlayerOrThrowAsync(int playerId)
 		{
 			return await _playerRepository.GetAsync(playerId)

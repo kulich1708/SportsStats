@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SportsStats.Application.Players;
 using SportsStats.Application.Players.DTOs.Requests;
@@ -29,15 +29,12 @@ namespace SportsStats.API.Controllers
 		{
 			return Ok(await _playerApplicationService.GetAsync(id));
 		}
+		[HttpGet("positions")]
+		public ActionResult GetAllPositions() => Ok(_playerApplicationService.GetAllPlayerPositions());
 
 		[HttpPost]
 		public async Task<ActionResult<int>> Create([FromBody] CreatePlayerDTO dto)
 		{
-			if (string.IsNullOrWhiteSpace(dto.Name))
-				return BadRequest(new { error = "Имя не может быть пустым" });
-			if (string.IsNullOrWhiteSpace(dto.Surname))
-				return BadRequest(new { error = "Фамилия не может быть пустой" });
-
 			return Ok(await _playerApplicationService.CreateAsync(dto.Name, dto.Surname, dto.Position));
 		}
 		[HttpPost("{id}/general/change")]
