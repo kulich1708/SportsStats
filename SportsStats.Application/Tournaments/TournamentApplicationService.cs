@@ -1,17 +1,16 @@
-﻿using SportsStats.Application.Matches;
+using SportsStats.Application.Matches;
 using SportsStats.Application.Matches.DTOs.Responses;
-using SportsStats.Application.Teams;
 using SportsStats.Application.Tournaments.DTOs.Responses;
 using SportsStats.Application.Tournaments.DTOs.Shared;
+using SportsStats.Application.Tournaments.Mappers;
+using SportsStats.Application.Tournaments.Mappers.Rules;
 using SportsStats.Domain.Matches;
 using SportsStats.Domain.Shared;
 using SportsStats.Domain.Statistics;
 using SportsStats.Domain.Teams;
 using SportsStats.Domain.Tournaments;
-using SportsStats.Domain.Tournaments.Rules;
 using System;
 using System.Collections.Generic;
-using System.Net.NetworkInformation;
 using System.Text;
 
 namespace SportsStats.Application.Tournaments
@@ -86,7 +85,9 @@ namespace SportsStats.Application.Tournaments
 
 		public async Task SetRulesAsync(int tournamentId, TournamentRulesDTO rules)
 		{
-			await UpdateAndSaveAsync(tournamentId, tournament => tournament.SetRules(TournamentMapper.ToDomain(rules)));
+			Console.WriteLine("Пришло в application: " + rules.MatchPointsRules.DrawPoints);
+			Console.WriteLine("Приходит от маппера: " + MatchRulesMapper.ToDomain(rules).MatchPointsRules.DrawPoints);
+			await UpdateAndSaveAsync(tournamentId, tournament => tournament.SetRules(MatchRulesMapper.ToDomain(rules)));
 		}
 
 		public async Task<List<TournamentShortDTO>> GetAllAsync(int page, int pageSize, string? search = null)

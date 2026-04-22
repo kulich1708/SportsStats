@@ -1,4 +1,4 @@
-﻿using SportsStats.Domain.Matches;
+using SportsStats.Domain.Matches;
 using SportsStats.Domain.Shared;
 using SportsStats.Domain.Statistics;
 using System;
@@ -32,11 +32,13 @@ namespace SportsStats.Application.Matches
 
 			TeamStats homeTeamStats = await _teamStatsRepository.GetAsync(match.HomeTeamId, match.TournamentId);
 			TeamStats awayTeamStats = await _teamStatsRepository.GetAsync(match.AwayTeamId, match.TournamentId);
-			int homeTeamPoint = match.Rules.MatchPointsRules.GetPoints(match.HomeTeamWinType);
-			int awayTeamPoint = match.Rules.MatchPointsRules.GetPoints(match.AwayTeamWinType);
+			int? homeTeamPoint = match.Rules.MatchPointsRules.GetPoints(match.HomeTeamWinType);
+			int? awayTeamPoint = match.Rules.MatchPointsRules.GetPoints(match.AwayTeamWinType);
+			if (!homeTeamPoint.HasValue || !awayTeamPoint.HasValue)
+				throw new ArgumentException("Найдено несовпадение. Для команд(ы) установлен исход, для которого не установлнено количество очков. Проверьте события и правила матча");
 
-			homeTeamStats.AddOutcome(match.HomeTeamWinType, homeTeamPoint);
-			awayTeamStats.AddOutcome(match.AwayTeamWinType, awayTeamPoint);
+			homeTeamStats.AddOutcome(match.HomeTeamWinType, homeTeamPoint.Value);
+			awayTeamStats.AddOutcome(match.AwayTeamWinType, awayTeamPoint.Value);
 
 			await _teamStatsRepository.SaveChangesAsync();
 		}

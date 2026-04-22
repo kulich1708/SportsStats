@@ -1,4 +1,4 @@
-﻿using SportsStats.Domain.Common;
+using SportsStats.Domain.Common;
 using SportsStats.Domain.Matches.Goals;
 using SportsStats.Domain.Tournaments.Rules;
 using SportsStats.Domain.Matches;
@@ -15,7 +15,6 @@ namespace SportsStats.Domain.Matches
 		private readonly List<GoalEvent> _goals = new();
 		private readonly HashSet<int> _homeTeamRoster = new();
 		private readonly HashSet<int> _awayTeamRoster = new();
-		private readonly TournamentRules _rules;
 		public int HomeTeamId { get; private set; }
 		public int AwayTeamId { get; private set; }
 		public IReadOnlySet<int> HomeTeamRoster => _homeTeamRoster;
@@ -31,7 +30,7 @@ namespace SportsStats.Domain.Matches
 		public MatchWinType AwayTeamWinType { get; private set; }
 		public bool IsOvertime { get; private set; }
 		public IReadOnlyList<GoalEvent> Goals => _goals;
-		public TournamentRules Rules => _rules;
+		public TournamentRules Rules { get; private set; }
 		private Match() { }
 		public Match(int tournamentId, int homeTeamId, int awayTeamId, TournamentRules rules, DateTime scheduledAt)
 		{
@@ -42,7 +41,7 @@ namespace SportsStats.Domain.Matches
 			HomeTeamId = homeTeamId;
 			AwayTeamId = awayTeamId;
 
-			_rules = rules ?? throw new ArgumentNullException();
+			Rules = rules ?? throw new ArgumentNullException();
 			ScheduledAt = scheduledAt;
 		}
 		public void Start(DateTime startedAt)
@@ -61,7 +60,7 @@ namespace SportsStats.Domain.Matches
 			if (StartedAt > finishedAt)
 				throw new ArgumentException($"Нельзя завершить матч {finishedAt}, так как он был начат лишь {StartedAt}");
 
-			if (HomeTeamScore == AwayTeamScore && !_rules.MatchDurationRules.IsDrawPossible)
+			if (HomeTeamScore == AwayTeamScore && !Rules.MatchTimeRules.IsDrawPossible)
 				throw new ArgumentException("Нельзя завершить матч с ничейным счётом, когда ничья запрещена правилами");
 
 			FinishedAt = finishedAt;
@@ -147,11 +146,11 @@ namespace SportsStats.Domain.Matches
 			if (scoringTeamId == HomeTeamId) HomeTeamScore++;
 			else AwayTeamScore++;
 
-			if (_rules.MatchDurationRules.IsOvertimePeriod(period))
-				IsOvertime = true;
-
-			if (_rules.MatchDurationRules.DoesGoalEndMatch(period))
+			if (Rules.MatchTimeRules.DoesGoalEndMatch(period))
+			{
 				goal.SetAsWinningGoal(true);
+				IsOvertime = true;
+			}
 			return goal;
 		}
 
@@ -170,11 +169,11 @@ namespace SportsStats.Domain.Matches
 
 		protected void ValidateGoalTiming(int period, int time)
 		{
-			if (!_rules.MatchDurationRules.IsValidPeriod(period))
+			if (!Rules.MatchTimeRules.IsValidPeriod(period))
 				throw new ArgumentException("Проверьте значение периода, по правилам такого периода не существует");
-			if (!_rules.MatchDurationRules.IsValidTimeInPeriod(period, time))
+			if (!Rules.MatchTimeRules.IsValidTimeInPeriod(period, time))
 				throw new ArgumentException("Проверьте время, данный период не может иметь такое время.");
-			if (_rules.MatchDurationRules.IsOvertimePeriod(period) && HomeTeamScore != AwayTeamScore)
+			if (Rules.MatchTimeRules.IsOvertimePeriod(period) && HomeTeamScore != AwayTeamScore)
 				throw new ArgumentException("Нельзя добавить гол в овертайме, если у команд разный счёт");
 		}
 
