@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using SportsStats.Application.Shared;
 using SportsStats.Application.Tournaments;
 using SportsStats.Application.Tournaments.DTOs.Requests;
@@ -42,13 +42,9 @@ namespace SportsStats.API.Controllers
 		}
 
 		[HttpPost]
-		public async Task<ActionResult<int>> Create([FromBody] CreateTournamentDTO createTournamentDTO)
+		public async Task<ActionResult<int>> Create([FromBody] CreateTournamentDTO dto)
 		{
-			string name = createTournamentDTO.Name;
-			if (string.IsNullOrWhiteSpace(name))
-				return BadRequest(new { error = "Название турнира не может быть пустым" });
-
-			return Ok(await _tournamentApplicationService.CreateAsync(name));
+			return Ok(await _tournamentApplicationService.CreateAsync(dto.Name));
 		}
 		[HttpPost("{id}/start")]
 		public async Task<ActionResult> Start(int id, [FromBody] DateTime? startedAt)
@@ -79,6 +75,7 @@ namespace SportsStats.API.Controllers
 		[HttpPost("{id}/rules/set")]
 		public async Task<ActionResult> SetRules(int id, [FromBody] TournamentRulesDTO rules)
 		{
+			Console.WriteLine(rules);
 			await _tournamentApplicationService.SetRulesAsync(id, rules);
 			return NoContent();
 		}

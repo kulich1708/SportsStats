@@ -1,4 +1,4 @@
-﻿using SportsStats.Application.Tournaments;
+using SportsStats.Application.Tournaments.Mappers;
 using SportsStats.Domain.Matches;
 using SportsStats.Domain.Players;
 using SportsStats.Domain.Services;
@@ -31,7 +31,7 @@ namespace SportsStats.Application.Matches
 			Tournament tournament = await _tournamentRepository.GetAsync(tournamentId)
 				?? throw new ArgumentException("Нет турнира с таким Id");
 
-			Match match = _matchService.CreateMatch(tournament, homeTeamId, awayTeamId, scheduledAt, TournamentMapper.ToDomain(TournamentMapper.ToDTO(tournament.TournamentRules)));
+			Match match = _matchService.CreateMatch(tournament, homeTeamId, awayTeamId, scheduledAt, tournament.TournamentRules);
 			await _matchRepository.AddAsync(match);
 			await _matchRepository.SaveChangesAsync();
 			return match.Id;

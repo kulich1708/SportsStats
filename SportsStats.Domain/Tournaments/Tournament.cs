@@ -1,4 +1,4 @@
-﻿using SportsStats.Domain.Common;
+using SportsStats.Domain.Common;
 using SportsStats.Domain.Tournaments.Rules;
 using System;
 using System.Collections.Generic;
@@ -16,7 +16,7 @@ namespace SportsStats.Domain.Tournaments
 		public TournamentStatus Status { get; private set; } = TournamentStatus.Draft;
 		public byte[]? Photo { get; private set; }
 		public string? PhotoMime { get; private set; }
-		public TournamentRules TournamentRules { get; private set; }
+		public TournamentRules? TournamentRules { get; private set; }
 		public IReadOnlySet<int> TeamsId => _teamsId;
 
 		public Tournament(string name)
@@ -73,7 +73,7 @@ namespace SportsStats.Domain.Tournaments
 		public bool IsRegistration() => Status == TournamentStatus.Registration;
 		public bool IsStarted() => Status == TournamentStatus.InProgress;
 		public bool IsFinished() => Status == TournamentStatus.Finished;
-		public bool HasRules() => TournamentRules != null && TournamentRules.HasRules();
+		public bool HasRules() => TournamentRules != null;
 
 		public void RegistrateTeam(int teamId)
 		{
