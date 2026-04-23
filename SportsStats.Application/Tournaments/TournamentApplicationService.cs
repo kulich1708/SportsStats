@@ -57,7 +57,17 @@ namespace SportsStats.Application.Tournaments
 		}
 		public async Task StartAsync(int tournamentId, DateTime? startedAt = null)
 		{
-			await UpdateAndSaveAsync(tournamentId, tournament => tournament.Start(startedAt ?? _timeProvider.GetCurrentTime()));
+			Tournament tournament = await GetTournamentOrThrowAsync(tournamentId);
+
+
+			foreach (var teamId in tournament.TeamsId)
+			{
+				TeamStats teamStats = new(teamId, tournamentId);
+				await _teamStatsRepository.AddAsync(teamStats);
+			}
+			await _teamStatsRepository.SaveChangesAsync();
+			tournament.Start(startedAt ?? _timeProvider.GetCurrentTime());
+			await _tournamentRepository.SaveChangesAsync();
 		}
 		public async Task FinishAsync(int tournamentId, DateTime? finishedAt = null)
 		{
@@ -71,16 +81,9 @@ namespace SportsStats.Application.Tournaments
 		{
 			await UpdateAndSaveAsync(tournamentId, tournament => tournament.Registration());
 		}
-		public async Task RegistrateTeamAsync(int tournamentId, int teamId)
+		public async Task SetRegistrationTeamsAsync(int tournamentId, List<int> teamIds)
 		{
-			Team team = await _teamRepository.GetAsync(teamId)
-				?? throw new ArgumentException($"Не существует команды с id {teamId}");
-
-			await UpdateAndSaveAsync(tournamentId, tournament => tournament.RegistrateTeam(teamId));
-
-			TeamStats teamStats = new(teamId, tournamentId);
-			await _teamStatsRepository.AddAsync(teamStats);
-			await _teamStatsRepository.SaveChangesAsync();
+			await UpdateAndSaveAsync(tournamentId, tournament => tournament.SetRegistrationTeams(teamIds));
 		}
 
 		public async Task SetRulesAsync(int tournamentId, TournamentRulesDTO rules)

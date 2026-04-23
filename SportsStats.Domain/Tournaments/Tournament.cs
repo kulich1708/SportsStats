@@ -75,10 +75,17 @@ namespace SportsStats.Domain.Tournaments
 		public bool IsFinished() => Status == TournamentStatus.Finished;
 		public bool HasRules() => TournamentRules != null;
 
+		public void SetRegistrationTeams(List<int> teamIds)
+		{
+			_teamsId.Clear();
+
+			foreach (int teamId in teamIds)
+				RegistrateTeam(teamId);
+		}
 		public void RegistrateTeam(int teamId)
 		{
 			if (!IsRegistration())
-				throw new ArgumentException("Можно заявить команду, только когда турнир в статусе Registration");
+				throw new ArgumentException("Можно заявлять команды, только когда турнир в статусе Registration");
 			if (_teamsId.Contains(teamId))
 				throw new ArgumentException("Команда уже заявлена на этот турнир");
 			_teamsId.Add(teamId);

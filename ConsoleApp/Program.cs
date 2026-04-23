@@ -11,6 +11,7 @@ using SportsStats.Domain.Services;
 using SportsStats.Infrastructure.Persistence.DbContexts;
 using SportsStats.Infrastructure.Persistence.Repositories;
 using SportsStats.Infrastructure.Services;
+using System.Collections.Immutable;
 using System.Text;
 using System.Text.Json;
 
@@ -112,8 +113,7 @@ namespace SportsStats.ConsoleApp
 			await _tournamentApplicationService.RegistrationAsync(tournamentId);
 			var teamIds = await GenerateTeamsAsync(teamNames, namesData);
 
-			foreach (var teamId in teamIds)
-				await _tournamentApplicationService.RegistrateTeamAsync(tournamentId, teamId);
+			await _tournamentApplicationService.SetRegistrationTeamsAsync(tournamentId, teamIds);
 
 			await _tournamentApplicationService.StartAsync(tournamentId, startedAt);
 
@@ -229,6 +229,7 @@ namespace SportsStats.ConsoleApp
 	{
 		public static async Task Main()
 		{
+
 			//var test = new DataGenerator();
 			//await test.Start();
 			//var playerPhotoHelper = new PhotoHelper();
