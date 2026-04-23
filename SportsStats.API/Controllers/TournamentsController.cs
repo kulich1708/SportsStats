@@ -65,10 +65,10 @@ namespace SportsStats.API.Controllers
 			return NoContent();
 		}
 
-		[HttpPost("{tournamentId}/teams/{teamId}")]
-		public async Task<ActionResult> RegistrateTeam(int tournamentId, int teamId)
+		[HttpPost("{tournamentId}/teams")]
+		public async Task<ActionResult> SetRegistrationTeams(int tournamentId, [FromBody] List<int> teamIds)
 		{
-			await _tournamentApplicationService.RegistrateTeamAsync(tournamentId, teamId);
+			await _tournamentApplicationService.SetRegistrationTeamsAsync(tournamentId, teamIds);
 			return NoContent();
 		}
 
