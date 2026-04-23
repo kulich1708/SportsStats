@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SportsStats.Domain.Teams;
 using SportsStats.Infrastructure.Persistence.DbContexts;
 using System;
@@ -38,10 +38,14 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 				.Take(pageSize)
 				.ToListAsync();
 		}
-		public async Task<List<Team>> GetByTournamentAsync(int tournamentId)
+		public async Task<List<Team>> GetByTournamentAsync(int tournamentId, string? search = null)
 		{
 			var tournament = await _context.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId);
-			return tournament == null ? [] : await _context.Teams.Where(t => tournament.TeamsId.Contains(t.Id)).ToListAsync();
+			return tournament == null ? [] :
+				await _context.Teams
+							  .Where(t => tournament.TeamsId.Contains(t.Id))
+							  .Where(t => search == null ? true : t.Name.ToLower().Contains(search.ToLower()))
+							  .ToListAsync();
 		}
 	}
 }

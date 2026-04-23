@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SportsStats.Application.Matches;
 using SportsStats.Application.Matches.DTOs.Requests;
@@ -48,7 +48,7 @@ namespace SportsStats.API.Controllers
 		[HttpPost("{id}/goals/{goalId}")]
 		public async Task<ActionResult> FillGoalDetaild(int id, int goalId, [FromBody] FillGoalDetailDTO dto)
 		{
-			await _matchGoalService.FillGoalDetailsAsync(id, goalId, dto.FirstAssistId, dto.SecondAssistId, dto.StrengthType, dto.NetType);
+			await _matchGoalService.FillGoalDetailsAsync(id, goalId, dto.ScorerId, dto.FirstAssistId, dto.SecondAssistId, dto.StrengthType, dto.NetType);
 			return NoContent();
 		}
 		[HttpPost("{id}/start")]
@@ -61,6 +61,12 @@ namespace SportsStats.API.Controllers
 		public async Task<ActionResult> Finish(int id, [FromBody] DateTime? finishedAt)
 		{
 			await _matchFinishService.FinishAsync(id, finishedAt);
+			return NoContent();
+		}
+		[HttpPost("{id}/general")]
+		public async Task<ActionResult> ChangeGeneralInfo(int id, [FromBody] MatchGeneralInfoDTO dto)
+		{
+			await _matchLifecycleService.ChangeGeneralInfoAsync(id, dto);
 			return NoContent();
 		}
 	}

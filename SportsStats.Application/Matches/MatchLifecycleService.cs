@@ -1,3 +1,4 @@
+using SportsStats.Application.Matches.DTOs.Requests;
 using SportsStats.Application.Tournaments.Mappers;
 using SportsStats.Domain.Matches;
 using SportsStats.Domain.Players;
@@ -48,6 +49,13 @@ namespace SportsStats.Application.Matches
 
 			_matchService.Start(match, tournament, homeTeamRoster, awayTeamRoster, homeTeam, awayTeam, startedAt ?? _timeProvider.GetCurrentTime());
 
+			await _matchRepository.SaveChangesAsync();
+		}
+
+		public async Task ChangeGeneralInfoAsync(int id, MatchGeneralInfoDTO dto)
+		{
+			Match match = await GetMatchOrThrowAsync(id);
+			match.SetScheduleAt(dto.ScheduleAt);
 			await _matchRepository.SaveChangesAsync();
 		}
 	}

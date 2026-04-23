@@ -52,6 +52,7 @@ namespace SportsStats.Application.Matches
 			TeamDTO scoringTeam,
 			List<PlayerDTO> teamRoster
 			) => new(
+				goal.Id,
 				scoringTeam,
 				teamRoster.First(p => p.Id == goal.GoalScorerId),
 				goal.Period,
