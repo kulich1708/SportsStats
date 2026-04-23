@@ -196,15 +196,18 @@ namespace SportsStats.Domain.Matches
 		// Решение: создать GoalsCollection с методами Add, UpdateAssists, UpdateStrength, UpdateNetType
 		// Match будет делегировать вызовы или предоставлять доступ через свойство Goals
 		// Приоритет: после MVP (когда потребуется частое редактирование голов)
-		public void FillGoalDetails(int goalId, int? firstAssistId, int? secondAssistId,
+		public void FillGoalDetails(int goalId, int goalScorerId, int? firstAssistId, int? secondAssistId,
 									GoalStrengthType strengthType, GoalNetType? netType)
 		{
 			GoalEvent goal = GetGoalEventById(goalId);
+			if (!IsPlayerOnRoster(goalScorerId, goal.ScoringTeamId))
+				throw new ArgumentException("Игрок, которого вы пытаетесь установить автором гола, не заявлен за команду, которая забила гол");
 			if (firstAssistId.HasValue && !IsPlayerOnRoster(firstAssistId.Value, goal.ScoringTeamId))
-				throw new ArgumentException("Этот игрок не заявлен за команду, которая забила гол");
+				throw new ArgumentException("Игрок, которого вы пытаетесь установить как первого ассистента, не заявлен за команду, которая забила гол");
 			if (secondAssistId.HasValue && !IsPlayerOnRoster(secondAssistId.Value, goal.ScoringTeamId))
-				throw new ArgumentException("Этот игрок не заявлен за команду, которая забила гол");
+				throw new ArgumentException("Игрок, которого вы пытаетесь установить как второго ассистента, не заявлен за команду, которая забила гол");
 
+			goal.SetScorer(goalScorerId);
 			goal.SetAssists(firstAssistId, secondAssistId);
 			goal.SetNetType(netType);
 			goal.SetStrengthType(strengthType);
@@ -246,5 +249,6 @@ namespace SportsStats.Domain.Matches
 			if (!IsTeamInMatch(teamId))
 				throw new ArgumentException("Команда не учавствует в матче");
 		}
+		public void SetScheduleAt(DateTime scheduleAt) => ScheduledAt = scheduleAt;
 	}
 }

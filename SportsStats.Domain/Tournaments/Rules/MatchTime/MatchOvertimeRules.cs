@@ -11,7 +11,7 @@ namespace SportsStats.Domain.Tournaments.Rules.MatchTime
 		public bool GoalEndsOvertime { get; init; }
 
 
-		public MatchOvertimeRules(int? overtimeDurationSeconds, int? overtimesCount, bool goalEndsOvertime)
+		public MatchOvertimeRules(int? overtimesCount, int? overtimeDurationSeconds, bool goalEndsOvertime)
 		{
 			OvertimeDurationSeconds = overtimeDurationSeconds;
 			OvertimesCount = OvertimeDurationSeconds.HasValue ? overtimesCount : 1;

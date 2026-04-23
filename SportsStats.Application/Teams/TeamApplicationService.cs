@@ -32,9 +32,9 @@ namespace SportsStats.Application.Teams
 			var teams = await _teamRepository.GetAllAsync(page, pageSize, search);
 			return teams.Select(TeamMapper.ToDTO).ToList();
 		}
-		public async Task<List<TeamDTO>> GetByTournamentAsync(int tournamentId)
+		public async Task<List<TeamDTO>> GetByTournamentAsync(int tournamentId, string? search = null)
 		{
-			var teams = await _teamRepository.GetByTournamentAsync(tournamentId);
+			var teams = await _teamRepository.GetByTournamentAsync(tournamentId, search);
 			return teams.Select(TeamMapper.ToDTO).ToList();
 		}
 		public async Task ChangeGeneralInfo(int id, string name, string? city, byte[]? photo, string? photoMime)
