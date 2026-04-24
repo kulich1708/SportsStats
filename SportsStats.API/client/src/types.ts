@@ -3,20 +3,54 @@
 export interface TeamDTO {
   id: number;
   name: string;
+  city: string | null;
+  photo: string | null;
+  photoMime: string | null;
+}
+
+export interface CitizenshipDTO {
+  name: string;
+  photo: string | null;
+  photoMime: string | null;
+}
+
+export interface PlayerPositionDTO {
+  code: string;
+  name: string;
 }
 
 export interface PlayerDTO {
   id: number;
   name: string;
   surname: string;
-  teamId: number;
-  teamName: string;
-  position: string;
+  teamId: number | null;
+  teamName: string | null;
+  position: PlayerPositionDTO;
+  photo: string | null;
+  photoMime: string | null;
+  citizenship: CitizenshipDTO | null;
+  birthday?: string | null;
+  number?: number | null;
 }
 
 export interface TournamentShortDTO {
   id: number;
   name: string;
+  photo: string | null;
+  photoMime: string | null;
+  status: TournamentStatusDTO;
+}
+
+export interface TournamentStatusDTO {
+  code: number;
+  description: string;
+  nextActionDescription: string;
+}
+
+export interface MatchStatusDTO {
+  code: number;
+  description: string;
+  nextActionDescription: string;
 }
 
 export interface MatchShortDTO {
@@ -27,7 +61,7 @@ export interface MatchShortDTO {
   scheduleAt: string;
   startedAt: string | null;
   finishedAt: string | null;
-  status: string;
+  status: MatchStatusDTO;
   homeTeamScore: number;
   awayTeamScore: number;
   homeTeamWinType: string;
@@ -38,13 +72,19 @@ export interface MatchShortDTO {
 export interface TournamentWithMatchesDTO {
   id: number;
   name: string;
+  photo: string | null;
+  photoMime: string | null;
   startedAt: string | null;
   finishedAt: string | null;
-  status: string;
+  status: TournamentStatusDTO;
   matches: MatchShortDTO[];
 }
 
 export interface GoalDTO {
+  /** camelCase JSON */
+  id?: number;
+  /** PascalCase JSON */
+  Id?: number;
   scoringTeamId: TeamDTO;
   goalScorerId: PlayerDTO;
   period: number;
@@ -55,15 +95,23 @@ export interface GoalDTO {
   netType: string;
 }
 
-export interface MatchDurationRulesDTO {
+export interface MatchOvertimeRulesDTO {
+  overtimesCount: number | null;
+  overtimeDurationSeconds: number | null;
+  goalEndsOvertime: boolean;
+}
+
+export interface MatchShootoutRulesDTO {
+}
+
+export interface MatchTimeRulesDTO {
   periodsCount: number;
   periodDurationSeconds: number;
-  hasOvertime: boolean;
-  overtimeDurationSeconds: number | null;
-  overtimesCount: number | null;
-  suddenDeathOvertime: boolean;
   isDrawPossible: boolean;
-  shootoutsCount: number;
+  hasOvertime: boolean;
+  hasShootout: boolean;
+  overtimeRules: MatchOvertimeRulesDTO | null;
+  shootoutRules: MatchShootoutRulesDTO | null;
 }
 
 export interface MatchRosterRulesDTO {
@@ -79,14 +127,16 @@ export interface MatchRosterRulesDTO {
 
 export interface MatchPointsRulesDTO {
   winPoints: number;
-  otWinPoints: number;
   lossPoints: number;
-  otLossPoints: number;
+  otWinPoints: number | null;
+  otLossPoints: number | null;
+  shootoutWinPoints: number | null;
+  shootoutLossPoints: number | null;
   drawPoints: number | null;
 }
 
 export interface TournamentRulesDTO {
-  matchDurationRules: MatchDurationRulesDTO;
+  matchTimeRules: MatchTimeRulesDTO;
   matchRosterRules: MatchRosterRulesDTO;
   matchPointsRules: MatchPointsRulesDTO;
 }
@@ -101,7 +151,7 @@ export interface MatchDTO {
   startedAt: string | null;
   finishedAt: string | null;
   tournament: TournamentShortDTO;
-  status: string;
+  status: MatchStatusDTO;
   homeTeamScore: number;
   awayTeamScore: number;
   homeTeamWinType: string;
@@ -128,14 +178,18 @@ export interface TeamStatsDTO {
 export interface TeamInTournamentDTO {
   id: number;
   name: string;
+  photo?: string | null;
+  photoMime?: string | null;
 }
 
 export interface TournamentDTO {
   id: number;
   name: string;
+  photo: string | null;
+  photoMime: string | null;
   startedAt: string | null;
   finishedAt: string | null;
-  status: string;
-  tournamentRules: TournamentRulesDTO;
+  status: TournamentStatusDTO;
+  tournamentRules: TournamentRulesDTO | null;
   teams: TeamInTournamentDTO[];
 }
