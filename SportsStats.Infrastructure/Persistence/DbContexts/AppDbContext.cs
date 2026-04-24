@@ -1,5 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.Extensions.Logging;
 using SportsStats.Domain.Common;
 using SportsStats.Domain.Matches;
@@ -7,6 +8,7 @@ using SportsStats.Domain.Players;
 using SportsStats.Domain.Statistics;
 using SportsStats.Domain.Teams;
 using SportsStats.Domain.Tournaments;
+using SportsStats.Domain.Tournaments.Rules;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -14,6 +16,7 @@ using System.Text.Json;
 
 namespace SportsStats.Infrastructure.Persistence.DbContexts
 {
+
 	public class AppDbContext : DbContext
 	{
 		public AppDbContext(DbContextOptions<AppDbContext> options)
@@ -48,15 +51,12 @@ namespace SportsStats.Infrastructure.Persistence.DbContexts
 					  			c => new HashSet<int>(c)
 							)
 					  );
-
-				entity.OwnsOne(t => t.TournamentRules, rulesBuilder =>
-				{
-					rulesBuilder.ToJson();
-
-					rulesBuilder.OwnsOne(r => r.MatchDurationRules);
-					rulesBuilder.OwnsOne(r => r.MatchRosterRules);
-					rulesBuilder.OwnsOne(r => r.MatchPointsRules);
-				});
+				entity.Property(t => t.TournamentRules)
+					  .HasColumnType("jsonb")
+					  .HasConversion(
+						  v => v == null ? null : JsonSerializer.Serialize(v),
+						  v => v == null ? null : JsonSerializer.Deserialize<TournamentRules>(v)
+					  );
 			});
 
 			modelBuilder.Entity<Match>(entity =>
@@ -90,14 +90,13 @@ namespace SportsStats.Infrastructure.Persistence.DbContexts
 							)
 					  );
 
-				entity.OwnsOne(m => m.Rules, rulesBuilder =>
-				{
-					rulesBuilder.ToJson();
 
-					rulesBuilder.OwnsOne(r => r.MatchDurationRules);
-					rulesBuilder.OwnsOne(r => r.MatchRosterRules);
-					rulesBuilder.OwnsOne(r => r.MatchPointsRules);
-				});
+				entity.Property(t => t.Rules)
+					  .HasColumnType("jsonb")
+					  .HasConversion(
+						  v => v == null ? null : JsonSerializer.Serialize(v),
+						  v => v == null ? null : JsonSerializer.Deserialize<TournamentRules>(v)
+					  );
 			});
 
 			modelBuilder.Entity<Team>(entity =>

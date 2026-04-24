@@ -1,4 +1,4 @@
-﻿using SportsStats.Domain.Teams;
+using SportsStats.Domain.Teams;
 using SportsStats.Domain.Tournaments;
 using System;
 using System.Collections.Generic;

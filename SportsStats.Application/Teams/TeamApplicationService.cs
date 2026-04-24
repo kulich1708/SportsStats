@@ -1,4 +1,4 @@
-﻿using SportsStats.Application.Teams.DTOs.Responses;
+using SportsStats.Application.Teams.DTOs.Responses;
 using SportsStats.Domain.Shared;
 using SportsStats.Domain.Teams;
 using SportsStats.Domain.Tournaments;
@@ -32,11 +32,20 @@ namespace SportsStats.Application.Teams
 			var teams = await _teamRepository.GetAllAsync(page, pageSize, search);
 			return teams.Select(TeamMapper.ToDTO).ToList();
 		}
-		public async Task<List<TeamDTO>> GetByTournamentAsync(int tournamentId)
+		public async Task<List<TeamDTO>> GetByTournamentAsync(int tournamentId, string? search = null)
 		{
-			var teams = await _teamRepository.GetByTournamentAsync(tournamentId);
+			var teams = await _teamRepository.GetByTournamentAsync(tournamentId, search);
 			return teams.Select(TeamMapper.ToDTO).ToList();
 		}
+		public async Task ChangeGeneralInfo(int id, string name, string? city, byte[]? photo, string? photoMime)
+		{
+			var team = await _teamRepository.GetAsync(id)
+				?? throw new ArgumentException("Команда с таким id не найдена");
+			team.SetName(name);
+			team.SetCity(city);
+			team.SetPhoto(photo, photoMime);
 
+			await _teamRepository.SaveChangesAsync();
+		}
 	}
 }

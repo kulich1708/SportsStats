@@ -9,6 +9,6 @@ namespace SportsStats.Application.Tournaments.DTOs.Responses
 		string Name,
 		byte[]? Photo,
 		string? PhotoMime,
-		string Status
+		TournamentStatusDTO Status
 	);
 }

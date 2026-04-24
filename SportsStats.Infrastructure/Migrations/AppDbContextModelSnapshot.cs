@@ -68,7 +68,7 @@ namespace SportsStats.Infrastructure.Migrations
 
                     b.HasIndex("MatchId");
 
-                    b.ToTable("GoalEvent");
+                    b.ToTable("GoalEvent", (string)null);
                 });
 
             modelBuilder.Entity("SportsStats.Domain.Matches.Match", b =>
@@ -128,7 +128,7 @@ namespace SportsStats.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Matches");
+                    b.ToTable("Matches", (string)null);
                 });
 
             modelBuilder.Entity("SportsStats.Domain.Players.Player", b =>
@@ -162,7 +162,7 @@ namespace SportsStats.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("TeamId")
+                    b.Property<int?>("TeamId")
                         .HasColumnType("integer");
 
                     b.ComplexProperty(typeof(Dictionary<string, object>), "Citizenship", "SportsStats.Domain.Players.Player.Citizenship#Citizenship", b1 =>
@@ -189,7 +189,7 @@ namespace SportsStats.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Players");
+                    b.ToTable("Players", (string)null);
                 });
 
             modelBuilder.Entity("SportsStats.Domain.Statistics.TeamStats", b =>
@@ -232,7 +232,7 @@ namespace SportsStats.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TeamsStats");
+                    b.ToTable("TeamsStats", (string)null);
                 });
 
             modelBuilder.Entity("SportsStats.Domain.Teams.Team", b =>
@@ -261,7 +261,7 @@ namespace SportsStats.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Teams");
+                    b.ToTable("Teams", (string)null);
                 });
 
             modelBuilder.Entity("SportsStats.Domain.Tournaments.Tournament", b =>
@@ -300,7 +300,7 @@ namespace SportsStats.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Tournaments");
+                    b.ToTable("Tournaments", (string)null);
                 });
 
             modelBuilder.Entity("SportsStats.Domain.Matches.Goals.GoalEvent", b =>
@@ -318,7 +318,7 @@ namespace SportsStats.Infrastructure.Migrations
 
                             b1.HasKey("MatchId");
 
-                            b1.ToTable("Matches");
+                            b1.ToTable("Matches", (string)null);
 
                             b1
                                 .ToJson("Rules")
@@ -326,34 +326,6 @@ namespace SportsStats.Infrastructure.Migrations
 
                             b1.WithOwner()
                                 .HasForeignKey("MatchId");
-
-                            b1.OwnsOne("SportsStats.Domain.Tournaments.Rules.MatchDurationRules", "MatchDurationRules", b2 =>
-                                {
-                                    b2.Property<int>("TournamentRulesMatchId");
-
-                                    b2.Property<bool>("HasOvertime");
-
-                                    b2.Property<bool>("IsDrawPossible");
-
-                                    b2.Property<int?>("OvertimeDurationSeconds");
-
-                                    b2.Property<int?>("OvertimesCount");
-
-                                    b2.Property<int>("PeriodDurationSeconds");
-
-                                    b2.Property<int>("PeriodsCount");
-
-                                    b2.Property<int>("ShootoutsCount");
-
-                                    b2.Property<bool>("SuddenDeathOvertime");
-
-                                    b2.HasKey("TournamentRulesMatchId");
-
-                                    b2.ToTable("Matches");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("TournamentRulesMatchId");
-                                });
 
                             b1.OwnsOne("MatchPointsRules", "MatchPointsRules", b2 =>
                                 {
@@ -363,15 +335,19 @@ namespace SportsStats.Infrastructure.Migrations
 
                                     b2.Property<int>("LossPoints");
 
-                                    b2.Property<int>("OTLossPoints");
+                                    b2.Property<int?>("OTLossPoints");
 
-                                    b2.Property<int>("OTWinPoints");
+                                    b2.Property<int?>("OTWinPoints");
+
+                                    b2.Property<int?>("ShootoutLossPoints");
+
+                                    b2.Property<int?>("ShootoutWinPoints");
 
                                     b2.Property<int>("WinPoints");
 
                                     b2.HasKey("TournamentRulesMatchId");
 
-                                    b2.ToTable("Matches");
+                                    b2.ToTable("Matches", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TournamentRulesMatchId");
@@ -399,19 +375,75 @@ namespace SportsStats.Infrastructure.Migrations
 
                                     b2.HasKey("TournamentRulesMatchId");
 
-                                    b2.ToTable("Matches");
+                                    b2.ToTable("Matches", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TournamentRulesMatchId");
                                 });
 
-                            b1.Navigation("MatchDurationRules")
-                                .IsRequired();
+                            b1.OwnsOne("SportsStats.Domain.Tournaments.Rules.MatchTime.MatchTimeRules", "MatchTimeRules", b2 =>
+                                {
+                                    b2.Property<int>("TournamentRulesMatchId");
+
+                                    b2.Property<bool>("HasOvertime");
+
+                                    b2.Property<bool>("HasShootout");
+
+                                    b2.Property<bool>("IsDrawPossible");
+
+                                    b2.Property<int>("PeriodDurationSeconds");
+
+                                    b2.Property<int>("PeriodsCount");
+
+                                    b2.HasKey("TournamentRulesMatchId");
+
+                                    b2.ToTable("Matches", (string)null);
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("TournamentRulesMatchId");
+
+                                    b2.OwnsOne("SportsStats.Domain.Tournaments.Rules.MatchTime.MatchOvertimeRules", "OvertimeRules", b3 =>
+                                        {
+                                            b3.Property<int>("MatchTimeRulesTournamentRulesMatchId");
+
+                                            b3.Property<bool>("GoalEndsOvertime");
+
+                                            b3.Property<int?>("OvertimeDurationSeconds");
+
+                                            b3.Property<int?>("OvertimesCount");
+
+                                            b3.HasKey("MatchTimeRulesTournamentRulesMatchId");
+
+                                            b3.ToTable("Matches", (string)null);
+
+                                            b3.WithOwner()
+                                                .HasForeignKey("MatchTimeRulesTournamentRulesMatchId");
+                                        });
+
+                                    b2.OwnsOne("SportsStats.Domain.Tournaments.Rules.MatchTime.MatchShootoutRules", "ShootoutRules", b3 =>
+                                        {
+                                            b3.Property<int>("MatchTimeRulesTournamentRulesMatchId");
+
+                                            b3.HasKey("MatchTimeRulesTournamentRulesMatchId");
+
+                                            b3.ToTable("Matches", (string)null);
+
+                                            b3.WithOwner()
+                                                .HasForeignKey("MatchTimeRulesTournamentRulesMatchId");
+                                        });
+
+                                    b2.Navigation("OvertimeRules");
+
+                                    b2.Navigation("ShootoutRules");
+                                });
 
                             b1.Navigation("MatchPointsRules")
                                 .IsRequired();
 
                             b1.Navigation("MatchRosterRules")
+                                .IsRequired();
+
+                            b1.Navigation("MatchTimeRules")
                                 .IsRequired();
                         });
 
@@ -427,7 +459,7 @@ namespace SportsStats.Infrastructure.Migrations
 
                             b1.HasKey("TournamentId");
 
-                            b1.ToTable("Tournaments");
+                            b1.ToTable("Tournaments", (string)null);
 
                             b1
                                 .ToJson("TournamentRules")
@@ -435,34 +467,6 @@ namespace SportsStats.Infrastructure.Migrations
 
                             b1.WithOwner()
                                 .HasForeignKey("TournamentId");
-
-                            b1.OwnsOne("SportsStats.Domain.Tournaments.Rules.MatchDurationRules", "MatchDurationRules", b2 =>
-                                {
-                                    b2.Property<int>("TournamentRulesTournamentId");
-
-                                    b2.Property<bool>("HasOvertime");
-
-                                    b2.Property<bool>("IsDrawPossible");
-
-                                    b2.Property<int?>("OvertimeDurationSeconds");
-
-                                    b2.Property<int?>("OvertimesCount");
-
-                                    b2.Property<int>("PeriodDurationSeconds");
-
-                                    b2.Property<int>("PeriodsCount");
-
-                                    b2.Property<int>("ShootoutsCount");
-
-                                    b2.Property<bool>("SuddenDeathOvertime");
-
-                                    b2.HasKey("TournamentRulesTournamentId");
-
-                                    b2.ToTable("Tournaments");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("TournamentRulesTournamentId");
-                                });
 
                             b1.OwnsOne("MatchPointsRules", "MatchPointsRules", b2 =>
                                 {
@@ -472,15 +476,19 @@ namespace SportsStats.Infrastructure.Migrations
 
                                     b2.Property<int>("LossPoints");
 
-                                    b2.Property<int>("OTLossPoints");
+                                    b2.Property<int?>("OTLossPoints");
 
-                                    b2.Property<int>("OTWinPoints");
+                                    b2.Property<int?>("OTWinPoints");
+
+                                    b2.Property<int?>("ShootoutLossPoints");
+
+                                    b2.Property<int?>("ShootoutWinPoints");
 
                                     b2.Property<int>("WinPoints");
 
                                     b2.HasKey("TournamentRulesTournamentId");
 
-                                    b2.ToTable("Tournaments");
+                                    b2.ToTable("Tournaments", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TournamentRulesTournamentId");
@@ -508,24 +516,79 @@ namespace SportsStats.Infrastructure.Migrations
 
                                     b2.HasKey("TournamentRulesTournamentId");
 
-                                    b2.ToTable("Tournaments");
+                                    b2.ToTable("Tournaments", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TournamentRulesTournamentId");
                                 });
 
-                            b1.Navigation("MatchDurationRules")
-                                .IsRequired();
+                            b1.OwnsOne("SportsStats.Domain.Tournaments.Rules.MatchTime.MatchTimeRules", "MatchTimeRules", b2 =>
+                                {
+                                    b2.Property<int>("TournamentRulesTournamentId");
+
+                                    b2.Property<bool>("HasOvertime");
+
+                                    b2.Property<bool>("HasShootout");
+
+                                    b2.Property<bool>("IsDrawPossible");
+
+                                    b2.Property<int>("PeriodDurationSeconds");
+
+                                    b2.Property<int>("PeriodsCount");
+
+                                    b2.HasKey("TournamentRulesTournamentId");
+
+                                    b2.ToTable("Tournaments", (string)null);
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("TournamentRulesTournamentId");
+
+                                    b2.OwnsOne("SportsStats.Domain.Tournaments.Rules.MatchTime.MatchOvertimeRules", "OvertimeRules", b3 =>
+                                        {
+                                            b3.Property<int>("MatchTimeRulesTournamentRulesTournamentId");
+
+                                            b3.Property<bool>("GoalEndsOvertime");
+
+                                            b3.Property<int?>("OvertimeDurationSeconds");
+
+                                            b3.Property<int?>("OvertimesCount");
+
+                                            b3.HasKey("MatchTimeRulesTournamentRulesTournamentId");
+
+                                            b3.ToTable("Tournaments", (string)null);
+
+                                            b3.WithOwner()
+                                                .HasForeignKey("MatchTimeRulesTournamentRulesTournamentId");
+                                        });
+
+                                    b2.OwnsOne("SportsStats.Domain.Tournaments.Rules.MatchTime.MatchShootoutRules", "ShootoutRules", b3 =>
+                                        {
+                                            b3.Property<int>("MatchTimeRulesTournamentRulesTournamentId");
+
+                                            b3.HasKey("MatchTimeRulesTournamentRulesTournamentId");
+
+                                            b3.ToTable("Tournaments", (string)null);
+
+                                            b3.WithOwner()
+                                                .HasForeignKey("MatchTimeRulesTournamentRulesTournamentId");
+                                        });
+
+                                    b2.Navigation("OvertimeRules");
+
+                                    b2.Navigation("ShootoutRules");
+                                });
 
                             b1.Navigation("MatchPointsRules")
                                 .IsRequired();
 
                             b1.Navigation("MatchRosterRules")
                                 .IsRequired();
+
+                            b1.Navigation("MatchTimeRules")
+                                .IsRequired();
                         });
 
-                    b.Navigation("TournamentRules")
-                        .IsRequired();
+                    b.Navigation("TournamentRules");
                 });
 
             modelBuilder.Entity("SportsStats.Domain.Matches.Match", b =>
