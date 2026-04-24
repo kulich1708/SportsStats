@@ -1,28 +1,19 @@
-﻿using ConsoleApp;
+using ConsoleApp;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using SportsStats.Application.Matches;
 using SportsStats.Application.Players;
 using SportsStats.Application.Players.DTOs.Responses;
 using SportsStats.Application.Teams;
 using SportsStats.Application.Teams.DTOs.Responses;
 using SportsStats.Application.Tournaments;
-using SportsStats.Domain.Common;
-using SportsStats.Domain.Matches;
-using SportsStats.Domain.Matches.Goals;
 using SportsStats.Domain.Players;
 using SportsStats.Domain.Services;
-using SportsStats.Domain.Shared;
-using SportsStats.Domain.Teams;
-using SportsStats.Domain.Tournaments;
-using SportsStats.Domain.Tournaments.Rules;
 using SportsStats.Infrastructure.Persistence.DbContexts;
 using SportsStats.Infrastructure.Persistence.Repositories;
 using SportsStats.Infrastructure.Services;
-using System.Numerics;
+using System.Collections.Immutable;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Timers;
+using System.Text.Json;
 
 namespace SportsStats.ConsoleApp
 {
@@ -118,12 +109,11 @@ namespace SportsStats.ConsoleApp
 		{
 			int tournamentId = await _tournamentApplicationService.CreateAsync(name);
 
-			await _tournamentApplicationService.SetRulesAsync(tournamentId, TournamentMapper.ToDTO(TournamentRules.CreateKHLRules()));
+			//await _tournamentApplicationService.SetRulesAsync(tournamentId, TournamentMapper.ToDTO(TournamentRules.CreateKHLRules()));
 			await _tournamentApplicationService.RegistrationAsync(tournamentId);
 			var teamIds = await GenerateTeamsAsync(teamNames, namesData);
 
-			foreach (var teamId in teamIds)
-				await _tournamentApplicationService.RegistrateTeamAsync(tournamentId, teamId);
+			await _tournamentApplicationService.SetRegistrationTeamsAsync(tournamentId, teamIds);
 
 			await _tournamentApplicationService.StartAsync(tournamentId, startedAt);
 
@@ -184,11 +174,11 @@ namespace SportsStats.ConsoleApp
 			var homeTeamPlayers = await _playerApplicationService.GetByteamAsync(homeTeamId);
 			var awayTeamPlayers = await _playerApplicationService.GetByteamAsync(awayTeamId);
 
-			foreach (var homeTeamPlayer in homeTeamPlayers)
-				await _matchRosterService.AddPlayerToRosterAsync(matchId, homeTeamPlayer.Id, homeTeamId);
+			var homeTeamPlayerIds = homeTeamPlayers.Select(p => p.Id).ToList();
+			var awayTeamPlayerIds = awayTeamPlayers.Select(p => p.Id).ToList();
 
-			foreach (var awayTeamPlayer in awayTeamPlayers)
-				await _matchRosterService.AddPlayerToRosterAsync(matchId, awayTeamPlayer.Id, awayTeamId);
+			await _matchRosterService.SetPlayersToRosterAsync(matchId, homeTeamPlayerIds, homeTeamId);
+			await _matchRosterService.SetPlayersToRosterAsync(matchId, awayTeamPlayerIds, awayTeamId);
 		}
 		public async Task GenerateGoalsAsync(int matchId)
 		{
@@ -199,17 +189,17 @@ namespace SportsStats.ConsoleApp
 
 			int difference = 0;
 
-			for (int period = 1; period < match.Rules.MatchDurationRules.PeriodsCount + 1; period++)
+			for (int period = 1; period < match.Rules.MatchTimeRules.PeriodsCount + 1; period++)
 			{
 				int goalsCount = _random.Next(1, 4);
 				int lastTime = 0;
 				for (int i = 0; i <= goalsCount; i++)
-					lastTime = await GenerateGoalAsync(period, lastTime, match.Rules.MatchDurationRules.PeriodDurationSeconds);
+					lastTime = await GenerateGoalAsync(period, lastTime, match.Rules.MatchTimeRules.PeriodDurationSeconds);
 			}
 
-			if (difference == 0 && !match.Rules.MatchDurationRules.IsDrawPossible)
+			if (difference == 0 && !match.Rules.MatchTimeRules.IsDrawPossible && match.Rules.MatchTimeRules.HasOvertime)
 			{
-				await GenerateGoalAsync(match.Rules.MatchDurationRules.PeriodsCount + 1, 0, match.Rules.MatchDurationRules.OvertimeDurationSeconds ?? 2400);
+				await GenerateGoalAsync(match.Rules.MatchTimeRules.PeriodsCount + 1, 0, match.Rules.MatchTimeRules.OvertimeRules!.OvertimeDurationSeconds ?? 2400);
 			}
 
 
@@ -239,11 +229,14 @@ namespace SportsStats.ConsoleApp
 	{
 		public static async Task Main()
 		{
+
 			//var test = new DataGenerator();
 			//await test.Start();
-			var playerPhotoHelper = new PhotoHelper();
-			playerPhotoHelper.FillPhoto();
+			//var playerPhotoHelper = new PhotoHelper();
+			//playerPhotoHelper.FillPhoto();
+
 		}
+
 
 	}
 }

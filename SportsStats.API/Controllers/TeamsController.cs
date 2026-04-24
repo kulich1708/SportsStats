@@ -1,4 +1,4 @@
-﻿using Humanizer;
+using Humanizer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -55,11 +55,13 @@ namespace SportsStats.API.Controllers
 		[HttpPost]
 		public async Task<ActionResult<int>> Create([FromBody] CreateTeamDTO dto)
 		{
-			string name = dto.Name;
-			if (string.IsNullOrWhiteSpace(name))
-				return BadRequest(new { error = "Имя команды не должно быть пустым" });
-
-			return Ok(await _teamApplicationService.CreateAsync(name));
+			return Ok(await _teamApplicationService.CreateAsync(dto.Name));
+		}
+		[HttpPost("{id}/general/change")]
+		public async Task<ActionResult> ChangeGeneralInfo(int id, [FromBody] TeamGeneralInfoDTO dto)
+		{
+			await _teamApplicationService.ChangeGeneralInfo(id, dto.Name, dto.City, dto.Photo, dto.PhotoMime);
+			return NoContent();
 		}
 	}
 }
