@@ -1,4 +1,4 @@
-﻿using SportsStats.Domain.Common;
+using SportsStats.Domain.Tournaments.Rules.MatchTime;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,27 +8,36 @@ namespace SportsStats.Domain.Tournaments.Rules
 	public record TournamentRules
 	{
 
-		public MatchDurationRules MatchDurationRules { get; private set; }
+		public MatchTimeRules MatchTimeRules { get; private set; }
 		public MatchRosterRules MatchRosterRules { get; private set; }
 		public MatchPointsRules MatchPointsRules { get; private set; }
 
 		private TournamentRules() { }
-		public TournamentRules(MatchDurationRules matchDurationRules, MatchRosterRules matchRosterRules, MatchPointsRules matchPointsRules)
+		public TournamentRules(MatchTimeRules matchTimeRules, MatchRosterRules matchRosterRules, MatchPointsRules matchPointsRules)
 		{
-			MatchDurationRules = matchDurationRules ?? throw new ArgumentNullException();
-			MatchRosterRules = matchRosterRules ?? throw new ArgumentNullException();
-			MatchPointsRules = matchPointsRules ?? throw new ArgumentNullException();
+			MatchTimeRules = matchTimeRules;
+			MatchRosterRules = matchRosterRules;
+			MatchPointsRules = matchPointsRules;
+			ValidateRules();
+		}
+		private void ValidateRules()
+		{
+			if (MatchTimeRules == null)
+				throw new ArgumentException("Необходимо заполнить правила длины матча");
+			if (MatchRosterRules == null)
+				throw new ArgumentException("Необходимо заполнить правила заявки игроков на матч");
+			if (MatchPointsRules == null)
+				throw new ArgumentException("Необходимо заполнить правила начисления очков");
+
+			bool hasOvertime = MatchTimeRules.HasOvertime;
+			bool hasShootout = MatchTimeRules.HasShootout;
+			bool isDrawPossible = MatchTimeRules.IsDrawPossible;
+			MatchPointsRules.ValidateRules(hasOvertime, hasShootout, isDrawPossible);
+
 		}
 
-		public bool HasRules() => MatchDurationRules != null
+		public bool HasRules() => MatchTimeRules != null
 							   && MatchPointsRules != null
 							   && MatchRosterRules != null;
-		public static TournamentRules CreateKHLRules()
-		{
-			var durationRules = MatchDurationRules.CreateKHLRules();
-			var rosterRules = MatchRosterRules.CreateKHLRules();
-			var pointsRules = MatchPointsRules.CreateKHLRules();
-			return new TournamentRules(durationRules, rosterRules, pointsRules);
-		}
 	}
 }

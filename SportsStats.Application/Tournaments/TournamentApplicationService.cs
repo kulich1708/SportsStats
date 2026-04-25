@@ -1,17 +1,16 @@
-﻿using SportsStats.Application.Matches;
+using SportsStats.Application.Matches;
 using SportsStats.Application.Matches.DTOs.Responses;
-using SportsStats.Application.Teams;
 using SportsStats.Application.Tournaments.DTOs.Responses;
 using SportsStats.Application.Tournaments.DTOs.Shared;
+using SportsStats.Application.Tournaments.Mappers;
+using SportsStats.Application.Tournaments.Mappers.Rules;
 using SportsStats.Domain.Matches;
 using SportsStats.Domain.Shared;
 using SportsStats.Domain.Statistics;
 using SportsStats.Domain.Teams;
 using SportsStats.Domain.Tournaments;
-using SportsStats.Domain.Tournaments.Rules;
 using System;
 using System.Collections.Generic;
-using System.Net.NetworkInformation;
 using System.Text;
 
 namespace SportsStats.Application.Tournaments
@@ -58,7 +57,17 @@ namespace SportsStats.Application.Tournaments
 		}
 		public async Task StartAsync(int tournamentId, DateTime? startedAt = null)
 		{
-			await UpdateAndSaveAsync(tournamentId, tournament => tournament.Start(startedAt ?? _timeProvider.GetCurrentTime()));
+			Tournament tournament = await GetTournamentOrThrowAsync(tournamentId);
+
+
+			foreach (var teamId in tournament.TeamsId)
+			{
+				TeamStats teamStats = new(teamId, tournamentId);
+				await _teamStatsRepository.AddAsync(teamStats);
+			}
+			await _teamStatsRepository.SaveChangesAsync();
+			tournament.Start(startedAt ?? _timeProvider.GetCurrentTime());
+			await _tournamentRepository.SaveChangesAsync();
 		}
 		public async Task FinishAsync(int tournamentId, DateTime? finishedAt = null)
 		{
@@ -72,21 +81,16 @@ namespace SportsStats.Application.Tournaments
 		{
 			await UpdateAndSaveAsync(tournamentId, tournament => tournament.Registration());
 		}
-		public async Task RegistrateTeamAsync(int tournamentId, int teamId)
+		public async Task SetRegistrationTeamsAsync(int tournamentId, List<int> teamIds)
 		{
-			Team team = await _teamRepository.GetAsync(teamId)
-				?? throw new ArgumentException($"Не существует команды с id {teamId}");
-
-			await UpdateAndSaveAsync(tournamentId, tournament => tournament.RegistrateTeam(teamId));
-
-			TeamStats teamStats = new(teamId, tournamentId);
-			await _teamStatsRepository.AddAsync(teamStats);
-			await _teamStatsRepository.SaveChangesAsync();
+			await UpdateAndSaveAsync(tournamentId, tournament => tournament.SetRegistrationTeams(teamIds));
 		}
 
 		public async Task SetRulesAsync(int tournamentId, TournamentRulesDTO rules)
 		{
-			await UpdateAndSaveAsync(tournamentId, tournament => tournament.SetRules(TournamentMapper.ToDomain(rules)));
+			Console.WriteLine("Пришло в application: " + rules.MatchPointsRules.DrawPoints);
+			Console.WriteLine("Приходит от маппера: " + MatchRulesMapper.ToDomain(rules).MatchPointsRules.DrawPoints);
+			await UpdateAndSaveAsync(tournamentId, tournament => tournament.SetRules(MatchRulesMapper.ToDomain(rules)));
 		}
 
 		public async Task<List<TournamentShortDTO>> GetAllAsync(int page, int pageSize, string? search = null)
@@ -102,11 +106,6 @@ namespace SportsStats.Application.Tournaments
 			var tournament = await _tournamentRepository.GetAsync(tournamentId);
 			var teams = await _teamRepository.GetByTournamentAsync(tournamentId);
 			return tournament == null ? null : TournamentMapper.ToDTO(tournament, teams);
-		}
-		public async Task<List<TournamentShortDTO>> GetActiveByDateAsync(DateOnly date)
-		{
-			var tournaments = await _tournamentRepository.GetActiveByDateAsync(date);
-			return tournaments.Select(TournamentMapper.ToDTO).ToList();
 		}
 		public async Task<List<TournamentWithMatchesDTO>> GetActiveByDateWithMatchesAsync(DateOnly date)
 		{
@@ -150,6 +149,15 @@ namespace SportsStats.Application.Tournaments
 			return matchesInTournaments
 				.Select(g => TournamentMapper.ToDTO(tournamentsLookup[g[0].TournamentId], g))
 				.ToList();
+		}
+		public async Task ChangeGeneralInfoAsync(int id, string name, byte[]? photo, string? photoMime)
+		{
+			Tournament tournament = await GetTournamentOrThrowAsync(id);
+			tournament.SetName(name);
+			if (photo != null)
+				tournament.SetPhoto(photo, photoMime);
+
+			await _tournamentRepository.SaveChangesAsync();
 		}
 	}
 }

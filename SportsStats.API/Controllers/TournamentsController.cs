@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using SportsStats.Application.Shared;
 using SportsStats.Application.Tournaments;
 using SportsStats.Application.Tournaments.DTOs.Requests;
@@ -42,45 +42,48 @@ namespace SportsStats.API.Controllers
 		}
 
 		[HttpPost]
-		public async Task<ActionResult<int>> Create([FromBody] CreateTournamentDTO createTournamentDTO)
+		public async Task<ActionResult<int>> Create([FromBody] CreateTournamentDTO dto)
 		{
-			string name = createTournamentDTO.Name;
-			if (string.IsNullOrWhiteSpace(name))
-				return BadRequest(new { error = "Название турнира не может быть пустым" });
-
-			return Ok(await _tournamentApplicationService.CreateAsync(name));
+			return Ok(await _tournamentApplicationService.CreateAsync(dto.Name));
 		}
 		[HttpPost("{id}/start")]
 		public async Task<ActionResult> Start(int id, [FromBody] DateTime? startedAt)
 		{
 			await _tournamentApplicationService.StartAsync(id, startedAt);
-			return Ok();
+			return NoContent();
 		}
 		[HttpPost("{id}/registration")]
 		public async Task<ActionResult> Registration(int id)
 		{
 			await _tournamentApplicationService.RegistrationAsync(id);
-			return Ok();
+			return NoContent();
 		}
 		[HttpPost("{id}/finish")]
 		public async Task<ActionResult> Finish(int id, [FromBody] DateTime? finishedAt)
 		{
 			await _tournamentApplicationService.FinishAsync(id, finishedAt);
-			return Ok();
+			return NoContent();
 		}
 
-		[HttpPost("{tournamentId}/teams/{teamId}")]
-		public async Task<ActionResult> RegistrateTeam(int tournamentId, int teamId)
+		[HttpPost("{tournamentId}/teams")]
+		public async Task<ActionResult> SetRegistrationTeams(int tournamentId, [FromBody] List<int> teamIds)
 		{
-			await _tournamentApplicationService.RegistrateTeamAsync(tournamentId, teamId);
-			return Ok();
+			await _tournamentApplicationService.SetRegistrationTeamsAsync(tournamentId, teamIds);
+			return NoContent();
 		}
 
 		[HttpPost("{id}/rules/set")]
 		public async Task<ActionResult> SetRules(int id, [FromBody] TournamentRulesDTO rules)
 		{
+			Console.WriteLine(rules);
 			await _tournamentApplicationService.SetRulesAsync(id, rules);
-			return Ok();
+			return NoContent();
+		}
+		[HttpPost("{id}/general/change")]
+		public async Task<ActionResult> ChangeGeneralInfo(int id, [FromBody] TournamentGeneralInfoDTO dto)
+		{
+			await _tournamentApplicationService.ChangeGeneralInfoAsync(id, dto.Name, dto.Photo, dto.PhotoMime);
+			return NoContent();
 		}
 	}
 }

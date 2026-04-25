@@ -12,30 +12,18 @@ namespace SportsStats.Application.Matches
 	{
 		private readonly IMatchRepository _matchRepository = matchRepository;
 		private readonly IPlayerRepository _playerRepository = playerRepository;
-		public async Task AddPlayerToRosterAsync(int matchId, int playerId, int teamId)
+
+		public async Task SetPlayersToRosterAsync(int matchId, List<int> playerIds, int teamId)
 		{
 			Match match = await GetMatchOrThrowAsync(matchId);
-			Player player = await _playerRepository.GetAsync(playerId)
-				?? throw new ArgumentException("Игрока с таким id не существует");
 
-			if (player.TeamId != teamId)
-				throw new ArgumentException("Игрок не состоит в данной команде");
-
-			match.AddPlayerToRoster(playerId, teamId);
-
-			await _matchRepository.SaveChangesAsync();
-		}
-
-		public async Task AddPlayersToRosterAsync(int matchId, List<int> playerIds, int teamId)
-		{
-			Match match = await GetMatchOrThrowAsync(matchId);
 			List<Player> players = await _playerRepository.GetAsync(playerIds);
 
 			foreach (var player in players)
 				if (player.TeamId != teamId)
 					throw new ArgumentException("Игрок не состоит в данной команде");
 
-			match.AddPlayersToRoster(playerIds, teamId);
+			match.SetPlayersToRoster(playerIds, teamId);
 
 			await _matchRepository.SaveChangesAsync();
 		}

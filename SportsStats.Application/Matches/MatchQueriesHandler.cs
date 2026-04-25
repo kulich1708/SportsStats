@@ -1,8 +1,8 @@
-﻿using SportsStats.Application.Matches.DTOs.Responses;
+using SportsStats.Application.Matches.DTOs.Responses;
 using SportsStats.Application.Players;
 using SportsStats.Application.Teams;
 using SportsStats.Application.Teams.DTOs.Responses;
-using SportsStats.Application.Tournaments;
+using SportsStats.Application.Tournaments.Mappers;
 using SportsStats.Domain.Matches;
 using SportsStats.Domain.Players;
 using SportsStats.Domain.Teams;

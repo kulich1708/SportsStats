@@ -1,4 +1,4 @@
-﻿using SportsStats.Domain.Matches;
+using SportsStats.Domain.Matches;
 using SportsStats.Domain.Matches.Goals;
 using SportsStats.Domain.Players;
 using SportsStats.Domain.Tournaments;
@@ -36,12 +36,12 @@ namespace SportsStats.Application.Matches
 
 			return goal.Id;
 		}
-		public async Task FillGoalDetailsAsync(int matchId, int goalId, int? firstAssistId, int? secondAssistId,
+		public async Task FillGoalDetailsAsync(int matchId, int goalId, int scorerId, int? firstAssistId, int? secondAssistId,
 									GoalStrengthType strengthType, GoalNetType? netType = null)
 		{
 			Match match = await GetMatchOrThrowAsync(matchId);
 
-			match.FillGoalDetails(goalId, firstAssistId, secondAssistId, strengthType, netType);
+			match.FillGoalDetails(goalId, scorerId, firstAssistId, secondAssistId, strengthType, netType);
 
 			await _matchRepository.SaveChangesAsync();
 		}

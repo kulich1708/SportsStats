@@ -1,4 +1,4 @@
-﻿using SportsStats.Domain.Common;
+using SportsStats.Domain.Common;
 using SportsStats.Domain.Shared;
 using System;
 using System.Collections.Generic;
@@ -28,6 +28,7 @@ namespace SportsStats.Domain.Matches.Goals
 		}
 
 
+		public void SetScorer(int scorerId) => GoalScorerId = scorerId;
 		public void SetAssists(int? firstAssistId, int? secondAssistId)
 		{
 			if (firstAssistId.HasValue && secondAssistId.HasValue &&
