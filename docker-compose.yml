@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  sports-stats-api:
+    restart: always
+    build: .
+    container_name: sports-stats-api
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=SportsStats;Username=VladislavKulichkov;Password=qw06062013?
+    networks:
+      - sports-network
+
+  db:
+    restart: always
+    image: postgres:15
+    container_name: sports-stats-db
+    environment:
+      - POSTGRES_DB=SportsStats
+      - POSTGRES_USER=VladislavKulichkov
+      - POSTGRES_PASSWORD=qw06062013?
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U VladislavKulichkov -d SportsStats"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sports-network
+
+networks:
+  sports-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
