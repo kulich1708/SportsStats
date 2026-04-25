@@ -1,19 +1,16 @@
-﻿using SportsStats.Application.Matches.DTOs.Responses;
+using SportsStats.Application.Matches.DTOs.Responses;
 using SportsStats.Application.Players.DTOs.Responses;
 using SportsStats.Application.Teams.DTOs.Responses;
 using SportsStats.Application.Tournaments.DTOs.Responses;
-using SportsStats.Application.Tournaments;
 using SportsStats.Domain.Matches;
 using SportsStats.Domain.Matches.Goals;
 using SportsStats.Domain.Shared.Enums;
 using SportsStats.Domain.Tournaments;
-using SportsStats.Domain.Tournaments.Rules;
+using SportsStats.Application.Tournaments.Mappers.Rules;
+using System.Data;
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Net.NetworkInformation;
 using System.Text;
-using System.Timers;
 
 namespace SportsStats.Application.Matches
 {
@@ -47,7 +44,7 @@ namespace SportsStats.Application.Matches
 					g => MatchMapper.ToDTO(g, g.ScoringTeamId == match.HomeTeamId ? homeTeam : awayTeam,
 											g.ScoringTeamId == match.HomeTeamId ? homeTeamRoster : awayTeamRoster))
 					.ToList(),
-				TournamentMapper.ToDTO(match.Rules)
+				MatchRulesMapper.ToDTO(match.Rules)
 			);
 
 		public static GoalDTO ToDTO(
@@ -55,6 +52,7 @@ namespace SportsStats.Application.Matches
 			TeamDTO scoringTeam,
 			List<PlayerDTO> teamRoster
 			) => new(
+				goal.Id,
 				scoringTeam,
 				teamRoster.First(p => p.Id == goal.GoalScorerId),
 				goal.Period,

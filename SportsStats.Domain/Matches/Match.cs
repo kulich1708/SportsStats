@@ -1,4 +1,4 @@
-﻿using SportsStats.Domain.Common;
+using SportsStats.Domain.Common;
 using SportsStats.Domain.Matches.Goals;
 using SportsStats.Domain.Tournaments.Rules;
 using SportsStats.Domain.Matches;
@@ -15,7 +15,6 @@ namespace SportsStats.Domain.Matches
 		private readonly List<GoalEvent> _goals = new();
 		private readonly HashSet<int> _homeTeamRoster = new();
 		private readonly HashSet<int> _awayTeamRoster = new();
-		private readonly TournamentRules _rules;
 		public int HomeTeamId { get; private set; }
 		public int AwayTeamId { get; private set; }
 		public IReadOnlySet<int> HomeTeamRoster => _homeTeamRoster;
@@ -31,7 +30,7 @@ namespace SportsStats.Domain.Matches
 		public MatchWinType AwayTeamWinType { get; private set; }
 		public bool IsOvertime { get; private set; }
 		public IReadOnlyList<GoalEvent> Goals => _goals;
-		public TournamentRules Rules => _rules;
+		public TournamentRules Rules { get; private set; }
 		private Match() { }
 		public Match(int tournamentId, int homeTeamId, int awayTeamId, TournamentRules rules, DateTime scheduledAt)
 		{
@@ -42,7 +41,7 @@ namespace SportsStats.Domain.Matches
 			HomeTeamId = homeTeamId;
 			AwayTeamId = awayTeamId;
 
-			_rules = rules ?? throw new ArgumentNullException();
+			Rules = rules ?? throw new ArgumentNullException();
 			ScheduledAt = scheduledAt;
 		}
 		public void Start(DateTime startedAt)
@@ -61,7 +60,7 @@ namespace SportsStats.Domain.Matches
 			if (StartedAt > finishedAt)
 				throw new ArgumentException($"Нельзя завершить матч {finishedAt}, так как он был начат лишь {StartedAt}");
 
-			if (HomeTeamScore == AwayTeamScore && !_rules.MatchDurationRules.IsDrawPossible)
+			if (HomeTeamScore == AwayTeamScore && !Rules.MatchTimeRules.IsDrawPossible)
 				throw new ArgumentException("Нельзя завершить матч с ничейным счётом, когда ничья запрещена правилами");
 
 			FinishedAt = finishedAt;
@@ -147,11 +146,11 @@ namespace SportsStats.Domain.Matches
 			if (scoringTeamId == HomeTeamId) HomeTeamScore++;
 			else AwayTeamScore++;
 
-			if (_rules.MatchDurationRules.IsOvertimePeriod(period))
-				IsOvertime = true;
-
-			if (_rules.MatchDurationRules.DoesGoalEndMatch(period))
+			if (Rules.MatchTimeRules.DoesGoalEndMatch(period))
+			{
 				goal.SetAsWinningGoal(true);
+				IsOvertime = true;
+			}
 			return goal;
 		}
 
@@ -170,11 +169,11 @@ namespace SportsStats.Domain.Matches
 
 		protected void ValidateGoalTiming(int period, int time)
 		{
-			if (!_rules.MatchDurationRules.IsValidPeriod(period))
+			if (!Rules.MatchTimeRules.IsValidPeriod(period))
 				throw new ArgumentException("Проверьте значение периода, по правилам такого периода не существует");
-			if (!_rules.MatchDurationRules.IsValidTimeInPeriod(period, time))
+			if (!Rules.MatchTimeRules.IsValidTimeInPeriod(period, time))
 				throw new ArgumentException("Проверьте время, данный период не может иметь такое время.");
-			if (_rules.MatchDurationRules.IsOvertimePeriod(period) && HomeTeamScore != AwayTeamScore)
+			if (Rules.MatchTimeRules.IsOvertimePeriod(period) && HomeTeamScore != AwayTeamScore)
 				throw new ArgumentException("Нельзя добавить гол в овертайме, если у команд разный счёт");
 		}
 
@@ -197,15 +196,18 @@ namespace SportsStats.Domain.Matches
 		// Решение: создать GoalsCollection с методами Add, UpdateAssists, UpdateStrength, UpdateNetType
 		// Match будет делегировать вызовы или предоставлять доступ через свойство Goals
 		// Приоритет: после MVP (когда потребуется частое редактирование голов)
-		public void FillGoalDetails(int goalId, int? firstAssistId, int? secondAssistId,
+		public void FillGoalDetails(int goalId, int goalScorerId, int? firstAssistId, int? secondAssistId,
 									GoalStrengthType strengthType, GoalNetType? netType)
 		{
 			GoalEvent goal = GetGoalEventById(goalId);
+			if (!IsPlayerOnRoster(goalScorerId, goal.ScoringTeamId))
+				throw new ArgumentException("Игрок, которого вы пытаетесь установить автором гола, не заявлен за команду, которая забила гол");
 			if (firstAssistId.HasValue && !IsPlayerOnRoster(firstAssistId.Value, goal.ScoringTeamId))
-				throw new ArgumentException("Этот игрок не заявлен за команду, которая забила гол");
+				throw new ArgumentException("Игрок, которого вы пытаетесь установить как первого ассистента, не заявлен за команду, которая забила гол");
 			if (secondAssistId.HasValue && !IsPlayerOnRoster(secondAssistId.Value, goal.ScoringTeamId))
-				throw new ArgumentException("Этот игрок не заявлен за команду, которая забила гол");
+				throw new ArgumentException("Игрок, которого вы пытаетесь установить как второго ассистента, не заявлен за команду, которая забила гол");
 
+			goal.SetScorer(goalScorerId);
 			goal.SetAssists(firstAssistId, secondAssistId);
 			goal.SetNetType(netType);
 			goal.SetStrengthType(strengthType);
@@ -213,8 +215,8 @@ namespace SportsStats.Domain.Matches
 
 		public void AddPlayerToRoster(int playerId, int teamId)
 		{
-			if (!IsTeamInMatch(teamId))
-				throw new ArgumentException("Нельзя заявить игрока за команду, которая не учавствует в матче");
+			ValidateTeamInMatch(teamId);
+
 			if (IsPlayerOnRoster(playerId))
 				throw new ArgumentException("Нельзя добавить игрока дважды");
 			if (!IsMatchWaiting())
@@ -227,8 +229,26 @@ namespace SportsStats.Domain.Matches
 		}
 		public void AddPlayersToRoster(List<int> playerIds, int teamId)
 		{
+			ValidateTeamInMatch(teamId);
 			foreach (int playerId in playerIds)
 				AddPlayerToRoster(playerId, teamId);
 		}
+		public void SetPlayersToRoster(List<int> playerIds, int teamId)
+		{
+			ValidateTeamInMatch(teamId);
+
+			if (teamId == HomeTeamId)
+				_homeTeamRoster.Clear();
+			else
+				_awayTeamRoster.Clear();
+
+			AddPlayersToRoster(playerIds, teamId);
+		}
+		private void ValidateTeamInMatch(int teamId)
+		{
+			if (!IsTeamInMatch(teamId))
+				throw new ArgumentException("Команда не учавствует в матче");
+		}
+		public void SetScheduleAt(DateTime scheduleAt) => ScheduledAt = scheduleAt;
 	}
 }

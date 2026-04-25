@@ -18,7 +18,7 @@ namespace SportsStats.Domain.Players
 	}
 	public static class PositionTypeText
 	{
-		private static readonly Dictionary<PositionType, string> PositionDescription = new()
+		private static readonly Dictionary<PositionType, string> _positionDescription = new()
 		{
 			[PositionType.Forward] = "Нападающий",
 			[PositionType.Winger] = "Крайний нападающий",
@@ -30,9 +30,10 @@ namespace SportsStats.Domain.Players
 			[PositionType.RightDefenseman] = "Правый защитник",
 			[PositionType.Goalie] = "Вратарь",
 		};
+		public static IReadOnlyDictionary<PositionType, string> PositionDescription => _positionDescription;
 		public static string GetDescription(this PositionType position)
 		{
-			return PositionDescription.TryGetValue(position, out var text) ? text : string.Empty;
+			return _positionDescription.TryGetValue(position, out var text) ? text : string.Empty;
 		}
 	}
 }

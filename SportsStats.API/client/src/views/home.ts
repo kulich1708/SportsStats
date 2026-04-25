@@ -1,15 +1,50 @@
 import { tournamentsByDate } from '../api';
 import { renderMatchRow, bindMatchRowClicks } from '../components/matchRow';
-import { go } from '../nav';
+import { goSameMode, urlFor } from '../nav';
 import {
   addDays,
   dayMonthLabel,
+  dtoImg,
   el,
   escapeHtml,
   parseDateOnlyIso,
   toDateOnlyIso,
   weekdayShort,
 } from '../ui/utils';
+
+
+
+function bindHomeAccordions(host: HTMLElement): void {
+  host.querySelectorAll<HTMLElement>('[data-accordion]').forEach((block) => {
+    const summary = block.querySelector<HTMLElement>('[data-accordion-summary]');
+    const body = block.querySelector<HTMLElement>('[data-accordion-body]');
+    if (!summary || !body) return;
+
+    const apply = (open: boolean) => {
+      block.classList.toggle('is-open', open);
+      body.classList.toggle('is-open', open);
+      summary.setAttribute('aria-expanded', open ? 'true' : 'false');
+    };
+
+    apply(block.classList.contains('is-open'));
+
+    const toggle = (e?: MouseEvent) => {
+      if (e) {
+        const t = e.target as HTMLElement | null;
+        if (t?.closest('a[data-app-link], button, input, textarea, select')) return;
+      }
+      apply(!block.classList.contains('is-open'));
+    };
+
+    summary.addEventListener('click', (e) => toggle(e as MouseEvent));
+    summary.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggle();
+      }
+    });
+  });
+}
 
 function isSameDay(a: Date, b: Date): boolean {
   return (
@@ -19,7 +54,7 @@ function isSameDay(a: Date, b: Date): boolean {
   );
 }
 
-export async function renderHome(root: HTMLElement, query: URLSearchParams): Promise<void> {
+export async function renderHome(root: HTMLElement, query: URLSearchParams, admin: boolean): Promise<void> {
   const today = new Date();
   const dateStr = query.get('date');
   const center = dateStr ? parseDateOnlyIso(dateStr) : today;
@@ -43,17 +78,27 @@ export async function renderHome(root: HTMLElement, query: URLSearchParams): Pro
 
   const blocks = data
     .map((t) => {
-      const matchesHtml = t.matches.map((m) => renderMatchRow(m)).join('');
+      const matchesHtml = t.matches
+        .map((m) => renderMatchRow(m, { admin, showEdit: admin && m.status.code === 0 }))
+        .join('');
       return `
-        <details class="tournament-block" open>
-          <summary class="tournament-block__summary">
+        <section class="tournament-block tournament-block--accordion is-open" data-accordion>
+          <div class="tournament-block__head" data-accordion-summary tabindex="0" role="button" aria-expanded="true">
             <span class="tournament-block__chevron" aria-hidden="true"></span>
-            <a class="tournament-block__title" href="/tournament/${t.id}" data-app-link>${escapeHtml(t.name)}</a>
-          </summary>
-          <div class="tournament-block__body">
-            ${matchesHtml || '<p class="muted">Нет матчей на эту дату.</p>'}
+            ${dtoImg(t.name, t.photo, t.photoMime, 'mini-photo')}
+            <span class="tournament-block__title-wrap">
+              <a class="tournament-block__title" href="${urlFor(`/tournament/${t.id}`, admin)}" data-app-link>${escapeHtml(t.name)}</a>
+            </span>
+            ${admin ? `<a class="icon-btn" href="${urlFor(`/admin/edit/tournament/${t.id}`, true)}" data-app-link title="Редактировать турнир">✎</a>` : ''}
           </div>
-        </details>
+          <div class="tournament-block__collapsible is-open" data-accordion-body>
+            <div class="tournament-block__collapsible-inner">
+              <div class="tournament-block__body">
+                ${matchesHtml || '<p class="muted">Нет матчей на эту дату.</p>'}
+              </div>
+            </div>
+          </div>
+        </section>
       `;
     })
     .join('');
@@ -64,6 +109,7 @@ export async function renderHome(root: HTMLElement, query: URLSearchParams): Pro
         <div class="page-head">
           <h1 class="page-title">Матчи</h1>
           <p class="page-sub">Турниры и игры на выбранный день</p>
+          ${admin ? '<p class="muted">Режим администратора</p>' : ''}
         </div>
         <div class="date-toolbar">
           <div class="date-strip">${stripHtml}</div>
@@ -85,14 +131,15 @@ export async function renderHome(root: HTMLElement, query: URLSearchParams): Pro
   section.querySelectorAll<HTMLButtonElement>('.date-strip__btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       const d = btn.dataset.date;
-      if (d) go(`/?date=${d}`);
+      if (d) goSameMode(`/?date=${d}`);
     });
   });
 
   const any = section.querySelector<HTMLInputElement>('.date-any__input');
   any?.addEventListener('change', () => {
-    if (any.value) go(`/?date=${any.value}`);
+    if (any.value) goSameMode(`/?date=${any.value}`);
   });
 
   bindMatchRowClicks(section);
+  bindHomeAccordions(section);
 }

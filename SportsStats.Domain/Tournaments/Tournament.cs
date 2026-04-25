@@ -1,4 +1,4 @@
-﻿using SportsStats.Domain.Common;
+using SportsStats.Domain.Common;
 using SportsStats.Domain.Tournaments.Rules;
 using System;
 using System.Collections.Generic;
@@ -16,12 +16,12 @@ namespace SportsStats.Domain.Tournaments
 		public TournamentStatus Status { get; private set; } = TournamentStatus.Draft;
 		public byte[]? Photo { get; private set; }
 		public string? PhotoMime { get; private set; }
-		public TournamentRules TournamentRules { get; private set; }
+		public TournamentRules? TournamentRules { get; private set; }
 		public IReadOnlySet<int> TeamsId => _teamsId;
 
 		public Tournament(string name)
 		{
-			Name = name;
+			SetName(name);
 		}
 		public void SetRules(TournamentRules tournamentRules)
 		{
@@ -73,12 +73,19 @@ namespace SportsStats.Domain.Tournaments
 		public bool IsRegistration() => Status == TournamentStatus.Registration;
 		public bool IsStarted() => Status == TournamentStatus.InProgress;
 		public bool IsFinished() => Status == TournamentStatus.Finished;
-		public bool HasRules() => TournamentRules != null && TournamentRules.HasRules();
+		public bool HasRules() => TournamentRules != null;
 
+		public void SetRegistrationTeams(List<int> teamIds)
+		{
+			_teamsId.Clear();
+
+			foreach (int teamId in teamIds)
+				RegistrateTeam(teamId);
+		}
 		public void RegistrateTeam(int teamId)
 		{
 			if (!IsRegistration())
-				throw new ArgumentException("Можно заявить команду, только когда турнир в статусе Registration");
+				throw new ArgumentException("Можно заявлять команды, только когда турнир в статусе Registration");
 			if (_teamsId.Contains(teamId))
 				throw new ArgumentException("Команда уже заявлена на этот турнир");
 			_teamsId.Add(teamId);
@@ -88,6 +95,13 @@ namespace SportsStats.Domain.Tournaments
 		{
 			Photo = photo;
 			PhotoMime = photoMime;
+		}
+		public void SetName(string name)
+		{
+			if (string.IsNullOrWhiteSpace(name))
+				throw new ArgumentException("Имя турнира не может быть пустым");
+
+			Name = name;
 		}
 	}
 }
