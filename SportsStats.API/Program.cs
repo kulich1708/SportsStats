@@ -102,25 +102,23 @@ namespace SportsStats.API
 
 		private static void ConfigureMiddleware(WebApplication app)
 		{
-			app.UseMiddleware<GlobalExceptionHandler>();
-			if (app.Environment.IsDevelopment())
+			var version = Assembly.GetExecutingAssembly()
+								  .GetName()
+								  .Version?
+								  .ToString() ?? "v1";
+
+			app.UseSwagger();
+
+			app.UseSwaggerUI(options =>
 			{
-				var version = Assembly.GetExecutingAssembly()
-									  .GetName()
-									  .Version?
-									  .ToString() ?? "v1";
+				options.SwaggerEndpoint(
+					$"/swagger/{version}/swagger.json",
+					$"Sports Stats API {version}");
 
-				app.UseSwagger();
+				options.RoutePrefix = "swagger";
+			});
+			app.UseMiddleware<GlobalExceptionHandler>();
 
-				app.UseSwaggerUI(options =>
-				{
-					options.SwaggerEndpoint(
-						$"/swagger/{version}/swagger.json",
-						$"Sports Stats API {version}");
-
-					options.RoutePrefix = "swagger";
-				});
-			}
 
 			app.UseDefaultFiles();
 			app.UseStaticFiles();
