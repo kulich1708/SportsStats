@@ -71,3 +71,18 @@ obj/
 .cursorrules
 .editorconfig
 .gitattributes
+
+# ========== Secrets & Environment ==========
+.env
+.env.*
+!.env.template
+*.key
+*.pem
+*.crt
+
+# ========== Docker ==========
+
+# Локальные данные Docker
+volumes/
+pgdata/
+postgres_data/
