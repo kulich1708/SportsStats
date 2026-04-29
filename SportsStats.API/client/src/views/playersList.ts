@@ -5,7 +5,7 @@ import { citizenshipBadgeHtml, dtoImg, el, escapeHtml } from '../ui/utils';
 
 const PAGE_SIZE = 40;
 
-export async function renderAdminPlayersPage(root: HTMLElement, query: URLSearchParams): Promise<void> {
+export async function renderPlayersPage(root: HTMLElement, query: URLSearchParams, admin: boolean): Promise<void> {
   let page = Number(query.get('page') || 1);
   let search = query.get('search') || '';
   let selectedTeamIds: number[] = [];
@@ -15,12 +15,12 @@ export async function renderAdminPlayersPage(root: HTMLElement, query: URLSearch
     items
       .map((p) => `
       <article class="list-row">
-        <a class="entity-link" href="${urlFor(`/player/${p.id}`, true)}" data-app-link>
+        <a class="entity-link" href="${urlFor(`/player/${p.id}`, admin)}" data-app-link>
           ${dtoImg(`${p.name} ${p.surname}`, p.photo, p.photoMime, 'mini-photo player-cards__img--round')}
           <span>${escapeHtml(`${p.name} ${p.surname}`)}</span>${citizenshipBadgeHtml(p.citizenship ?? null)}
         </a>
         <span class="muted">${escapeHtml(`${p.teamName ?? 'Без команды'} · ${p.position.name}`)}</span>
-        <a class="icon-btn" href="${urlFor(`/admin/edit/player/${p.id}`, true)}" data-app-link>✎</a>
+        ${admin ? `<a class="icon-btn" href="${urlFor(`/admin/edit/player/${p.id}`, true)}" data-app-link>✎</a>` : ''}
       </article>`)
       .join('');
 
@@ -29,7 +29,7 @@ export async function renderAdminPlayersPage(root: HTMLElement, query: URLSearch
       <section class="page">
         <div class="page-head page-head--row">
           <h1 class="page-title">Игроки</h1>
-          <a class="action-btn" href="${urlFor('/admin/edit/player/new', true)}" data-app-link>Добавить игрока</a>
+          ${admin ? `<a class="action-btn" href="${urlFor('/admin/edit/player/new', true)}" data-app-link>Добавить игрока</a>` : ''}
         </div>
         <div class="filters-row">
           <input class="search-input" placeholder="Поиск игрока" value="${escapeHtml(search)}" data-search />
@@ -94,4 +94,8 @@ export async function renderAdminPlayersPage(root: HTMLElement, query: URLSearch
     rows = [...rows, ...chunk];
     list.insertAdjacentHTML('beforeend', renderRows(chunk));
   });
+}
+
+export async function renderAdminPlayersPage(root: HTMLElement, query: URLSearchParams): Promise<void> {
+  await renderPlayersPage(root, query, true);
 }
