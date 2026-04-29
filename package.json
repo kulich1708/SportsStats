@@ -1,7 +1,6 @@
 {
   "name": "sportsstats",
   "version": "1.0.0",
-  "description": "Web API для спортивной статистики с иерархией: виды спорта → лиги → команды → игроки → матчи. Реализована DDD-архитектура, REST API, JWT-авторизация, CI/CD (GitHub Actions), unit-тесты, SQL-Server, EF Core.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
