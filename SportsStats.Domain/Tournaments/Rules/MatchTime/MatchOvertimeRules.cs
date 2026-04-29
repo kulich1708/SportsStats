@@ -34,5 +34,7 @@ namespace SportsStats.Domain.Tournaments.Rules.MatchTime
 
 		public bool IsInfiniteOvertime()
 			=> !OvertimesCount.HasValue || !OvertimeDurationSeconds.HasValue;
+
+		public static MatchOvertimeRules CreateKHLOvertimeRules() => new(1, 300, true);
 	}
 }

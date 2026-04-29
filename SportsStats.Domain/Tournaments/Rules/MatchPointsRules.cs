@@ -59,4 +59,15 @@ public record MatchPointsRules
 		if (!IsDrawPossible)
 			DrawPoints = null;
 	}
+
+	public static MatchPointsRules CreateKHLPointsRules()
+	{
+		return new(
+			winPoints: 2,
+			lossPoints: 0,
+			otWinPoints: 1,
+			otLossPoints: 0,
+			shootoutWinPoints: 1,
+			shootoutLossPoints: 0);
+	}
 }
