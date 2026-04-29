@@ -45,6 +45,14 @@
 
 ---
 
+## Онлайн демо
+
+Развернутое демо приложения: [https://sportsstats-production.up.railway.app/](https://sportsstats-production.up.railway.app/).
+
+Можно открыть и попробовать функциональность без локальной настройки.
+
+---
+
 ## Стек (бэкенд)
 
 | Область | Технология |
@@ -68,7 +76,7 @@
 | **SportsStats.Application** | Domain | Сценарии (application services), DTO, маппинг в/из домена, оркестрация репозиториев |
 | **SportsStats.Infrastructure** | Domain | `AppDbContext`, репозитории, миграции EF, `ITimeProvider` |
 | **SportsStats.API** | Application | ASP.NET Core, контроллеры, middleware, хостинг статики, настройка DI (`Program.cs`) |
-| **SportsStats.Tests** | Все проекты | xUnit; **фактическое покрытие сценариями пока минимальное** |
+| **SportsStats.Tests** | Все проекты | xUnit; покрыты ключевые доменные инварианты и бизнес-правила (жизненный цикл турниров/матчей, валидации состава и голы); интеграционные тесты API/БД пока не выделены |
 | **ConsoleApp** | Infrastructure | Вспомогательная консоль (генерация данных; для разработки) |
 
 **Схема зависимостей в коде:**
@@ -229,6 +237,20 @@ docker exec sports-stats-db psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} -f /backu
 docker-compose up --build
 ```
 URL по умолчанию `http://localhost:8080/`.
+
+---
+
+## Запуск тестов
+
+Тесты написаны на `xUnit` и находятся в проекте `SportsStats.Tests`.
+
+Тесты сфокусированы на ключевых доменных правилах (инварианты агрегатов, жизненный цикл турнира/матча, валидации состава и логика добавления гола). Интеграционные проверки API/БД пока не делаются.
+
+Запуск локально (из корня репозитория):
+```bash
+dotnet test SportsStats.Tests/SportsStats.Tests.csproj
+```
+В CI тесты запускаются в конфигурации `Release` с `--verbosity minimal`.
 
 ---
 
