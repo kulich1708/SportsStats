@@ -39,5 +39,14 @@ namespace SportsStats.Domain.Tournaments.Rules
 		public bool HasRules() => MatchTimeRules != null
 							   && MatchPointsRules != null
 							   && MatchRosterRules != null;
+
+		public static TournamentRules CreateKHLRules()
+		{
+			var timeRules = MatchTimeRules.CreateKHLMatchTimeRules();
+			var rosterRules = MatchRosterRules.CreateKHLRules();
+			var pointsRules = MatchPointsRules.CreateKHLPointsRules();
+
+			return new(timeRules, rosterRules, pointsRules);
+		}
 	}
 }

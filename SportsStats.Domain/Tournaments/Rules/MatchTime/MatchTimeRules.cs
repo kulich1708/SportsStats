@@ -100,5 +100,12 @@ namespace SportsStats.Domain.Tournaments.Rules.MatchTime
 			=> IsValidPeriod(period) && period > PeriodsCount;
 		private bool IsRegularPeriod(int period)
 			=> IsValidPeriod(period) && period <= PeriodsCount;
+
+		public static MatchTimeRules CreateKHLMatchTimeRules()
+		{
+			var overtimeRules = MatchOvertimeRules.CreateKHLOvertimeRules();
+			var shootoutRules = MatchShootoutRules.CreateKHLShootoutRules();
+			return new(3, 1200, false, true, false, overtimeRules, shootoutRules);
+		}
 	}
 }
