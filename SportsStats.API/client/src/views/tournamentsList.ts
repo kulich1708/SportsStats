@@ -83,25 +83,25 @@ function openCreateTournamentModal(): void {
     .forEach((b) => b.addEventListener('click', () => void createNow()));
 }
 
-function tournamentRow(t: import('../types').TournamentShortDTO): string {
+function tournamentRow(t: import('../types').TournamentShortDTO, admin: boolean): string {
   return `
     <article class="list-row">
       <div class="list-row__lead">
-        <a class="entity-link" href="${urlFor(`/tournament/${t.id}`, true)}" data-app-link>${dtoImg(t.name, t.photo, t.photoMime, 'mini-photo')}<span>${escapeHtml(t.name)}</span></a>
+        <a class="entity-link" href="${urlFor(`/tournament/${t.id}`, admin)}" data-app-link>${dtoImg(t.name, t.photo, t.photoMime, 'mini-photo')}<span>${escapeHtml(t.name)}</span></a>
         <span class="muted list-row__meta">${escapeHtml(t.status.description)}</span>
       </div>
-      <a class="icon-btn" href="${urlFor(`/admin/edit/tournament/${t.id}`, true)}" data-app-link>✎</a>
+      ${admin ? `<a class="icon-btn" href="${urlFor(`/admin/edit/tournament/${t.id}`, true)}" data-app-link>✎</a>` : ''}
     </article>`;
 }
 
-export async function renderAdminTournamentsPage(root: HTMLElement, query: URLSearchParams): Promise<void> {
+export async function renderTournamentsPage(root: HTMLElement, query: URLSearchParams, admin: boolean): Promise<void> {
   let page = Number(query.get('page') || 1);
   let search = query.get('search') || '';
   let rows = await tournamentsPaged(page, PAGE_SIZE, search);
-  const render = () => rows.map((t) => tournamentRow(t)).join('');
+  const render = () => rows.map((t) => tournamentRow(t, admin)).join('');
 
   root.replaceChildren(el(`
-    <section class="page"><div class="page-head page-head--row"><h1 class="page-title">Турниры</h1><button type="button" class="action-btn" data-create-tournament>Создать турнир</button></div>
+    <section class="page"><div class="page-head page-head--row"><h1 class="page-title">Турниры</h1>${admin ? '<button type="button" class="action-btn" data-create-tournament>Создать турнир</button>' : ''}</div>
       <div class="filters-row">
         <input class="search-input" placeholder="Поиск турниров" value="${escapeHtml(search)}" data-search />
       </div>
@@ -109,10 +109,9 @@ export async function renderAdminTournamentsPage(root: HTMLElement, query: URLSe
       <button class="action-btn action-btn--ghost" data-more>Показать больше</button>
     </section>`));
 
-  root.querySelector<HTMLButtonElement>('[data-create-tournament]')
-    ?.addEventListener('click', () => openCreateTournamentModal());
+  root.querySelector<HTMLButtonElement>('[data-create-tournament]')?.addEventListener('click', () => openCreateTournamentModal());
 
-  if (query.get('create') === '1') {
+  if (admin && query.get('create') === '1') {
     const next = new URLSearchParams(query);
     next.delete('create');
     const nextSearch = next.toString();
@@ -136,6 +135,10 @@ export async function renderAdminTournamentsPage(root: HTMLElement, query: URLSe
     const chunk = await tournamentsPaged(page, PAGE_SIZE, search);
     if (chunk.length === 0) return;
     rows = [...rows, ...chunk];
-    if (list) list.insertAdjacentHTML('beforeend', chunk.map((t) => tournamentRow(t)).join(''));
+    if (list) list.insertAdjacentHTML('beforeend', chunk.map((t) => tournamentRow(t, admin)).join(''));
   });
+}
+
+export async function renderAdminTournamentsPage(root: HTMLElement, query: URLSearchParams): Promise<void> {
+  await renderTournamentsPage(root, query, true);
 }

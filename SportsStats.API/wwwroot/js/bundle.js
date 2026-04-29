@@ -1544,23 +1544,23 @@
     };
     modal.body.querySelectorAll("[data-create-top], [data-create-bottom]").forEach((b) => b.addEventListener("click", () => void createNow()));
   }
-  function tournamentRow(t) {
+  function tournamentRow(t, admin) {
     return `
     <article class="list-row">
       <div class="list-row__lead">
-        <a class="entity-link" href="${urlFor(`/tournament/${t.id}`, true)}" data-app-link>${dtoImg(t.name, t.photo, t.photoMime, "mini-photo")}<span>${escapeHtml(t.name)}</span></a>
+        <a class="entity-link" href="${urlFor(`/tournament/${t.id}`, admin)}" data-app-link>${dtoImg(t.name, t.photo, t.photoMime, "mini-photo")}<span>${escapeHtml(t.name)}</span></a>
         <span class="muted list-row__meta">${escapeHtml(t.status.description)}</span>
       </div>
-      <a class="icon-btn" href="${urlFor(`/admin/edit/tournament/${t.id}`, true)}" data-app-link>\u270E</a>
+      ${admin ? `<a class="icon-btn" href="${urlFor(`/admin/edit/tournament/${t.id}`, true)}" data-app-link>\u270E</a>` : ""}
     </article>`;
   }
-  async function renderAdminTournamentsPage(root, query) {
+  async function renderTournamentsPage(root, query, admin) {
     let page = Number(query.get("page") || 1);
     let search = query.get("search") || "";
     let rows = await tournamentsPaged(page, PAGE_SIZE3, search);
-    const render = () => rows.map((t) => tournamentRow(t)).join("");
+    const render = () => rows.map((t) => tournamentRow(t, admin)).join("");
     root.replaceChildren(el(`
-    <section class="page"><div class="page-head page-head--row"><h1 class="page-title">\u0422\u0443\u0440\u043D\u0438\u0440\u044B</h1><button type="button" class="action-btn" data-create-tournament>\u0421\u043E\u0437\u0434\u0430\u0442\u044C \u0442\u0443\u0440\u043D\u0438\u0440</button></div>
+    <section class="page"><div class="page-head page-head--row"><h1 class="page-title">\u0422\u0443\u0440\u043D\u0438\u0440\u044B</h1>${admin ? '<button type="button" class="action-btn" data-create-tournament>\u0421\u043E\u0437\u0434\u0430\u0442\u044C \u0442\u0443\u0440\u043D\u0438\u0440</button>' : ""}</div>
       <div class="filters-row">
         <input class="search-input" placeholder="\u041F\u043E\u0438\u0441\u043A \u0442\u0443\u0440\u043D\u0438\u0440\u043E\u0432" value="${escapeHtml(search)}" data-search />
       </div>
@@ -1568,7 +1568,7 @@
       <button class="action-btn action-btn--ghost" data-more>\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0431\u043E\u043B\u044C\u0448\u0435</button>
     </section>`));
     root.querySelector("[data-create-tournament]")?.addEventListener("click", () => openCreateTournamentModal());
-    if (query.get("create") === "1") {
+    if (admin && query.get("create") === "1") {
       const next = new URLSearchParams(query);
       next.delete("create");
       const nextSearch = next.toString();
@@ -1591,30 +1591,33 @@
       const chunk = await tournamentsPaged(page, PAGE_SIZE3, search);
       if (chunk.length === 0) return;
       rows = [...rows, ...chunk];
-      if (list) list.insertAdjacentHTML("beforeend", chunk.map((t) => tournamentRow(t)).join(""));
+      if (list) list.insertAdjacentHTML("beforeend", chunk.map((t) => tournamentRow(t, admin)).join(""));
     });
+  }
+  async function renderAdminTournamentsPage(root, query) {
+    await renderTournamentsPage(root, query, true);
   }
 
   // src/views/teamsList.ts
   var PAGE_SIZE4 = 40;
   var timer2 = 0;
-  function teamRow(t) {
+  function teamRow(t, admin) {
     return `
     <article class="list-row">
       <div class="list-row__lead">
-        <a class="entity-link" href="${urlFor(`/team/${t.id}`, true)}" data-app-link>${dtoImg(t.name, t.photo, t.photoMime, "mini-photo")}<span>${escapeHtml(t.name)}</span></a>
+        <a class="entity-link" href="${urlFor(`/team/${t.id}`, admin)}" data-app-link>${dtoImg(t.name, t.photo, t.photoMime, "mini-photo")}<span>${escapeHtml(t.name)}</span></a>
         <span class="muted list-row__meta">${escapeHtml(t.city ?? "\u2014")}</span>
       </div>
-      <a class="icon-btn" href="${urlFor(`/admin/edit/team/${t.id}`, true)}" data-app-link>\u270E</a>
+      ${admin ? `<a class="icon-btn" href="${urlFor(`/admin/edit/team/${t.id}`, true)}" data-app-link>\u270E</a>` : ""}
     </article>`;
   }
-  async function renderAdminTeamsPage(root, query) {
+  async function renderTeamsPage(root, query, admin) {
     let page = Number(query.get("page") || 1);
     let search = query.get("search") || "";
     let rows = await teamsPaged(page, PAGE_SIZE4, search);
-    const render = () => rows.map((t) => teamRow(t)).join("");
+    const render = () => rows.map((t) => teamRow(t, admin)).join("");
     root.replaceChildren(el(`
-    <section class="page"><div class="page-head page-head--row"><h1 class="page-title">\u041A\u043E\u043C\u0430\u043D\u0434\u044B</h1><a class="action-btn" href="${urlFor("/admin/edit/team/new", true)}" data-app-link>\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u043A\u043E\u043C\u0430\u043D\u0434\u0443</a></div>
+    <section class="page"><div class="page-head page-head--row"><h1 class="page-title">\u041A\u043E\u043C\u0430\u043D\u0434\u044B</h1>${admin ? `<a class="action-btn" href="${urlFor("/admin/edit/team/new", true)}" data-app-link>\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u043A\u043E\u043C\u0430\u043D\u0434\u0443</a>` : ""}</div>
       <div class="filters-row">
         <input class="search-input" placeholder="\u041F\u043E\u0438\u0441\u043A \u043A\u043E\u043C\u0430\u043D\u0434\u044B" value="${escapeHtml(search)}" data-search />
       </div>
@@ -1637,32 +1640,35 @@
       const chunk = await teamsPaged(page, PAGE_SIZE4, search);
       if (chunk.length === 0) return;
       rows = [...rows, ...chunk];
-      if (list) list.insertAdjacentHTML("beforeend", chunk.map((t) => teamRow(t)).join(""));
+      if (list) list.insertAdjacentHTML("beforeend", chunk.map((t) => teamRow(t, admin)).join(""));
     });
+  }
+  async function renderAdminTeamsPage(root, query) {
+    await renderTeamsPage(root, query, true);
   }
 
   // src/views/playersList.ts
   var PAGE_SIZE5 = 40;
-  async function renderAdminPlayersPage(root, query) {
+  async function renderPlayersPage(root, query, admin) {
     let page = Number(query.get("page") || 1);
     let search = query.get("search") || "";
     let selectedTeamIds = [];
     let rows = await playersPaged(page, PAGE_SIZE5, search);
     const renderRows = (items) => items.map((p) => `
       <article class="list-row">
-        <a class="entity-link" href="${urlFor(`/player/${p.id}`, true)}" data-app-link>
+        <a class="entity-link" href="${urlFor(`/player/${p.id}`, admin)}" data-app-link>
           ${dtoImg(`${p.name} ${p.surname}`, p.photo, p.photoMime, "mini-photo player-cards__img--round")}
           <span>${escapeHtml(`${p.name} ${p.surname}`)}</span>${citizenshipBadgeHtml(p.citizenship ?? null)}
         </a>
         <span class="muted">${escapeHtml(`${p.teamName ?? "\u0411\u0435\u0437 \u043A\u043E\u043C\u0430\u043D\u0434\u044B"} \xB7 ${p.position.name}`)}</span>
-        <a class="icon-btn" href="${urlFor(`/admin/edit/player/${p.id}`, true)}" data-app-link>\u270E</a>
+        ${admin ? `<a class="icon-btn" href="${urlFor(`/admin/edit/player/${p.id}`, true)}" data-app-link>\u270E</a>` : ""}
       </article>`).join("");
     root.replaceChildren(
       el(`
       <section class="page">
         <div class="page-head page-head--row">
           <h1 class="page-title">\u0418\u0433\u0440\u043E\u043A\u0438</h1>
-          <a class="action-btn" href="${urlFor("/admin/edit/player/new", true)}" data-app-link>\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0438\u0433\u0440\u043E\u043A\u0430</a>
+          ${admin ? `<a class="action-btn" href="${urlFor("/admin/edit/player/new", true)}" data-app-link>\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0438\u0433\u0440\u043E\u043A\u0430</a>` : ""}
         </div>
         <div class="filters-row">
           <input class="search-input" placeholder="\u041F\u043E\u0438\u0441\u043A \u0438\u0433\u0440\u043E\u043A\u0430" value="${escapeHtml(search)}" data-search />
@@ -1723,6 +1729,9 @@
       rows = [...rows, ...chunk];
       list.insertAdjacentHTML("beforeend", renderRows(chunk));
     });
+  }
+  async function renderAdminPlayersPage(root, query) {
+    await renderPlayersPage(root, query, true);
   }
 
   // src/views/editTournament.ts
@@ -2673,14 +2682,14 @@
     const q = new URLSearchParams(search);
     const parts = strippedPath.split("/").filter(Boolean);
     if (parts.length === 0) return { name: "home", query: q, admin };
-    if (admin && parts[0] === "tournaments" && parts.length === 1) {
-      return { name: "admin-tournaments", query: q };
+    if (parts[0] === "tournaments" && parts.length === 1) {
+      return admin ? { name: "admin-tournaments", query: q } : { name: "tournaments", query: q, admin };
     }
-    if (admin && parts[0] === "teams" && parts.length === 1) {
-      return { name: "admin-teams", query: q };
+    if (parts[0] === "teams" && parts.length === 1) {
+      return admin ? { name: "admin-teams", query: q } : { name: "teams", query: q, admin };
     }
-    if (admin && parts[0] === "players" && parts.length === 1) {
-      return { name: "admin-players", query: q };
+    if (parts[0] === "players" && parts.length === 1) {
+      return admin ? { name: "admin-players", query: q } : { name: "players", query: q, admin };
     }
     if (admin && parts[0] === "edit" && parts[1] === "tournament" && parts[2]) {
       return { name: "admin-edit-tournament", idOrNew: parts[2] };
@@ -2736,6 +2745,15 @@
           break;
         case "player":
           await renderPlayerPage(root, route.id, route.admin);
+          break;
+        case "tournaments":
+          await renderTournamentsPage(root, route.query, route.admin);
+          break;
+        case "teams":
+          await renderTeamsPage(root, route.query, route.admin);
+          break;
+        case "players":
+          await renderPlayersPage(root, route.query, route.admin);
           break;
         case "admin-tournaments":
           await renderAdminTournamentsPage(root, route.query);
@@ -2799,11 +2817,9 @@
     const links = [
       ...admin ? [{ href: "/", text: "\u041A\u043B\u0438\u0435\u043D\u0442" }] : [{ href: "/admin", text: "\u0410\u0434\u043C\u0438\u043D\u043A\u0430" }],
       { href: withMode("/", admin), text: "\u0413\u043B\u0430\u0432\u043D\u0430\u044F" },
-      ...admin ? [
-        { href: "/admin/tournaments", text: "\u0422\u0443\u0440\u043D\u0438\u0440\u044B" },
-        { href: "/admin/teams", text: "\u041A\u043E\u043C\u0430\u043D\u0434\u044B" },
-        { href: "/admin/players", text: "\u0418\u0433\u0440\u043E\u043A\u0438" }
-      ] : []
+      { href: withMode("/tournaments", admin), text: "\u0422\u0443\u0440\u043D\u0438\u0440\u044B" },
+      { href: withMode("/teams", admin), text: "\u041A\u043E\u043C\u0430\u043D\u0434\u044B" },
+      { href: withMode("/players", admin), text: "\u0418\u0433\u0440\u043E\u043A\u0438" }
     ];
     nav.innerHTML = links.map((x) => `<a href="${x.href}" data-app-link>${x.text}</a>`).join("");
   }
