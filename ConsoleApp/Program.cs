@@ -44,7 +44,7 @@ namespace SportsStats.ConsoleApp
 		public DataGenerator()
 		{
 			_options = new DbContextOptionsBuilder<AppDbContext>()
-					.UseNpgsql("Host=localhost;Database=SportsStats;Username=VladislavKulichkov;Password=qw06062013?");
+					.UseNpgsql("Host=localhost;Database=SportsStats;Username=VladislavKulichkov;Password=PASSWORD");
 			_context = new(_options.Options);
 
 

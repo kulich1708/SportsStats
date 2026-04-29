@@ -28,7 +28,6 @@ namespace SportsStats.API
 			var builder = WebApplication.CreateBuilder(args);
 
 
-			// ГЇВїВЅГЇВїВЅГЇВїВЅГЇВїВЅГЇВїВЅГЇВїВЅ ГЇВїВЅГЇВїВЅГЇВїВЅ ГЇВїВЅГЇВїВЅГЇВїВЅГЇВїВЅГЇВїВЅГЇВїВЅГЇВїВЅ ГЇВїВЅГЇВїВЅГЇВїВЅ ГЇВїВЅГЇВїВЅ
 			builder.Services.AddDbContext<AppDbContext>(options =>
 				options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 			);
@@ -87,7 +86,7 @@ namespace SportsStats.API
 					Title = "Sports Stats API",
 					Version = version,
 
-					Description = "API ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"
+					Description = "API бэкенда хоккейной статисктики"
 				});
 
 				var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
