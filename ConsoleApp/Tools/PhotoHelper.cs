@@ -9,7 +9,6 @@ namespace ConsoleApp.Tools
 		public static string GetMimeTypeFromExtension(string filePath)
 		{
 			string extension = Path.GetExtension(filePath).ToLower();
-			Console.WriteLine(extension);
 			return extension switch
 			{
 				".png" => "image/png",

@@ -7,7 +7,6 @@ using System.Text;
 namespace ConsoleApp.Matches
 {
 	public class MatchGenerator(
-		MatchGoalService matchGoalService,
 		MatchLifecycleService matchLifecycleService,
 		MatchFinishService matchFinishService,
 		MatchRosterService matchRosterService,
@@ -15,7 +14,6 @@ namespace ConsoleApp.Matches
 		PlayerApplicationService playerApplicationService,
 		GoalsGenerator goalsGenerator)
 	{
-		private readonly MatchGoalService _matchGoalService = matchGoalService;
 		private readonly MatchLifecycleService _matchLifecycleService = matchLifecycleService;
 		private readonly MatchFinishService _matchFinishService = matchFinishService;
 		private readonly MatchRosterService _matchRosterService = matchRosterService;
@@ -28,10 +26,11 @@ namespace ConsoleApp.Matches
 			int matchId = await _matchLifecycleService.CreateAsync(tournamentId, homeTeamId, awayTeamId, scheduleAt);
 
 			await GenerateMatchRosterAsync(matchId, homeTeamId, awayTeamId);
-			await _matchLifecycleService.StartAsync(matchId);
+			await _matchLifecycleService.StartAsync(matchId, scheduleAt);
 			await _goalsGenerator.GenerateGoalsAsync(matchId);
+
 			if (!await _matchQueriesHandler.IsFinished(matchId))
-				await _matchFinishService.FinishAsync(matchId);
+				await _matchFinishService.FinishAsync(matchId, scheduleAt.AddHours(2).AddMinutes(30));
 
 			return matchId;
 		}
@@ -45,6 +44,11 @@ namespace ConsoleApp.Matches
 
 			await _matchRosterService.SetPlayersToRosterAsync(matchId, homeTeamPlayerIds, homeTeamId);
 			await _matchRosterService.SetPlayersToRosterAsync(matchId, awayTeamPlayerIds, awayTeamId);
+		}
+		public async Task<int> CreateMatchAsync(int homeTeamId, int awayTeamId, int tournamentId, DateTime scheduleAt)
+		{
+			int matchId = await _matchLifecycleService.CreateAsync(tournamentId, homeTeamId, awayTeamId, scheduleAt);
+			return matchId;
 		}
 	}
 }

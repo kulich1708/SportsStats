@@ -1,11 +1,12 @@
 ﻿using ConsoleApp.Matches;
-using ConsoleApp.Players;
-using ConsoleApp.Teams;
+using SportsStats.Application.Matches;
 using SportsStats.Application.Tournaments;
 using SportsStats.Application.Tournaments.Mappers.Rules;
 using SportsStats.Domain.Tournaments.Rules;
+using SportsStats.Generator.Tools;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace ConsoleApp.Tournaments
@@ -20,6 +21,8 @@ namespace ConsoleApp.Tournaments
 		public async Task<int> GenerateTournamentAsync
 			(string name, List<int> teamIds, DateTime? startedAt = null)
 		{
+			var sw = Stopwatch.StartNew();
+
 			int tournamentId = await _tournamentApplicationService.CreateAsync(name);
 
 			await _tournamentApplicationService.SetRulesAsync(tournamentId, MatchRulesMapper.ToDTO(TournamentRules.CreateKHLRules()));
@@ -30,17 +33,33 @@ namespace ConsoleApp.Tournaments
 			await _tournamentApplicationService.StartAsync(tournamentId, startedAt);
 
 			startedAt = (await _tournamentApplicationService.GetAsync(tournamentId))?.StartedAt;
-			DateOnly currentDate = DateOnly.FromDateTime(startedAt.Value);
+			DateOnly currentDate = DateOnly.FromDateTime(startedAt.Value).AddDays(1);
 			var schedule = GenerateSchedule(teamIds);
+			DateTime time = DateTime.SpecifyKind(currentDate.ToDateTime(new TimeOnly(19, 30, 0)), DateTimeKind.Utc);
 
+			int matchCount = schedule.Select(d => d.Count).Sum();
+			Console.WriteLine($"Начало генерации матчей в турнире. Всего матчей - {matchCount}");
+			int generatedMatchCount = 0;
 			foreach (var day in schedule)
 			{
 				foreach (var match in day)
-					await _matchGenerator.GenerateMatchAsync(
-						match.Item1, match.Item2, tournamentId,
-						DateTime.SpecifyKind(currentDate.ToDateTime(new TimeOnly(19, 30, 0)), DateTimeKind.Utc));
+				{
+					if (generatedMatchCount % 50 == 0)
+						Console.WriteLine($"Сгенерировано {generatedMatchCount}, осталось {matchCount - generatedMatchCount}");
+					generatedMatchCount++;
+
+					if (generatedMatchCount > matchCount / 2)
+						await _matchGenerator.CreateMatchAsync(match.Item1, match.Item2, tournamentId, time);
+					else
+						await _matchGenerator.GenerateMatchAsync(
+							match.Item1, match.Item2, tournamentId, time);
+				}
 				currentDate = currentDate.AddDays(1);
+				time = DateTime.SpecifyKind(currentDate.ToDateTime(new TimeOnly(19, 30, 0)), DateTimeKind.Utc);
 			}
+
+			sw.Log("Все матчи турнира сгенерированы");
+			Console.WriteLine();
 			return tournamentId;
 		}
 		public List<List<(int, int)>> GenerateSchedule(List<int> teamIds)

@@ -3,36 +3,38 @@ using SportsStats.Application.Players;
 using SportsStats.Application.Players.DTOs.Requests;
 using SportsStats.Application.Players.DTOs.Shared;
 using SportsStats.Domain.Players;
-using SportsStats.Domain.Teams;
+using SportsStats.Generator.Tools;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace ConsoleApp.Players
 {
 	public class PlayersGenerator(
-		PlayerApplicationService playerApplicationService,
-		INamesData namesData)
+		PlayerApplicationService playerApplicationService)
 	{
 		private readonly PlayerApplicationService _playerApplicationService = playerApplicationService;
-		private readonly List<string> _names = namesData.FirstNames;
-		private readonly List<string> _surnames = namesData.LastNames;
 		private readonly Random _random = new();
 
-		private string _basePath = @".\Photos\KHL";
-		private string _basePathForFlags = @".\Photos\Flags";
+		private readonly string _basePath = Path.GetFullPath(@".\Players\Photos\KHL");
+		private readonly string _basePathForFlags = Path.GetFullPath(@".\Players\Photos\Flags");
 
 		private static int _count = 1;
-		public async Task<Dictionary<int, List<int>>> GeneratePlayersForTeamsAsync(List<int> teamIds, bool isRussian = true)
+		public async Task<Dictionary<int, List<int>>> GeneratePlayersForTeamsAsync(List<int> teamIds, INamesData names, bool isRussian = true)
 		{
+			var sw = Stopwatch.StartNew();
 			Dictionary<int, List<int>> players = new();
 
 			foreach (int teamId in teamIds)
-				players.Add(teamId, await GeneratePlayersForTeamAsync(teamId));
-
+			{
+				players.Add(teamId, await GeneratePlayersForTeamAsync(teamId, names, isRussian));
+				sw.Log($"Сгенерированы игроки для команды {teamId}");
+			}
+			Console.WriteLine();
 			return players;
 		}
-		public async Task<List<int>> GeneratePlayersForTeamAsync(int teamId, bool isRussian = true)
+		public async Task<List<int>> GeneratePlayersForTeamAsync(int teamId, INamesData names, bool isRussian = true)
 		{
 			List<int> players = new();
 			Dictionary<PositionType, int> positionsCount = new()
@@ -41,7 +43,7 @@ namespace ConsoleApp.Players
 				{PositionType.RightWinger, 4},
 				{PositionType.Center, 4},
 				{PositionType.LeftDefenseman, 3},
-				{PositionType.LeftDefenseman, 3},
+				{PositionType.RightDefenseman, 3},
 				{PositionType.Goalie, 2},
 			};
 
@@ -49,17 +51,18 @@ namespace ConsoleApp.Players
 			int[] numbers = Enumerable.Range(1, 99).OrderBy(_random.Next).ToArray();
 			foreach (var item in positionsCount)
 				for (int i = 0; i < item.Value; i++)
-					players.Add(await GeneratePlayerAsync(item.Key, teamId, numbers[count++], isRussian));
+				{
+					int nameIndex = _random.Next(names.FirstNames.Count);
+					int surnameIndex = _random.Next(names.LastNames.Count);
+					string name = names.FirstNames[nameIndex];
+					string surname = names.LastNames[surnameIndex];
+					players.Add(await GeneratePlayerAsync(name, surname, item.Key, teamId, numbers[count++], isRussian));
+				}
 
 			return players;
 		}
-		public async Task<int> GeneratePlayerAsync(PositionType position, int teamId, int number, bool isRussian = true)
+		public async Task<int> GeneratePlayerAsync(string name, string surname, PositionType position, int teamId, int number, bool isRussian = true)
 		{
-			int nameIndex = _random.Next(_names.Count);
-			int surnameIndex = _random.Next(_surnames.Count);
-			string name = _names[nameIndex];
-			string surname = _surnames[surnameIndex];
-
 			int minDays = 18 * 365;
 			int maxDays = 40 * 365;
 			int daysAgo = _random.Next(minDays, maxDays + 1);
@@ -84,7 +87,7 @@ namespace ConsoleApp.Players
 				teamId,
 				number,
 				birthday,
-				GenerateCitizenship(),
+				isRussian ? GenerateCitizenship() : null,
 				photo,
 				photoMime
 			);
