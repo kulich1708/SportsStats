@@ -75,7 +75,6 @@ namespace SportsStats.API.Controllers
 		[HttpPost("{id}/rules/set")]
 		public async Task<ActionResult> SetRules(int id, [FromBody] TournamentRulesDTO rules)
 		{
-			Console.WriteLine(rules);
 			await _tournamentApplicationService.SetRulesAsync(id, rules);
 			return NoContent();
 		}

@@ -88,8 +88,6 @@ namespace SportsStats.Application.Tournaments
 
 		public async Task SetRulesAsync(int tournamentId, TournamentRulesDTO rules)
 		{
-			Console.WriteLine("Пришло в application: " + rules.MatchPointsRules.DrawPoints);
-			Console.WriteLine("Приходит от маппера: " + MatchRulesMapper.ToDomain(rules).MatchPointsRules.DrawPoints);
 			await UpdateAndSaveAsync(tournamentId, tournament => tournament.SetRules(MatchRulesMapper.ToDomain(rules)));
 		}
 
