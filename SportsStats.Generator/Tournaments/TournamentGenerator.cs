@@ -1,7 +1,7 @@
 ﻿using ConsoleApp.Matches;
-using SportsStats.Application.Matches;
 using SportsStats.Application.Tournaments;
 using SportsStats.Application.Tournaments.Mappers.Rules;
+using SportsStats.Domain.Shared;
 using SportsStats.Domain.Tournaments.Rules;
 using SportsStats.Generator.Tools;
 using System;
@@ -13,10 +13,12 @@ namespace ConsoleApp.Tournaments
 {
 	public class TournamentGenerator(
 		TournamentApplicationService tournamentApplicationService,
-		MatchGenerator matchGenerator)
+		MatchGenerator matchGenerator,
+		ITimeProvider timeProvider)
 	{
 		private readonly TournamentApplicationService _tournamentApplicationService = tournamentApplicationService;
 		private readonly MatchGenerator _matchGenerator = matchGenerator;
+		private readonly ITimeProvider _timeProvider = timeProvider;
 		private readonly Random _random = new();
 		public async Task<int> GenerateTournamentAsync
 			(string name, List<int> teamIds, DateTime? startedAt = null)
@@ -30,25 +32,29 @@ namespace ConsoleApp.Tournaments
 
 			await _tournamentApplicationService.SetRegistrationTeamsAsync(tournamentId, teamIds);
 
+			var schedule = GenerateSchedule(teamIds);
+			int scheduleDays = schedule.Count;
+
+			startedAt = startedAt ?? _timeProvider.GetCurrentTime().AddDays(-1 * (scheduleDays / 2));
 			await _tournamentApplicationService.StartAsync(tournamentId, startedAt);
 
 			startedAt = (await _tournamentApplicationService.GetAsync(tournamentId))?.StartedAt;
 			DateOnly currentDate = DateOnly.FromDateTime(startedAt.Value).AddDays(1);
-			var schedule = GenerateSchedule(teamIds);
 			DateTime time = DateTime.SpecifyKind(currentDate.ToDateTime(new TimeOnly(19, 30, 0)), DateTimeKind.Utc);
 
 			int matchCount = schedule.Select(d => d.Count).Sum();
 			Console.WriteLine($"Начало генерации матчей в турнире. Всего матчей - {matchCount}");
 			int generatedMatchCount = 0;
-			foreach (var day in schedule)
+			for (int i = 0; i < scheduleDays; i++)
 			{
+				var day = schedule[i];
 				foreach (var match in day)
 				{
 					if (generatedMatchCount % 50 == 0)
 						Console.WriteLine($"Сгенерировано {generatedMatchCount}, осталось {matchCount - generatedMatchCount}");
 					generatedMatchCount++;
 
-					if (generatedMatchCount > matchCount / 2)
+					if (i >= scheduleDays / 2)
 						await _matchGenerator.CreateMatchAsync(match.Item1, match.Item2, tournamentId, time);
 					else
 						await _matchGenerator.GenerateMatchAsync(

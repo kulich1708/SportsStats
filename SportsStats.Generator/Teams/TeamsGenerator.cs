@@ -17,7 +17,7 @@ namespace ConsoleApp.Teams
 			var sw = Stopwatch.StartNew();
 			var data = teamsData.Data;
 			int count = countLimit.HasValue ? Math.Min(data.Count, countLimit.Value) : data.Count;
-			string basePath = Path.GetFullPath(Path.Combine(@".\Teams\Photos", directory));
+			string basePath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @".\Teams\Photos", directory));
 			List<int> ids = new List<int>();
 
 			for (int i = 0; i < count; i++)

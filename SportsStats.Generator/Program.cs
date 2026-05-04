@@ -18,7 +18,8 @@ namespace SportsStats.ConsoleApp
 	{
 		public static async Task Main()
 		{
-			var appSettingsPath = "appsettings.json";
+			string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+			var appSettingsPath = Path.Combine(baseDir, "appsettings.json");
 
 			if (!File.Exists(appSettingsPath))
 				throw new FileNotFoundException($"appsettings.json не найден: {appSettingsPath}");

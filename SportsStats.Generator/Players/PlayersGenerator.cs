@@ -17,8 +17,9 @@ namespace ConsoleApp.Players
 		private readonly PlayerApplicationService _playerApplicationService = playerApplicationService;
 		private readonly Random _random = new();
 
-		private readonly string _basePath = Path.GetFullPath(@".\Players\Photos\KHL");
-		private readonly string _basePathForFlags = Path.GetFullPath(@".\Players\Photos\Flags");
+		private static readonly string _baseDir = AppDomain.CurrentDomain.BaseDirectory;
+		private static readonly string _basePath = Path.GetFullPath(Path.Combine(_baseDir, @".\Players\Photos\KHL"));
+		private static readonly string _basePathForFlags = Path.GetFullPath(Path.Combine(_baseDir, @".\Players\Photos\Flags"));
 
 		private static int _count = 1;
 		public async Task<Dictionary<int, List<int>>> GeneratePlayersForTeamsAsync(List<int> teamIds, INamesData names, bool isRussian = true)
@@ -71,12 +72,14 @@ namespace ConsoleApp.Players
 			byte[]? photo = null;
 			string? photoMime = null;
 
-			string filePath = Path.Combine(_basePath, @$"{_count++ % Directory.GetFiles(_basePath).Length}.jpg");
-			if (Directory.Exists(_basePath) &&
-				File.Exists(filePath))
+			if (Directory.Exists(_basePath))
 			{
-				photo = File.ReadAllBytes(filePath);
-				photoMime = PhotoHelper.GetMimeTypeFromExtension(filePath);
+				string filePath = Path.Combine(_basePath, @$"{_count++ % Directory.GetFiles(_basePath).Length}.jpg");
+				if (File.Exists(filePath))
+				{
+					photo = File.ReadAllBytes(filePath);
+					photoMime = PhotoHelper.GetMimeTypeFromExtension(filePath);
+				}
 			}
 
 			int playerId = await _playerApplicationService.CreateAsync(name, surname, position);
