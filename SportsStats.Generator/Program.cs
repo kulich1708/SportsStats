@@ -21,9 +21,6 @@ namespace SportsStats.ConsoleApp
 			string baseDir = AppDomain.CurrentDomain.BaseDirectory;
 			var appSettingsPath = Path.Combine(baseDir, "appsettings.json");
 
-			if (!File.Exists(appSettingsPath))
-				throw new FileNotFoundException($"appsettings.json не найден: {appSettingsPath}");
-
 			var configuration = new ConfigurationBuilder()
 				.AddJsonFile(appSettingsPath, optional: false, reloadOnChange: false)
 				.AddEnvironmentVariables()
