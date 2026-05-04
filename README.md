@@ -190,7 +190,7 @@ docker-compose up sports-stats-api
 URL по умолчанию `http://localhost:8080/`.
 
 <details>
-<summary> ### 2. Локальный запуск (для разработки)</summary>
+### <summary>2. Локальный запуск (для разработки)</summary>
 
 ```bash
 # 1. Клонирование репозитория
