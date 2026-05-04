@@ -12,7 +12,6 @@ namespace SportsStats.Domain.Players
 		private Citizenship() { }
 		public Citizenship(string name, byte[]? photo = null, string? photoMime = null)
 		{
-			Console.WriteLine("Пришло в Cit " + name);
 			Name = name;
 			Photo = photo;
 			PhotoMime = photoMime;

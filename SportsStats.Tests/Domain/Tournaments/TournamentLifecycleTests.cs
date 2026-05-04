@@ -33,7 +33,6 @@ namespace SportsStats.Tests.Domain.Tournaments
 		{
 			var tournament = new Tournament("KHL test");
 			DateTime startAt = new(2026, 4, 29);
-			Console.WriteLine(startAt);
 
 			var ex = Assert.Throws<ArgumentException>(() => tournament.Start(startAt));
 
