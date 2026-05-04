@@ -69,12 +69,9 @@ namespace SportsStats.API
 
 		private static async Task ConfigureMiddleware(WebApplication app)
 		{
-			if (!app.Environment.IsProduction())
-			{
-				using var scope = app.Services.CreateScope();
-				var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-				await db.Database.MigrateAsync();
-			}
+			using var scope = app.Services.CreateScope();
+			var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+			await db.Database.MigrateAsync();
 
 			var version = Assembly.GetExecutingAssembly()
 								  .GetName()

@@ -34,7 +34,19 @@ services:
       retries: 5
     networks:
       - sports-network
-
+  sports-stats-generator:
+    build:
+      context: .
+      dockerfile: SportsStats.Generator/Dockerfile
+    container_name: sports-stats-generator
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - ConnectionStrings__DefaultConnection=${CONNECTION_STRING}
+    networks:
+      - sports-network
+    restart: "no"
 networks:
   sports-network:
     driver: bridge

@@ -26,6 +26,7 @@ namespace SportsStats.ConsoleApp
 
 			var configuration = new ConfigurationBuilder()
 				.AddJsonFile(appSettingsPath, optional: false, reloadOnChange: false)
+				.AddEnvironmentVariables()
 				.Build();
 
 			var services = new ServiceCollection();
