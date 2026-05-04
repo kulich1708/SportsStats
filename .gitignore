@@ -73,7 +73,7 @@ obj/
 .gitattributes
 
 # ========== Secrets & Environment ==========
-.env
+
 .env.*
 !.env.template
 *.key
