@@ -9,19 +9,17 @@ namespace SportsStats.Application.Matches
 {
 	public class MatchFinishService(
 		ITeamStatsRepository teamStatsRepository,
-		IMatchRepository matchRepository,
-		ITimeProvider timeProvider) : MatchUseCaseBase(matchRepository)
+		IMatchRepository matchRepository) : MatchUseCaseBase(matchRepository)
 	{
 		private readonly ITeamStatsRepository _teamStatsRepository = teamStatsRepository;
 		private readonly IMatchRepository _matchRepository = matchRepository;
-		private readonly ITimeProvider _timeProvider = timeProvider;
 
 
 		public async Task FinishAsync(int matchId, DateTime? finishedAt = null)
 		{
 			Match match = await GetMatchOrThrowAsync(matchId);
 
-			match.Finish(finishedAt ?? _timeProvider.GetCurrentTime());
+			match.Finish(finishedAt ?? match.StartedAt.Value.AddHours(2).AddMinutes(30));
 
 			await _matchRepository.SaveChangesAsync();
 

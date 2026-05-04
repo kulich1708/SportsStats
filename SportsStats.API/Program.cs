@@ -1,29 +1,15 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using SportsStats.API.Middleware;
-using SportsStats.Application.Matches;
-using SportsStats.Application.Players;
-using SportsStats.Application.Statistics;
-using SportsStats.Application.Teams;
-using SportsStats.Application.Tournaments;
-using SportsStats.Domain.Matches;
-using SportsStats.Domain.Players;
-using SportsStats.Domain.Services;
-using SportsStats.Domain.Shared;
-using SportsStats.Domain.Statistics;
-using SportsStats.Domain.Teams;
-using SportsStats.Domain.Tournaments;
 using SportsStats.Infrastructure.Persistence.DbContexts;
-using SportsStats.Infrastructure.Persistence.Repositories;
-using SportsStats.Infrastructure.Services;
+using SportsStats.Infrastructure;
 using System.Reflection;
-using System.Text.Json.Serialization;
 
 namespace SportsStats.API
 {
 	public class Program
 	{
-		public static void Main(string[] args)
+		public static async Task Main(string[] args)
 		{
 			var builder = WebApplication.CreateBuilder(args);
 
@@ -35,7 +21,7 @@ namespace SportsStats.API
 
 			var app = builder.Build();
 
-			ConfigureMiddleware(app);
+			await ConfigureMiddleware(app);
 
 			app.Run();
 		}
@@ -50,26 +36,8 @@ namespace SportsStats.API
 			//		options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 			//	});
 
-			services.AddScoped<ITournamentRepository, TournamentRepository>();
-			services.AddScoped<ITeamRepository, TeamRepository>();
-			services.AddScoped<IMatchRepository, MatchRepository>();
-			services.AddScoped<IPlayerRepository, PlayerRepository>();
-			services.AddScoped<ITeamStatsRepository, TeamStatsRepository>();
-			services.AddScoped<ITimeProvider, SystemTimeProvider>();
-			services.AddScoped<IMatchService, MatchService>();
 
-			services.AddScoped<TournamentApplicationService>();
-
-			services.AddScoped<PlayerApplicationService>();
-
-			services.AddScoped<TeamApplicationService>();
-			services.AddScoped<TeamStatsApplicationService>();
-
-			services.AddScoped<MatchGoalService>();
-			services.AddScoped<MatchFinishService>();
-			services.AddScoped<MatchLifecycleService>();
-			services.AddScoped<MatchRosterService>();
-			services.AddScoped<MatchQueriesHandler>();
+			builder.Services.AddSportsStatsCore(builder.Configuration);
 
 			services.AddControllers();
 			services.AddEndpointsApiExplorer();
@@ -99,8 +67,15 @@ namespace SportsStats.API
 			});
 		}
 
-		private static void ConfigureMiddleware(WebApplication app)
+		private static async Task ConfigureMiddleware(WebApplication app)
 		{
+			if (!app.Environment.IsProduction())
+			{
+				using var scope = app.Services.CreateScope();
+				var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+				await db.Database.MigrateAsync();
+			}
+
 			var version = Assembly.GetExecutingAssembly()
 								  .GetName()
 								  .Version?
