@@ -170,73 +170,46 @@ DTO и мапперы лежат рядом по областям (турнир�
 ---
 
 ## Сборка, запуск, Docker
-### 1. Клонируйте репозиторий
-```bash
-git clone https://github.com/kulich1708/SportsStats.git
-cd SportsStats
-```
-Далее есть 3 варианта как запустить проект
-### 1. Локально:
 
-```bash
-# 1. Настраиваем строку подключения
-cd SportsStats.API
-# Скопировать файл appsettings.json
-cp appsettings.template.json appsettings.json
-# Отредактируйте, указав ваши данные
-cd ../
-# 2. Собираем проект
-dotnet restore
-dotnet build
-
-# 3. Применяем миграции (БД уже должна быть запущена)
-dotnet ef database update --project SportsStats.Infrastructure --startup-project SportsStats.API
-
-# 4. Запускаем API
-dotnet run --project SportsStats.API
-```
-URL по умолчанию см. `SportsStats.API/Properties/launchSettings.json` (например, `http://localhost:5121`).
-
-### 2. Docker
+### 1. Docker
 
 **Docker Compose** поднимает API и Postgres; переменные окружения для БД и строки подключения задаются в `.env`.
 
 ``` bash
-cp .env.template .env
-# Отредактируйте файл .env, указав ваши данные
+# Клонирование и сборка
+git clone https://github.com/kulich1708/SportsStats.git
+cd SportsStats
+docker-compose build
 
-# Поднимите БД
-docker-compose up -d db
-sleep 5
-docker-compose up -d --build api
-# Примините миграции
-docker exec sports-stats-api dotnet ef database update
-# Запустите приложение
-docker-compose up -d sports-stats-api
+# Заполнение демо-данными
+docker-compose run --rm sports-stats-generator
+
+# Запуск API
+docker-compose up sports-stats-api
 ```
 URL по умолчанию `http://localhost:8080/`.
 
-### 3. Docker с восстановлением бэкапа бд
-- Скачайте бэкап [ссылка](https://disk.yandex.ru/d/56iM-J7FUmFdng)
-- Положите файл backup.sql в корень проекта
+<details>
+<summary> ### 2. Локальный запуск (для разработки)</summary>
 
-- Восстановите данные
 ```bash
-# Поднять только базу данных
-docker-compose up -d db
+# 1. Клонирование репозитория
+git clone https://github.com/kulich1708/SportsStats.git
+cd SportsStats
 
-# Загрузить переменные из .env
-$env:POSTGRES_USER = (Get-Content .env | Where-Object { $_ -match '^POSTGRES_USER=' }) -replace '^POSTGRES_USER=',''
-$env:POSTGRES_DB = (Get-Content .env | Where-Object { $_ -match '^POSTGRES_DB=' }) -replace '^POSTGRES_DB=',''
+# 2. Настройка строки подключения
+cd SportsStats.API
+cp appsettings.template.json appsettings.json
+# ВНИМАНИЕ: Отредактируйте файл appsettings.json, указав ваши данные
 
-# Скопировать и применить бэкап
-docker cp backup.sql sports-stats-db:/backup.sql
-docker exec sports-stats-db psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} -f /backup.sql
-
-# Запустить приложение
-docker-compose up --build
+# 3. Сборка, генерация демо данных и запуск проекта
+cd ../
+dotnet build
+dotnet run --project SportsStats.Generator
+dotnet run --project SportsStats.API
 ```
-URL по умолчанию `http://localhost:8080/`.
+URL по умолчанию см. `SportsStats.API/Properties/launchSettings.json` (например, `http://localhost:5121`).
+</details>
 
 ---
 
