@@ -21,10 +21,15 @@ namespace SportsStats.ConsoleApp
 			string baseDir = AppDomain.CurrentDomain.BaseDirectory;
 			var appSettingsPath = Path.Combine(baseDir, "appsettings.json");
 
-			var configuration = new ConfigurationBuilder()
-				.AddJsonFile(appSettingsPath, optional: false, reloadOnChange: false)
-				.AddEnvironmentVariables()
-				.Build();
+			var configurationBuilder = new ConfigurationBuilder()
+				.AddEnvironmentVariables();
+
+			if (File.Exists(appSettingsPath))
+			{
+				configurationBuilder.AddJsonFile(appSettingsPath, optional: true, reloadOnChange: false);
+			}
+
+			var configuration = configurationBuilder.Build();
 
 			var services = new ServiceCollection();
 
