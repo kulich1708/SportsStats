@@ -18,8 +18,8 @@ namespace ConsoleApp.Players
 		private readonly Random _random = new();
 
 		private static readonly string _baseDir = AppDomain.CurrentDomain.BaseDirectory;
-		private static readonly string _basePath = Path.GetFullPath(Path.Combine(_baseDir, @".\Players\Photos\KHL"));
-		private static readonly string _basePathForFlags = Path.GetFullPath(Path.Combine(_baseDir, @".\Players\Photos\Flags"));
+		private static readonly string _basePath = Path.GetFullPath(Path.Combine(_baseDir, "Players", "Photos", "KHL"));
+		private static readonly string _basePathForFlags = Path.GetFullPath(Path.Combine(_baseDir, "Players", "Photos", "Flags"));
 
 		private static int _count = 1;
 		public async Task<Dictionary<int, List<int>>> GeneratePlayersForTeamsAsync(List<int> teamIds, INamesData names, bool isRussian = true)
