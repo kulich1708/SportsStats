@@ -35,14 +35,14 @@ namespace SportsStats.Application.Matches
 				match.FinishedAt,
 				tournament,
 				ToDTO(match.Status),
-				match.HomeTeamScore,
-				match.AwayTeamScore,
-				match.HomeTeamWinType.GetDescription(),
-				match.AwayTeamWinType.GetDescription(),
+				match.HomeTeam.Score,
+				match.AwayTeam.Score,
+				match.HomeTeam.WinType.GetDescription(),
+				match.AwayTeam.WinType.GetDescription(),
 				match.IsOvertime,
 				match.Goals.Select(
-					g => MatchMapper.ToDTO(g, g.ScoringTeamId == match.HomeTeamId ? homeTeam : awayTeam,
-											g.ScoringTeamId == match.HomeTeamId ? homeTeamRoster : awayTeamRoster))
+					g => MatchMapper.ToDTO(g, g.ScoringTeamId == match.HomeTeam.Id ? homeTeam : awayTeam,
+											g.ScoringTeamId == match.HomeTeam.Id ? homeTeamRoster : awayTeamRoster))
 					.ToList(),
 				MatchRulesMapper.ToDTO(match.Rules)
 			);
@@ -71,10 +71,10 @@ namespace SportsStats.Application.Matches
 			match.StartedAt,
 			match.FinishedAt,
 			ToDTO(match.Status),
-			match.HomeTeamScore,
-			match.AwayTeamScore,
-			match.HomeTeamWinType.GetDescription(),
-			match.AwayTeamWinType.GetDescription(),
+			match.HomeTeam.Score,
+			match.AwayTeam.Score,
+			match.HomeTeam.WinType.GetDescription(),
+			match.AwayTeam.WinType.GetDescription(),
 			match.IsOvertime
 		);
 	}

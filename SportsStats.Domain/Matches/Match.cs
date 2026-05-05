@@ -13,21 +13,13 @@ namespace SportsStats.Domain.Matches
 	public class Match : BaseEntity, IAggregateRoot
 	{
 		private readonly List<GoalEvent> _goals = new();
-		private readonly HashSet<int> _homeTeamRoster = new();
-		private readonly HashSet<int> _awayTeamRoster = new();
-		public int HomeTeamId { get; private set; }
-		public int AwayTeamId { get; private set; }
-		public IReadOnlySet<int> HomeTeamRoster => _homeTeamRoster;
-		public IReadOnlySet<int> AwayTeamRoster => _awayTeamRoster;
+		public MatchTeam HomeTeam { get; private set; }
+		public MatchTeam AwayTeam { get; private set; }
 		public DateTime ScheduledAt { get; private set; }
 		public DateTime? StartedAt { get; private set; }
 		public DateTime? FinishedAt { get; private set; }
 		public int TournamentId { get; private set; }
 		public MatchStatus Status { get; private set; } = MatchStatus.Waiting;
-		public int HomeTeamScore { get; private set; } = 0;
-		public int AwayTeamScore { get; private set; } = 0;
-		public MatchWinType HomeTeamWinType { get; private set; }
-		public MatchWinType AwayTeamWinType { get; private set; }
 		public bool IsOvertime { get; private set; }
 		public IReadOnlyList<GoalEvent> Goals => _goals;
 		public TournamentRules Rules { get; private set; }
@@ -38,8 +30,8 @@ namespace SportsStats.Domain.Matches
 				throw new ArgumentException("Команда не может играть сама с собой");
 
 			TournamentId = tournamentId;
-			HomeTeamId = homeTeamId;
-			AwayTeamId = awayTeamId;
+			HomeTeam = new(homeTeamId);
+			AwayTeam = new(awayTeamId);
 
 			Rules = rules ?? throw new ArgumentNullException();
 			ScheduledAt = scheduledAt;
@@ -60,80 +52,59 @@ namespace SportsStats.Domain.Matches
 			if (StartedAt > finishedAt)
 				throw new ArgumentException($"Нельзя завершить матч {finishedAt}, так как он был начат лишь {StartedAt}");
 
-			if (HomeTeamScore == AwayTeamScore && !Rules.MatchTimeRules.IsDrawPossible)
+			if (HomeTeam.Score == AwayTeam.Score && !Rules.MatchTimeRules.IsDrawPossible)
 				throw new ArgumentException("Нельзя завершить матч с ничейным счётом, когда ничья запрещена правилами");
 
 			FinishedAt = finishedAt;
 			Status = MatchStatus.Finished;
 
-			if (HomeTeamScore > AwayTeamScore)
+			SetWinTypes();
+		}
+		private void SetWinTypes()
+		{
+			if (HomeTeam.Score == AwayTeam.Score)
 			{
-				if (IsOvertime)
-				{
-					HomeTeamWinType = MatchWinType.OT_WIN;
-					AwayTeamWinType = MatchWinType.OT_LOSS;
-				}
-				else
-				{
-					HomeTeamWinType = MatchWinType.REGULATION_WIN;
-					AwayTeamWinType = MatchWinType.REGULATION_LOSS;
-				}
+				HomeTeam.SetWinType(MatchWinType.DRAW);
+				AwayTeam.SetWinType(MatchWinType.DRAW);
+				return;
 			}
-			else if (HomeTeamScore < AwayTeamScore)
+
+			var isHomeWin = HomeTeam.Score > AwayTeam.Score;
+
+			if (IsOvertime)
 			{
-				if (IsOvertime)
-				{
-					HomeTeamWinType = MatchWinType.OT_LOSS;
-					AwayTeamWinType = MatchWinType.OT_WIN;
-				}
-				else
-				{
-					HomeTeamWinType = MatchWinType.REGULATION_LOSS;
-					AwayTeamWinType = MatchWinType.REGULATION_WIN;
-				}
+				HomeTeam.SetWinType(isHomeWin ? MatchWinType.OT_WIN : MatchWinType.OT_LOSS);
+				AwayTeam.SetWinType(isHomeWin ? MatchWinType.OT_LOSS : MatchWinType.OT_WIN);
 			}
 			else
 			{
-				HomeTeamWinType = MatchWinType.DRAW;
-				AwayTeamWinType = MatchWinType.DRAW;
+				HomeTeam.SetWinType(isHomeWin ? MatchWinType.REGULATION_WIN : MatchWinType.REGULATION_LOSS);
+				AwayTeam.SetWinType(isHomeWin ? MatchWinType.REGULATION_LOSS : MatchWinType.REGULATION_WIN);
 			}
 		}
-
-
-		protected bool IsPlayerInHomeRoster(int playerId)
+		private MatchTeam GetTeamById(int teamId)
 		{
-			return HomeTeamRoster.Contains(playerId);
+			if (teamId == HomeTeam.Id)
+				return HomeTeam;
+			else if (teamId == AwayTeam.Id)
+				return AwayTeam;
+
+			throw new ArgumentException("Команада не учавствует в этом матче");
 		}
-
-		protected bool IsPlayerInAwayRoster(int playerId)
+		private bool IsPlayerInRoster(int playerId, int? teamId = null)
 		{
-			return AwayTeamRoster.Contains(playerId);
-		}
+			if (!teamId.HasValue && (HomeTeam.IsPlayerInRoster(playerId) || AwayTeam.IsPlayerInRoster(playerId)))
+				return true;
+			if (teamId.HasValue && GetTeamById(teamId.Value).IsPlayerInRoster(playerId))
+				return true;
 
-		protected bool IsPlayerOnRoster(int playerId, int? teamId = null)
-		{
-			return (teamId == null && (IsPlayerInAwayRoster(playerId) || IsPlayerInHomeRoster(playerId)))
-				|| (HomeTeamId == teamId && IsPlayerInHomeRoster(playerId))
-				|| (AwayTeamId == teamId && IsPlayerInAwayRoster(playerId));
-		}
-
-		protected bool IsTeamInMatch(int teamId)
-		{
-			return teamId == HomeTeamId || teamId == AwayTeamId;
+			return false;
 		}
 
-		public bool IsMatchInProgress()
-		{
-			return Status == MatchStatus.InProgress;
-		}
-		public bool IsMatchFinished()
-		{
-			return Status == MatchStatus.Finished;
-		}
-		public bool IsMatchWaiting()
-		{
-			return Status == MatchStatus.Waiting;
-		}
+		private bool IsTeamInMatch(int teamId) => teamId == HomeTeam.Id || teamId == AwayTeam.Id;
+		public bool IsMatchInProgress() => Status == MatchStatus.InProgress;
+		public bool IsMatchFinished() => Status == MatchStatus.Finished;
+		public bool IsMatchWaiting() => Status == MatchStatus.Waiting;
 
 
 		public GoalEvent AddGoal(int scoringTeamId, int goalScorerId, int period, int time, DateTime scoringMoment)
@@ -143,8 +114,7 @@ namespace SportsStats.Domain.Matches
 			GoalEvent goal = CreateGoal(scoringTeamId, goalScorerId, period, time);
 			_goals.Add(goal);
 
-			if (scoringTeamId == HomeTeamId) HomeTeamScore++;
-			else AwayTeamScore++;
+			GetTeamById(scoringTeamId).AddGoal();
 
 			if (Rules.MatchTimeRules.DoesGoalEndMatch(period))
 			{
@@ -154,35 +124,34 @@ namespace SportsStats.Domain.Matches
 			return goal;
 		}
 
-		protected void ValidateGoal(int scoringTeamId, int goalScorerId, int period, int time)
+		private void ValidateGoal(int scoringTeamId, int goalScorerId, int period, int time)
 		{
 			if (!IsMatchInProgress())
 				throw new ArgumentException("Нельзя добавить гол, матчу, который сейчас не идёт");
 
 			if (!IsTeamInMatch(scoringTeamId))
 				throw new ArgumentException("Нельзя назначить забившей команду, которая не учавствует в матче");
-			if (!IsPlayerOnRoster(goalScorerId, scoringTeamId))
+			if (!IsPlayerInRoster(goalScorerId, scoringTeamId))
 				throw new ArgumentException("Нельзя назначить автором гола игрока, которого нет в заявке за эту команду");
 
 			ValidateGoalTiming(period, time);
 		}
 
-		protected void ValidateGoalTiming(int period, int time)
+		private void ValidateGoalTiming(int period, int time)
 		{
 			if (!Rules.MatchTimeRules.IsValidPeriod(period))
 				throw new ArgumentException("Проверьте значение периода, по правилам такого периода не существует");
 			if (!Rules.MatchTimeRules.IsValidTimeInPeriod(period, time))
 				throw new ArgumentException("Проверьте время, данный период не может иметь такое время.");
-			if (Rules.MatchTimeRules.IsOvertimePeriod(period) && HomeTeamScore != AwayTeamScore)
+			if (Rules.MatchTimeRules.IsOvertimePeriod(period) && HomeTeam.Score != AwayTeam.Score)
 				throw new ArgumentException("Нельзя добавить гол в овертайме, если у команд разный счёт");
 		}
 
-		protected GoalEvent CreateGoal(int scoringTeamId, int goalScorerId, int period, int time)
-		{
-			return new GoalEvent(scoringTeamId, goalScorerId, period, time);
-		}
+		private GoalEvent CreateGoal(int scoringTeamId, int goalScorerId, int period, int time)
+			=> new(scoringTeamId, goalScorerId, period, time);
 
-		protected GoalEvent GetGoalEventById(int goalId)
+
+		private GoalEvent GetGoalEventById(int goalId)
 		{
 			GoalEvent goal = _goals.SingleOrDefault(goal => goal.Id == goalId);
 			if (goal == null)
@@ -191,20 +160,15 @@ namespace SportsStats.Domain.Matches
 			return goal;
 		}
 
-		// TODO: Вынести управление голами в GoalsCollection
-		// Проблема: Match обрастает методами для работы с GoalEvent
-		// Решение: создать GoalsCollection с методами Add, UpdateAssists, UpdateStrength, UpdateNetType
-		// Match будет делегировать вызовы или предоставлять доступ через свойство Goals
-		// Приоритет: после MVP (когда потребуется частое редактирование голов)
 		public void FillGoalDetails(int goalId, int goalScorerId, int? firstAssistId, int? secondAssistId,
 									GoalStrengthType strengthType, GoalNetType? netType)
 		{
 			GoalEvent goal = GetGoalEventById(goalId);
-			if (!IsPlayerOnRoster(goalScorerId, goal.ScoringTeamId))
+			if (!IsPlayerInRoster(goalScorerId, goal.ScoringTeamId))
 				throw new ArgumentException("Игрок, которого вы пытаетесь установить автором гола, не заявлен за команду, которая забила гол");
-			if (firstAssistId.HasValue && !IsPlayerOnRoster(firstAssistId.Value, goal.ScoringTeamId))
+			if (firstAssistId.HasValue && !IsPlayerInRoster(firstAssistId.Value, goal.ScoringTeamId))
 				throw new ArgumentException("Игрок, которого вы пытаетесь установить как первого ассистента, не заявлен за команду, которая забила гол");
-			if (secondAssistId.HasValue && !IsPlayerOnRoster(secondAssistId.Value, goal.ScoringTeamId))
+			if (secondAssistId.HasValue && !IsPlayerInRoster(secondAssistId.Value, goal.ScoringTeamId))
 				throw new ArgumentException("Игрок, которого вы пытаетесь установить как второго ассистента, не заявлен за команду, которая забила гол");
 
 			goal.SetScorer(goalScorerId);
@@ -217,15 +181,12 @@ namespace SportsStats.Domain.Matches
 		{
 			ValidateTeamInMatch(teamId);
 
-			if (IsPlayerOnRoster(playerId))
+			if (IsPlayerInRoster(playerId))
 				throw new ArgumentException("Нельзя добавить игрока дважды");
 			if (!IsMatchWaiting())
 				throw new ArgumentException("Нельзя добавить игрока, после начала матча");
 
-			if (teamId == HomeTeamId)
-				_homeTeamRoster.Add(playerId);
-			else
-				_awayTeamRoster.Add(playerId);
+			GetTeamById(teamId).AddToRoster(playerId);
 		}
 		public void AddPlayersToRoster(List<int> playerIds, int teamId)
 		{
@@ -237,10 +198,7 @@ namespace SportsStats.Domain.Matches
 		{
 			ValidateTeamInMatch(teamId);
 
-			if (teamId == HomeTeamId)
-				_homeTeamRoster.Clear();
-			else
-				_awayTeamRoster.Clear();
+			GetTeamById(teamId).ClearRoster();
 
 			AddPlayersToRoster(playerIds, teamId);
 		}

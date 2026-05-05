@@ -33,7 +33,7 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 			if (teamId == null)
 				return await mathces.ToListAsync();
 
-			return await mathces.Where(m => m.HomeTeamId == teamId || m.AwayTeamId == teamId).ToListAsync();
+			return await mathces.Where(m => m.HomeTeam.Id == teamId || m.AwayTeam.Id == teamId).ToListAsync();
 		}
 		public async Task<List<Match>> GetByDateAsync(DateOnly date, int? tournamentId = null)
 		{
@@ -71,7 +71,7 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 		public async Task<List<Match>> GetFinishedByTeamAsync(int teamId, int page, int pageSize)
 		{
 			return await _context.Matches
-				.Where(m => (m.HomeTeamId == teamId || m.AwayTeamId == teamId) && m.Status == MatchStatus.Finished)
+				.Where(m => (m.HomeTeam.Id == teamId || m.AwayTeam.Id == teamId) && m.Status == MatchStatus.Finished)
 				.OrderByDescending(m => m.FinishedAt)
 				.Skip((page - 1) * pageSize)
 				.Take(pageSize)
@@ -80,7 +80,7 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 		public async Task<List<Match>> GetScheduleByTeamAsync(int teamId, int page, int pageSize)
 		{
 			return await _context.Matches
-				.Where(m => (m.HomeTeamId == teamId || m.AwayTeamId == teamId) && m.Status != MatchStatus.Finished)
+				.Where(m => (m.HomeTeam.Id == teamId || m.AwayTeam.Id == teamId) && m.Status != MatchStatus.Finished)
 				.OrderBy(m => m.ScheduledAt)
 				.Skip((page - 1) * pageSize)
 				.Take(pageSize)

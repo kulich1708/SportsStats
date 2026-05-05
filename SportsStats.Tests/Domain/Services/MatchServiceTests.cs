@@ -21,8 +21,8 @@ namespace SportsStats.Tests.Domain.Services
 			Match match = _matchService.CreateMatch(tournament, 10, 20, scheduledAt, tournament.TournamentRules!);
 
 			Assert.NotNull(match);
-			Assert.Equal(10, match.HomeTeamId);
-			Assert.Equal(20, match.AwayTeamId);
+			Assert.Equal(10, match.HomeTeam.Id);
+			Assert.Equal(20, match.AwayTeam.Id);
 			Assert.Equal(MatchStatus.Waiting, match.Status);
 		}
 
@@ -35,8 +35,8 @@ namespace SportsStats.Tests.Domain.Services
 			Match match = _matchService.CreateMatch(tournament, 10, 20, scheduledAt, tournament.TournamentRules!);
 
 			Assert.NotNull(match);
-			Assert.Equal(10, match.HomeTeamId);
-			Assert.Equal(20, match.AwayTeamId);
+			Assert.Equal(10, match.HomeTeam.Id);
+			Assert.Equal(20, match.AwayTeam.Id);
 		}
 
 		[Fact]
