@@ -34,11 +34,11 @@ namespace SportsStats.Application.Matches
 			if (match == null)
 				return null;
 
-			var homeTeam = await _teamApplicationService.GetAsync(match.HomeTeamId);
-			var awayTeam = await _teamApplicationService.GetAsync(match.AwayTeamId);
+			var homeTeam = await _teamApplicationService.GetAsync(match.HomeTeam.Id);
+			var awayTeam = await _teamApplicationService.GetAsync(match.AwayTeam.Id);
 			var tournament = await _tournamentRepository.GetAsync(match.TournamentId);
-			var homeTeamRoster = await _playerApplicationService.GetAsync(match.HomeTeamRoster.ToList());
-			var awayTeamRoster = await _playerApplicationService.GetAsync(match.AwayTeamRoster.ToList());
+			var homeTeamRoster = await _playerApplicationService.GetAsync(match.HomeTeam.Roster.ToList());
+			var awayTeamRoster = await _playerApplicationService.GetAsync(match.AwayTeam.Roster.ToList());
 			return MatchMapper.ToDTO(match, homeTeam, awayTeam, homeTeamRoster, awayTeamRoster, TournamentMapper.ToDTO(tournament));
 		}
 		public async Task<List<MatchShortDTO>> GetFinishedByTournamentAsync(int tournamentId, int page, int pageSize)
@@ -68,11 +68,11 @@ namespace SportsStats.Application.Matches
 		}
 		private async Task<List<MatchShortDTO>> GetMatchDTOsByMatchesAsync(List<Match> matches)
 		{
-			var teamIds = matches.SelectMany(m => new[] { m.HomeTeamId, m.AwayTeamId }).ToList();
+			var teamIds = matches.SelectMany(m => new[] { m.HomeTeam.Id, m.AwayTeam.Id }).ToList();
 			var teams = await _teamRepository.GetAsync(teamIds);
 			var teamsDTO = teams.Select(TeamMapper.ToDTO).ToDictionary(t => t.Id);
 
-			return matches.Select(m => MatchMapper.ToDTO(m, teamsDTO[m.HomeTeamId], teamsDTO[m.AwayTeamId])).ToList();
+			return matches.Select(m => MatchMapper.ToDTO(m, teamsDTO[m.HomeTeam.Id], teamsDTO[m.AwayTeam.Id])).ToList();
 		}
 
 		public async Task<bool> IsFinished(int matchId)

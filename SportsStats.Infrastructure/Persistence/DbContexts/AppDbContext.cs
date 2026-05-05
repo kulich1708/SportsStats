@@ -20,9 +20,8 @@ namespace SportsStats.Infrastructure.Persistence.DbContexts
 	public class AppDbContext : DbContext
 	{
 		public AppDbContext(DbContextOptions<AppDbContext> options)
-			: base(options)
-		{
-		}
+			: base(options) { }
+
 		public DbSet<Tournament> Tournaments { get; set; }
 
 		public DbSet<Team> Teams { get; set; }
@@ -61,34 +60,51 @@ namespace SportsStats.Infrastructure.Persistence.DbContexts
 
 			modelBuilder.Entity<Match>(entity =>
 			{
-				entity.Property(match => match.HomeTeamRoster)
-					.HasField("_homeTeamRoster")
-					.HasColumnType("jsonb")
-					.HasConversion(
-							v => JsonSerializer.Serialize(v.ToList()),
-							v => new HashSet<int>(JsonSerializer.Deserialize<List<int>>(v)),
-							new ValueComparer<IReadOnlySet<int>>(
-								(c1, c2) => (c1 == c2) ||
-					  					(c1 != null && c2 != null &&
-					  					 c1.SetEquals(c2)),
-								c => c.Aggregate(0, (hash, item) => HashCode.Combine(hash, item.GetHashCode())),
-					  			c => new HashSet<int>(c)
-							)
-					  );
-				entity.Property(match => match.AwayTeamRoster)
-					.HasField("_awayTeamRoster")
-					.HasColumnType("jsonb")
-					.HasConversion(
-							v => JsonSerializer.Serialize(v.ToList()),
-							v => new HashSet<int>(JsonSerializer.Deserialize<List<int>>(v)),
-							new ValueComparer<IReadOnlySet<int>>(
-								(c1, c2) => (c1 == c2) ||
-					  					(c1 != null && c2 != null &&
-					  					 c1.SetEquals(c2)),
-								c => c.Aggregate(0, (hash, item) => HashCode.Combine(hash, item.GetHashCode())),
-					  			c => new HashSet<int>(c)
-							)
-					  );
+				entity.OwnsOne(m => m.HomeTeam, team =>
+				{
+					team.Property(t => t.Id).HasColumnName("HomeTeamId");
+					team.Property(t => t.Score).HasColumnName("HomeTeamScore");
+					team.Property(t => t.WinType).HasColumnName("HomeTeamWinType");
+
+					team.Property(t => t.Roster)
+						.HasColumnName("HomeTeamRoster")
+						.HasField("_roster")
+						.HasColumnType("jsonb")
+						.HasConversion(
+								v => JsonSerializer.Serialize(v.ToList()),
+								v => new HashSet<int>(JsonSerializer.Deserialize<List<int>>(v)),
+								new ValueComparer<IReadOnlySet<int>>(
+									(c1, c2) => (c1 == c2) ||
+											  (c1 != null && c2 != null &&
+											   c1.SetEquals(c2)),
+									c => c.Aggregate(0, (hash, item) => HashCode.Combine(hash, item.GetHashCode())),
+									  c => new HashSet<int>(c)
+								)
+						  );
+				});
+
+				entity.OwnsOne(m => m.AwayTeam, team =>
+				{
+					team.Property(t => t.Id).HasColumnName("AwayTeamId");
+					team.Property(t => t.Score).HasColumnName("AwayTeamScore");
+					team.Property(t => t.WinType).HasColumnName("AwayTeamWinType");
+
+					team.Property(t => t.Roster)
+						.HasColumnName("AwayTeamRoster")
+						.HasField("_roster")
+						.HasColumnType("jsonb")
+						.HasConversion(
+								v => JsonSerializer.Serialize(v.ToList()),
+								v => new HashSet<int>(JsonSerializer.Deserialize<List<int>>(v)),
+								new ValueComparer<IReadOnlySet<int>>(
+									(c1, c2) => (c1 == c2) ||
+											  (c1 != null && c2 != null &&
+											   c1.SetEquals(c2)),
+									c => c.Aggregate(0, (hash, item) => HashCode.Combine(hash, item.GetHashCode())),
+									  c => new HashSet<int>(c)
+								)
+						  );
+				});
 
 
 				entity.Property(t => t.Rules)

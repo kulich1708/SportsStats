@@ -52,8 +52,8 @@ namespace SportsStats.Tests.Domain.Matches
 
 			match.AddGoal(10, 101, 1, 120, DateTime.UtcNow);
 
-			Assert.Equal(1, match.HomeTeamScore);
-			Assert.Equal(0, match.AwayTeamScore);
+			Assert.Equal(1, match.HomeTeam.Score);
+			Assert.Equal(0, match.AwayTeam.Score);
 			Assert.Single(match.Goals);
 		}
 

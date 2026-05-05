@@ -45,8 +45,8 @@ namespace SportsStats.Tests.Domain.Matches
 
 			match.AddPlayerToRoster(playerId: 101, teamId: 10);
 
-			Assert.Contains(101, match.HomeTeamRoster);
-			Assert.DoesNotContain(101, match.AwayTeamRoster);
+			Assert.Contains(101, match.HomeTeam.Roster);
+			Assert.DoesNotContain(101, match.AwayTeam.Roster);
 		}
 
 		private static Match CreateMatch()

@@ -28,15 +28,15 @@ namespace SportsStats.Application.Matches
 		private async Task UpdateTeamsStatsAsync(Match match)
 		{
 
-			TeamStats homeTeamStats = await _teamStatsRepository.GetAsync(match.HomeTeamId, match.TournamentId);
-			TeamStats awayTeamStats = await _teamStatsRepository.GetAsync(match.AwayTeamId, match.TournamentId);
-			int? homeTeamPoint = match.Rules.MatchPointsRules.GetPoints(match.HomeTeamWinType);
-			int? awayTeamPoint = match.Rules.MatchPointsRules.GetPoints(match.AwayTeamWinType);
+			TeamStats homeTeamStats = await _teamStatsRepository.GetAsync(match.HomeTeam.Id, match.TournamentId);
+			TeamStats awayTeamStats = await _teamStatsRepository.GetAsync(match.AwayTeam.Id, match.TournamentId);
+			int? homeTeamPoint = match.Rules.MatchPointsRules.GetPoints(match.HomeTeam.WinType);
+			int? awayTeamPoint = match.Rules.MatchPointsRules.GetPoints(match.AwayTeam.WinType);
 			if (!homeTeamPoint.HasValue || !awayTeamPoint.HasValue)
 				throw new ArgumentException("Найдено несовпадение. Для команд(ы) установлен исход, для которого не установлнено количество очков. Проверьте события и правила матча");
 
-			homeTeamStats.AddOutcome(match.HomeTeamWinType, homeTeamPoint.Value);
-			awayTeamStats.AddOutcome(match.AwayTeamWinType, awayTeamPoint.Value);
+			homeTeamStats.AddOutcome(match.HomeTeam.WinType, homeTeamPoint.Value);
+			awayTeamStats.AddOutcome(match.AwayTeam.WinType, awayTeamPoint.Value);
 
 			await _teamStatsRepository.SaveChangesAsync();
 		}

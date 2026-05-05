@@ -18,15 +18,15 @@ namespace SportsStats.Tests.Domain.Matches
 
 			Assert.NotNull(match);
 			Assert.Equal(1, match.TournamentId);
-			Assert.Equal(10, match.HomeTeamId);
-			Assert.Equal(20, match.AwayTeamId);
+			Assert.Equal(10, match.HomeTeam.Id);
+			Assert.Equal(20, match.AwayTeam.Id);
 			Assert.Equal(scheduleAt, match.ScheduledAt);
 			Assert.Equal(MatchStatus.Waiting, match.Status);
-			Assert.Equal(0, match.HomeTeamScore);
-			Assert.Equal(0, match.AwayTeamScore);
+			Assert.Equal(0, match.HomeTeam.Score);
+			Assert.Equal(0, match.AwayTeam.Score);
 			Assert.Empty(match.Goals);
-			Assert.Empty(match.HomeTeamRoster);
-			Assert.Empty(match.AwayTeamRoster);
+			Assert.Empty(match.HomeTeam.Roster);
+			Assert.Empty(match.AwayTeam.Roster);
 		}
 		[Fact]
 		public void Constructor_WhenHomeAndAwayTeamsAreSame_ThrowsArgumentException()
@@ -117,8 +117,8 @@ namespace SportsStats.Tests.Domain.Matches
 
 			match.Finish(finishedAt);
 
-			Assert.Equal(MatchWinType.REGULATION_WIN, match.HomeTeamWinType);
-			Assert.Equal(MatchWinType.REGULATION_LOSS, match.AwayTeamWinType);
+			Assert.Equal(MatchWinType.REGULATION_WIN, match.HomeTeam.WinType);
+			Assert.Equal(MatchWinType.REGULATION_LOSS, match.AwayTeam.WinType);
 		}
 
 		[Fact]
@@ -136,8 +136,8 @@ namespace SportsStats.Tests.Domain.Matches
 
 			match.Finish(finishedAt);
 
-			Assert.Equal(MatchWinType.OT_LOSS, match.HomeTeamWinType);
-			Assert.Equal(MatchWinType.OT_WIN, match.AwayTeamWinType);
+			Assert.Equal(MatchWinType.OT_LOSS, match.HomeTeam.WinType);
+			Assert.Equal(MatchWinType.OT_WIN, match.AwayTeam.WinType);
 		}
 
 		private static Match CreateMatch(TournamentRules rules)
