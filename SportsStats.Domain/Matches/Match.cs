@@ -21,6 +21,7 @@ namespace SportsStats.Domain.Matches
 		public int TournamentId { get; private set; }
 		public MatchStatus Status { get; private set; } = MatchStatus.Waiting;
 		public bool IsOvertime { get; private set; }
+		public Period Period { get; private set; }
 		public IReadOnlyList<GoalEvent> Goals => _goals;
 		public TournamentRules Rules { get; private set; }
 		private Match() { }
@@ -35,6 +36,10 @@ namespace SportsStats.Domain.Matches
 
 			Rules = rules ?? throw new ArgumentNullException();
 			ScheduledAt = scheduledAt;
+
+			int period = 0;
+			bool isBreak = true;
+			Period = new(period, isBreak, GenerateTextForPeriod(period, isBreak));
 		}
 		public void Start(DateTime startedAt)
 		{
@@ -43,17 +48,18 @@ namespace SportsStats.Domain.Matches
 
 			StartedAt = startedAt;
 			Status = MatchStatus.InProgress;
+
+			int period = 1;
+			bool isBreak = false;
+			Period = new(period, isBreak, GenerateTextForPeriod(period, isBreak));
 		}
 
-		public void Finish(DateTime finishedAt)
+		private void Finish(DateTime finishedAt)
 		{
 			if (Status != MatchStatus.InProgress)
 				throw new ArgumentException("Нельзя завершить матч, который ещё не начат или уже закончен");
 			if (StartedAt > finishedAt)
 				throw new ArgumentException($"Нельзя завершить матч {finishedAt}, так как он был начат лишь {StartedAt}");
-
-			if (HomeTeam.Score == AwayTeam.Score && !Rules.MatchTimeRules.IsDrawPossible)
-				throw new ArgumentException("Нельзя завершить матч с ничейным счётом, когда ничья запрещена правилами");
 
 			FinishedAt = finishedAt;
 			Status = MatchStatus.Finished;
@@ -71,7 +77,7 @@ namespace SportsStats.Domain.Matches
 
 			var isHomeWin = HomeTeam.Score > AwayTeam.Score;
 
-			if (IsOvertime)
+			if (Rules.MatchTimeRules.IsOvertimePeriod(Period.Current))
 			{
 				HomeTeam.SetWinType(isHomeWin ? MatchWinType.OT_WIN : MatchWinType.OT_LOSS);
 				AwayTeam.SetWinType(isHomeWin ? MatchWinType.OT_LOSS : MatchWinType.OT_WIN);
@@ -107,24 +113,25 @@ namespace SportsStats.Domain.Matches
 		public bool IsMatchWaiting() => Status == MatchStatus.Waiting;
 
 
-		public GoalEvent AddGoal(int scoringTeamId, int goalScorerId, int period, int time, DateTime scoringMoment)
+		public GoalEvent AddGoal(int scoringTeamId, int goalScorerId, int time, DateTime scoringMoment)
 		{
-			ValidateGoal(scoringTeamId, goalScorerId, period, time);
+			ValidateGoal(scoringTeamId, goalScorerId, time);
 
-			GoalEvent goal = CreateGoal(scoringTeamId, goalScorerId, period, time);
+			GoalEvent goal = new(scoringTeamId, goalScorerId, Period.Current, time);
 			_goals.Add(goal);
 
 			GetTeamById(scoringTeamId).AddGoal();
 
-			if (Rules.MatchTimeRules.DoesGoalEndMatch(period))
+			if (Rules.MatchTimeRules.DoesGoalEndMatch(Period.Current))
 			{
 				goal.SetAsWinningGoal(true);
-				IsOvertime = true;
+				FinishCurrentPeriod(scoringMoment);
 			}
+
 			return goal;
 		}
 
-		private void ValidateGoal(int scoringTeamId, int goalScorerId, int period, int time)
+		private void ValidateGoal(int scoringTeamId, int goalScorerId, int time)
 		{
 			if (!IsMatchInProgress())
 				throw new ArgumentException("Нельзя добавить гол, матчу, который сейчас не идёт");
@@ -134,16 +141,16 @@ namespace SportsStats.Domain.Matches
 			if (!IsPlayerInRoster(goalScorerId, scoringTeamId))
 				throw new ArgumentException("Нельзя назначить автором гола игрока, которого нет в заявке за эту команду");
 
-			ValidateGoalTiming(period, time);
+			if (!Rules.MatchTimeRules.IsValidTimeInPeriod(Period.Current, time))
+				throw new ArgumentException("Проверьте время, данный период не может иметь такое время.");
+
 		}
 
-		private void ValidateGoalTiming(int period, int time)
+		private void ValidatePeriod()
 		{
-			if (!Rules.MatchTimeRules.IsValidPeriod(period))
+			if (!Rules.MatchTimeRules.IsValidPeriod(Period.Current))
 				throw new ArgumentException("Проверьте значение периода, по правилам такого периода не существует");
-			if (!Rules.MatchTimeRules.IsValidTimeInPeriod(period, time))
-				throw new ArgumentException("Проверьте время, данный период не может иметь такое время.");
-			if (Rules.MatchTimeRules.IsOvertimePeriod(period) && HomeTeam.Score != AwayTeam.Score)
+			if (Rules.MatchTimeRules.IsOvertimePeriod(Period.Current) && HomeTeam.Score != AwayTeam.Score)
 				throw new ArgumentException("Нельзя добавить гол в овертайме, если у команд разный счёт");
 		}
 
@@ -153,9 +160,8 @@ namespace SportsStats.Domain.Matches
 
 		private GoalEvent GetGoalEventById(int goalId)
 		{
-			GoalEvent goal = _goals.SingleOrDefault(goal => goal.Id == goalId);
-			if (goal == null)
-				throw new ArgumentException("Гол с данным Id не содержится в событиях этого матча");
+			GoalEvent goal = _goals.SingleOrDefault(goal => goal.Id == goalId)
+				?? throw new ArgumentException("Гол с данным Id не содержится в событиях этого матча");
 
 			return goal;
 		}
@@ -208,5 +214,50 @@ namespace SportsStats.Domain.Matches
 				throw new ArgumentException("Команда не учавствует в матче");
 		}
 		public void SetScheduleAt(DateTime scheduleAt) => ScheduledAt = scheduleAt;
+		public void StartNextPeriod()
+		{
+			if (!IsMatchInProgress())
+				throw new ArgumentException("Матч не начат или закончен");
+
+			Period.ValidateStart();
+			Period = new(Period.Current + 1, false, GenerateTextForPeriod(Period.Current, Period.IsBreak));
+
+			if (Rules.MatchTimeRules.IsOvertimePeriod(Period.Current))
+				IsOvertime = true;
+		}
+		public void FinishCurrentPeriod(DateTime dateTime)
+		{
+			if (!IsMatchInProgress())
+				throw new ArgumentException("Матч не начат или закончен");
+
+			Period.ValidateFinish();
+			if (Rules.MatchTimeRules.IsOneInfinityOvertime(Period.Current) && HomeTeam.Score == AwayTeam.Score)
+				throw new ArgumentException("Нельзя завершить бесконечный овертайм при равном счёте");
+
+			Period = new(Period.Current, true, GenerateTextForPeriod(Period.Current, Period.IsBreak));
+
+			if ((Period.Current + 1 == Rules.MatchTimeRules.FirstOvertimePeriod
+				|| Period.Current + 1 == Rules.MatchTimeRules.ShootoutPeriod)
+				&& HomeTeam.Score != AwayTeam.Score
+				|| Period.Current == Rules.MatchTimeRules.AllPeriodsCount)
+				Finish(dateTime);
+		}
+		private string? GenerateTextForPeriod(int period, bool isBreak)
+		{
+			string result = isBreak ? "Начать " : "Закончить ";
+
+			if (Rules.MatchTimeRules.IsRegularPeriod(period))
+				result += $"период {period}";
+			else if (Rules.MatchTimeRules.IsOvertimePeriod(period))
+				result += "овертайм " +
+					(Rules.MatchTimeRules.OvertimeRules!.OvertimesCount == 1 ?
+					"" : period - Rules.MatchTimeRules.PeriodsCount);
+			else if (Rules.MatchTimeRules.IsShootout(period))
+				result += $"буллиты";
+			else
+				return null;
+
+			return result;
+		}
 	}
 }

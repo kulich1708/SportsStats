@@ -1,5 +1,7 @@
+using SportsStats.Domain.Matches;
 using System;
 using System.Collections.Generic;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 
 namespace SportsStats.Domain.Tournaments.Rules.MatchTime
@@ -13,6 +15,17 @@ namespace SportsStats.Domain.Tournaments.Rules.MatchTime
 		public bool HasShootout { get; init; }               // Наличие буллитов
 		public MatchOvertimeRules? OvertimeRules { get; init; }
 		public MatchShootoutRules? ShootoutRules { get; init; }
+		public int? AllPeriodsCount
+		{
+			get
+			{
+				if (HasOvertime && !OvertimeRules!.OvertimesCount.HasValue)
+					return null;
+				return PeriodsCount + (OvertimeRules?.OvertimesCount ?? 0) + (HasShootout ? 1 : 0);
+			}
+		}
+		public int? FirstOvertimePeriod => HasOvertime ? PeriodsCount + 1 : null;
+		public int? ShootoutPeriod => HasShootout ? AllPeriodsCount : null;
 
 		private MatchTimeRules() { }
 		public MatchTimeRules(
@@ -98,9 +111,12 @@ namespace SportsStats.Domain.Tournaments.Rules.MatchTime
 		}
 		public bool IsOvertimePeriod(int period)
 			=> IsValidPeriod(period) && period > PeriodsCount;
-		private bool IsRegularPeriod(int period)
+		public bool IsRegularPeriod(int period)
 			=> IsValidPeriod(period) && period <= PeriodsCount;
-
+		public bool IsShootout(int period)
+			=> HasShootout && period == AllPeriodsCount;
+		public bool IsOneInfinityOvertime(int period)
+			=> !HasShootout && HasOvertime && !OvertimeRules!.OvertimeDurationSeconds.HasValue && IsOvertimePeriod(period);
 		public static MatchTimeRules CreateKHLMatchTimeRules()
 		{
 			var overtimeRules = MatchOvertimeRules.CreateKHLOvertimeRules();

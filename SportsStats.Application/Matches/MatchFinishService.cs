@@ -15,16 +15,16 @@ namespace SportsStats.Application.Matches
 		private readonly IMatchRepository _matchRepository = matchRepository;
 
 
-		public async Task FinishAsync(int matchId, DateTime? finishedAt = null)
-		{
-			Match match = await GetMatchOrThrowAsync(matchId);
+		//public async Task FinishAsync(int matchId, DateTime? finishedAt = null)
+		//{
+		//	Match match = await GetMatchOrThrowAsync(matchId);
 
-			match.Finish(finishedAt ?? match.StartedAt.Value.AddHours(2).AddMinutes(30));
+		//	match.Finish(finishedAt ?? match.StartedAt.Value.AddHours(2).AddMinutes(30));
 
-			await _matchRepository.SaveChangesAsync();
+		//	await _matchRepository.SaveChangesAsync();
 
-			await UpdateTeamsStatsAsync(match);
-		}
+		//	await UpdateTeamsStatsAsync(match);
+		//}
 		private async Task UpdateTeamsStatsAsync(Match match)
 		{
 

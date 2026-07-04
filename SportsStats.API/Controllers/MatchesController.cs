@@ -36,7 +36,7 @@ namespace SportsStats.API.Controllers
 		[HttpPost("{id}/goals")]
 		public async Task<ActionResult<int>> AddGoal(int id, [FromBody] AddGoalDTO dto)
 		{
-			int goalId = await _matchGoalService.AddGoalAsync(id, dto.ScoringTeamId, dto.GoalScorerId, dto.Period, dto.Time);
+			int goalId = await _matchGoalService.AddGoalAsync(id, dto.ScoringTeamId, dto.GoalScorerId, dto.Time);
 			return Ok(goalId);
 		}
 		[HttpPost("{id}/roster")]
@@ -57,12 +57,12 @@ namespace SportsStats.API.Controllers
 			await _matchLifecycleService.StartAsync(id, startedAt);
 			return NoContent();
 		}
-		[HttpPost("{id}/finish")]
-		public async Task<ActionResult> Finish(int id, [FromBody] DateTime? finishedAt)
-		{
-			await _matchFinishService.FinishAsync(id, finishedAt);
-			return NoContent();
-		}
+		//[HttpPost("{id}/finish")]
+		//public async Task<ActionResult> Finish(int id, [FromBody] DateTime? finishedAt)
+		//{
+		//	await _matchFinishService.FinishAsync(id, finishedAt);
+		//	return NoContent();
+		//}
 		[HttpPost("{id}/general")]
 		public async Task<ActionResult> ChangeGeneralInfo(int id, [FromBody] MatchGeneralInfoDTO dto)
 		{
