@@ -10,7 +10,7 @@ using SportsStats.Domain.Shared.Enums;
 
 namespace SportsStats.Domain.Matches
 {
-	public class Match : BaseEntity, IAggregateRoot
+	public class Match : AggregateRoot
 	{
 		private readonly List<GoalEvent> _goals = new();
 		public MatchTeam HomeTeam { get; private set; }
@@ -63,6 +63,7 @@ namespace SportsStats.Domain.Matches
 
 			FinishedAt = finishedAt;
 			Status = MatchStatus.Finished;
+			AddEvent(new MatchFinishedEvent(Id));
 
 			SetWinTypes();
 		}
@@ -125,7 +126,7 @@ namespace SportsStats.Domain.Matches
 			if (Rules.MatchTimeRules.DoesGoalEndMatch(Period.Current))
 			{
 				goal.SetAsWinningGoal(true);
-				FinishCurrentPeriod(scoringMoment);
+				FinishPeriod(scoringMoment);
 			}
 
 			return goal;
@@ -214,7 +215,7 @@ namespace SportsStats.Domain.Matches
 				throw new ArgumentException("Команда не учавствует в матче");
 		}
 		public void SetScheduleAt(DateTime scheduleAt) => ScheduledAt = scheduleAt;
-		public void StartNextPeriod()
+		public void StartPeriod()
 		{
 			if (!IsMatchInProgress())
 				throw new ArgumentException("Матч не начат или закончен");
@@ -225,7 +226,7 @@ namespace SportsStats.Domain.Matches
 			if (Rules.MatchTimeRules.IsOvertimePeriod(Period.Current))
 				IsOvertime = true;
 		}
-		public void FinishCurrentPeriod(DateTime dateTime)
+		public void FinishPeriod(DateTime dateTime)
 		{
 			if (!IsMatchInProgress())
 				throw new ArgumentException("Матч не начат или закончен");

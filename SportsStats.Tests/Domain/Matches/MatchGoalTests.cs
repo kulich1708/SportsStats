@@ -65,15 +65,15 @@ namespace SportsStats.Tests.Domain.Matches
 			PrepareRosters(match);
 			match.Start(new DateTime(2026, 4, 29, 19, 30, 0));
 			match.AddGoal(10, 101, 120, DateTime.UtcNow);
-			match.FinishCurrentPeriod(DateTime.UtcNow);
-			match.StartNextPeriod();
+			match.FinishPeriod(DateTime.UtcNow);
+			match.StartPeriod();
 			match.AddGoal(20, 201, 120, DateTime.UtcNow);
 
 
-			match.FinishCurrentPeriod(DateTime.UtcNow);
-			match.StartNextPeriod();
-			match.FinishCurrentPeriod(DateTime.UtcNow);
-			match.StartNextPeriod();
+			match.FinishPeriod(DateTime.UtcNow);
+			match.StartPeriod();
+			match.FinishPeriod(DateTime.UtcNow);
+			match.StartPeriod();
 
 			GoalEvent goal = match.AddGoal(10, 101, 30, DateTime.UtcNow);
 

@@ -7,9 +7,9 @@ namespace SportsStats.API.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
-	public class TeamStatsController(TeamStatsApplicationService teamStatsApplicationService) : ControllerBase
+	public class TeamStatsController(TeamStatsService teamStatsApplicationService) : ControllerBase
 	{
-		TeamStatsApplicationService _teamStatsApplicationService = teamStatsApplicationService;
+		TeamStatsService _teamStatsApplicationService = teamStatsApplicationService;
 		[HttpGet("tournaments/{tournamentId}")]
 		public async Task<ActionResult<List<TeamStatsDTO>>> GetByTournament(int tournamentId)
 		{

@@ -15,12 +15,10 @@ namespace SportsStats.Application.Matches
 {
 	public class MatchGoalService(
 		IMatchRepository matchRepository,
-		ITimeProvider timeProvider,
-		MatchFinishService matchFinishService) : MatchUseCaseBase(matchRepository)
+		ITimeProvider timeProvider) : MatchUseCaseBase(matchRepository)
 	{
 		private readonly IMatchRepository _matchRepository = matchRepository;
 		private readonly ITimeProvider _timeProvider = timeProvider;
-		private readonly MatchFinishService _matchFinishService = matchFinishService;
 
 
 		public async Task<int> AddGoalAsync(int matchId, int scoringTeamId, int goalScorerId, int time)

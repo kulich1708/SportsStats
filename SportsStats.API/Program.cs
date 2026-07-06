@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using SportsStats.API.Middleware;
-using SportsStats.Infrastructure.Persistence.DbContexts;
+using SportsStats.Application.Matches;
 using SportsStats.Infrastructure;
+using SportsStats.Infrastructure.Persistence.DbContexts;
 using System.Reflection;
 
 namespace SportsStats.API
@@ -12,15 +13,9 @@ namespace SportsStats.API
 		public static async Task Main(string[] args)
 		{
 			var builder = WebApplication.CreateBuilder(args);
-
-
-			builder.Services.AddDbContext<AppDbContext>(options =>
-				options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
-			);
 			ConfigureServices(builder);
 
 			var app = builder.Build();
-
 			await ConfigureMiddleware(app);
 
 			app.Run();
@@ -37,7 +32,10 @@ namespace SportsStats.API
 			//	});
 
 
-			builder.Services.AddSportsStatsCore(builder.Configuration);
+			services.AddDbContext<AppDbContext>(options =>
+				options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+			);
+			services.AddSportsStatsCore(builder.Configuration);
 
 			services.AddControllers();
 			services.AddEndpointsApiExplorer();
@@ -64,6 +62,10 @@ namespace SportsStats.API
 				{
 					options.IncludeXmlComments(xmlPath);
 				}
+			});
+			services.AddMediatR(cfg =>
+			{
+				cfg.RegisterServicesFromAssembly(typeof(MatchFinishHandler).Assembly);
 			});
 		}
 

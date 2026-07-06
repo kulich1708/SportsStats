@@ -8,14 +8,12 @@ namespace ConsoleApp.Matches
 {
 	public class MatchGenerator(
 		MatchLifecycleService matchLifecycleService,
-		MatchFinishService matchFinishService,
 		MatchRosterService matchRosterService,
 		MatchQueriesHandler matchQueriesHandler,
 		PlayerApplicationService playerApplicationService,
 		GoalsGenerator goalsGenerator)
 	{
 		private readonly MatchLifecycleService _matchLifecycleService = matchLifecycleService;
-		private readonly MatchFinishService _matchFinishService = matchFinishService;
 		private readonly MatchRosterService _matchRosterService = matchRosterService;
 		private readonly MatchQueriesHandler _matchQueriesHandler = matchQueriesHandler;
 		private readonly PlayerApplicationService _playerApplicationService = playerApplicationService;

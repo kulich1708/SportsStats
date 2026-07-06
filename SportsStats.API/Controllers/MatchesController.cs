@@ -11,13 +11,11 @@ namespace SportsStats.API.Controllers
 	public class MatchesController(
 		MatchGoalService matchGoalService,
 		MatchLifecycleService matchLifecycleService,
-		MatchFinishService matchFinishService,
 		MatchRosterService matchRosterService,
 		MatchQueriesHandler matchQueriesHandler) : ControllerBase
 	{
 		private readonly MatchGoalService _matchGoalService = matchGoalService;
 		private readonly MatchLifecycleService _matchLifecycleService = matchLifecycleService;
-		private readonly MatchFinishService _matchFinishService = matchFinishService;
 		private readonly MatchRosterService _matchRosterService = matchRosterService;
 		private readonly MatchQueriesHandler _matchQueriesHandler = matchQueriesHandler;
 

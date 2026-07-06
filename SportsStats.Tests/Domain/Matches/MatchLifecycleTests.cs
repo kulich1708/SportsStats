@@ -74,7 +74,7 @@ namespace SportsStats.Tests.Domain.Matches
 			DateTime startedAt = new(2026, 4, 29, 19, 30, 0);
 			match.Start(startedAt);
 
-			match.FinishCurrentPeriod(DateTime.UtcNow);
+			match.FinishPeriod(DateTime.UtcNow);
 
 			Assert.Equal(1, match.Period.Current);
 			Assert.True(match.Period.IsBreak);
@@ -83,7 +83,7 @@ namespace SportsStats.Tests.Domain.Matches
 		public void FinishPeriod_WhenMatchNotStarted_ThrowsArgumentException()
 		{
 			Match match = CreateMatch(TournamentRules.CreateKHLRules());
-			var ex = Assert.Throws<ArgumentException>(() => match.FinishCurrentPeriod(DateTime.UtcNow));
+			var ex = Assert.Throws<ArgumentException>(() => match.FinishPeriod(DateTime.UtcNow));
 
 			Assert.Contains("Матч не начат или закончен", ex.Message, StringComparison.OrdinalIgnoreCase);
 		}
@@ -94,9 +94,9 @@ namespace SportsStats.Tests.Domain.Matches
 			DateTime startedAt = new(2026, 4, 29, 19, 30, 0);
 			match.Start(startedAt);
 
-			match.FinishCurrentPeriod(DateTime.UtcNow);
+			match.FinishPeriod(DateTime.UtcNow);
 
-			var ex = Assert.Throws<ArgumentException>(() => match.FinishCurrentPeriod(DateTime.UtcNow));
+			var ex = Assert.Throws<ArgumentException>(() => match.FinishPeriod(DateTime.UtcNow));
 
 			Assert.Contains("Период уже закончен", ex.Message, StringComparison.OrdinalIgnoreCase);
 		}
@@ -109,8 +109,8 @@ namespace SportsStats.Tests.Domain.Matches
 			DateTime startedAt = new(2026, 4, 29, 19, 30, 0);
 			match.Start(startedAt);
 
-			match.FinishCurrentPeriod(DateTime.UtcNow);
-			match.StartNextPeriod();
+			match.FinishPeriod(DateTime.UtcNow);
+			match.StartPeriod();
 
 			Assert.Equal(2, match.Period.Current);
 			Assert.False(match.Period.IsBreak);
@@ -119,7 +119,7 @@ namespace SportsStats.Tests.Domain.Matches
 		public void StartPeriod_WhenMatchNotStarted_ThrowsArgumentException()
 		{
 			Match match = CreateMatch(TournamentRules.CreateKHLRules());
-			var ex = Assert.Throws<ArgumentException>(() => match.StartNextPeriod());
+			var ex = Assert.Throws<ArgumentException>(() => match.StartPeriod());
 
 			Assert.Contains("Матч не начат или закончен", ex.Message, StringComparison.OrdinalIgnoreCase);
 		}
@@ -130,9 +130,9 @@ namespace SportsStats.Tests.Domain.Matches
 			DateTime startedAt = new(2026, 4, 29, 19, 30, 0);
 			match.Start(startedAt);
 
-			match.FinishCurrentPeriod(DateTime.UtcNow);
-			match.StartNextPeriod();
-			var ex = Assert.Throws<ArgumentException>(() => match.StartNextPeriod());
+			match.FinishPeriod(DateTime.UtcNow);
+			match.StartPeriod();
+			var ex = Assert.Throws<ArgumentException>(() => match.StartPeriod());
 
 			Assert.Contains("Период уже начат", ex.Message, StringComparison.OrdinalIgnoreCase);
 		}
@@ -187,11 +187,11 @@ namespace SportsStats.Tests.Domain.Matches
 			match.Start(startedAt);
 			match.AddGoal(10, 101, 300, startedAt.AddMinutes(5));
 
-			match.FinishCurrentPeriod(DateTime.UtcNow);
-			match.StartNextPeriod();
-			match.FinishCurrentPeriod(DateTime.UtcNow);
-			match.StartNextPeriod();
-			match.FinishCurrentPeriod(DateTime.UtcNow);
+			match.FinishPeriod(DateTime.UtcNow);
+			match.StartPeriod();
+			match.FinishPeriod(DateTime.UtcNow);
+			match.StartPeriod();
+			match.FinishPeriod(DateTime.UtcNow);
 
 			Assert.Equal(MatchStatus.Finished, match.Status);
 			Assert.Equal(MatchWinType.REGULATION_WIN, match.HomeTeam.WinType);
@@ -209,15 +209,15 @@ namespace SportsStats.Tests.Domain.Matches
 
 			match.AddGoal(10, 101, 300, startedAt.AddMinutes(5));
 
-			match.FinishCurrentPeriod(DateTime.UtcNow);
-			match.StartNextPeriod();
+			match.FinishPeriod(DateTime.UtcNow);
+			match.StartPeriod();
 
 			match.AddGoal(20, 201, 600, startedAt.AddMinutes(25));
 
-			match.FinishCurrentPeriod(DateTime.UtcNow);
-			match.StartNextPeriod();
-			match.FinishCurrentPeriod(DateTime.UtcNow);
-			match.StartNextPeriod();
+			match.FinishPeriod(DateTime.UtcNow);
+			match.StartPeriod();
+			match.FinishPeriod(DateTime.UtcNow);
+			match.StartPeriod();
 
 			match.AddGoal(20, 201, 30, startedAt.AddMinutes(61));
 
@@ -237,21 +237,21 @@ namespace SportsStats.Tests.Domain.Matches
 
 			match.AddGoal(10, 101, 5 * 60, startedAt.AddMinutes(5));
 
-			match.FinishCurrentPeriod(DateTime.UtcNow);
-			match.StartNextPeriod();
+			match.FinishPeriod(DateTime.UtcNow);
+			match.StartPeriod();
 
 			match.AddGoal(20, 201, 10 * 60, startedAt.AddMinutes(25));
 
-			match.FinishCurrentPeriod(DateTime.UtcNow);
-			match.StartNextPeriod();
-			match.FinishCurrentPeriod(DateTime.UtcNow);
-			match.StartNextPeriod();
+			match.FinishPeriod(DateTime.UtcNow);
+			match.StartPeriod();
+			match.FinishPeriod(DateTime.UtcNow);
+			match.StartPeriod();
 
 			match.AddGoal(20, 201, 2 * 60, startedAt.AddMinutes(61));
-			match.FinishCurrentPeriod(DateTime.UtcNow);
-			match.StartNextPeriod();
+			match.FinishPeriod(DateTime.UtcNow);
+			match.StartPeriod();
 			match.AddGoal(10, 101, 4 * 60, startedAt.AddMinutes(68));
-			match.FinishCurrentPeriod(DateTime.UtcNow);
+			match.FinishPeriod(DateTime.UtcNow);
 
 			Assert.Equal(MatchStatus.Finished, match.Status);
 			Assert.True(match.IsOvertime);
@@ -266,14 +266,14 @@ namespace SportsStats.Tests.Domain.Matches
 			DateTime startedAt = new(2026, 4, 29, 19, 30, 0);
 			DateTime finishedAt = new(2026, 4, 29, 20, 40, 0);
 			match.Start(startedAt);
-			match.FinishCurrentPeriod(DateTime.UtcNow);
-			match.StartNextPeriod();
-			match.FinishCurrentPeriod(DateTime.UtcNow);
-			match.StartNextPeriod();
-			match.FinishCurrentPeriod(DateTime.UtcNow);
-			match.StartNextPeriod();
+			match.FinishPeriod(DateTime.UtcNow);
+			match.StartPeriod();
+			match.FinishPeriod(DateTime.UtcNow);
+			match.StartPeriod();
+			match.FinishPeriod(DateTime.UtcNow);
+			match.StartPeriod();
 
-			var ex = Assert.Throws<ArgumentException>(() => match.FinishCurrentPeriod(DateTime.UtcNow));
+			var ex = Assert.Throws<ArgumentException>(() => match.FinishPeriod(DateTime.UtcNow));
 
 			Assert.Contains("Нельзя завершить бесконечный", ex.Message);
 		}
