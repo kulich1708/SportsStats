@@ -10,12 +10,12 @@ using System.Text;
 namespace SportsStats.Application.Matches
 {
 	public class MatchFinishHandler(
-		TeamStatsService teamStatsService) : INotificationHandler<MatchFinishedNotification>
+		TeamStatsService teamStatsService) : INotificationHandler<MatchFinishedEvent>
 	{
 		private readonly TeamStatsService _teamStatsService = teamStatsService;
-		public async Task Handle(MatchFinishedNotification notification, CancellationToken ct)
+		public async Task Handle(MatchFinishedEvent @event, CancellationToken ct)
 		{
-			await _teamStatsService.UpdateTeamsStatsAsync(notification.DomainEvent.MatchId);
+			await _teamStatsService.UpdateTeamsStatsAsync(@event.MatchId);
 		}
 
 	}

@@ -39,7 +39,7 @@ namespace SportsStats.Domain.Matches
 
 			int period = 0;
 			bool isBreak = true;
-			Period = new(period, isBreak, GenerateTextForPeriod(period, isBreak));
+			Period = new(period, isBreak, GenerateTextForNextPeriod(period, isBreak));
 		}
 		public void Start(DateTime startedAt)
 		{
@@ -51,7 +51,7 @@ namespace SportsStats.Domain.Matches
 
 			int period = 1;
 			bool isBreak = false;
-			Period = new(period, isBreak, GenerateTextForPeriod(period, isBreak));
+			Period = new(period, isBreak, GenerateTextForNextPeriod(period, isBreak));
 		}
 
 		private void Finish(DateTime finishedAt)
@@ -221,7 +221,7 @@ namespace SportsStats.Domain.Matches
 				throw new ArgumentException("Матч не начат или закончен");
 
 			Period.ValidateStart();
-			Period = new(Period.Current + 1, false, GenerateTextForPeriod(Period.Current, Period.IsBreak));
+			Period = new(Period.Current + 1, false, GenerateTextForNextPeriod(Period.Current + 1, false));
 
 			if (Rules.MatchTimeRules.IsOvertimePeriod(Period.Current))
 				IsOvertime = true;
@@ -235,7 +235,7 @@ namespace SportsStats.Domain.Matches
 			if (Rules.MatchTimeRules.IsOneInfinityOvertime(Period.Current) && HomeTeam.Score == AwayTeam.Score)
 				throw new ArgumentException("Нельзя завершить бесконечный овертайм при равном счёте");
 
-			Period = new(Period.Current, true, GenerateTextForPeriod(Period.Current, Period.IsBreak));
+			Period = new(Period.Current, true, GenerateTextForNextPeriod(Period.Current, true));
 
 			if ((Period.Current + 1 == Rules.MatchTimeRules.FirstOvertimePeriod
 				|| Period.Current + 1 == Rules.MatchTimeRules.ShootoutPeriod)
@@ -243,16 +243,16 @@ namespace SportsStats.Domain.Matches
 				|| Period.Current == Rules.MatchTimeRules.AllPeriodsCount)
 				Finish(dateTime);
 		}
-		private string? GenerateTextForPeriod(int period, bool isBreak)
+		private string? GenerateTextForNextPeriod(int period, bool isBreak)
 		{
 			string result = isBreak ? "Начать " : "Закончить ";
 
 			if (Rules.MatchTimeRules.IsRegularPeriod(period))
-				result += $"период {period}";
+				result += $"период {period + (isBreak ? 1 : 0)}";
 			else if (Rules.MatchTimeRules.IsOvertimePeriod(period))
 				result += "овертайм " +
 					(Rules.MatchTimeRules.OvertimeRules!.OvertimesCount == 1 ?
-					"" : period - Rules.MatchTimeRules.PeriodsCount);
+					"" : period - Rules.MatchTimeRules.PeriodsCount + (isBreak ? 1 : 0));
 			else if (Rules.MatchTimeRules.IsShootout(period))
 				result += $"буллиты";
 			else
