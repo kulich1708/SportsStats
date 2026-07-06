@@ -27,6 +27,7 @@ namespace SportsStats.Application.Matches.DTOs.Responses
 		string HomeTeamWinType,
 		string AwayTeamWinType,
 		bool IsOvertime,
+		PeriodDTO Period,
 		List<GoalDTO> Goals,
 		TournamentRulesDTO Rules
 	);

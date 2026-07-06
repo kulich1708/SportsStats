@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using SportsStats.Application.Matches;
 using SportsStats.Domain.Common;
 using SportsStats.Domain.Matches;
 using SportsStats.Domain.Teams;
@@ -29,7 +30,10 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 			await _context.SaveChangesAsync();
 
 			foreach (var @event in events)
+			{
+				var notification = new MatchFinishedNotification(@event);
 				await _mediator.Publish(@event);
+			}
 
 			ClearEventsFromTrackedAggregates();
 		}

@@ -40,6 +40,7 @@ namespace SportsStats.Application.Matches
 				match.HomeTeam.WinType.GetDescription(),
 				match.AwayTeam.WinType.GetDescription(),
 				match.IsOvertime,
+				ToDTO(match.Period),
 				match.Goals.Select(
 					g => MatchMapper.ToDTO(g, g.ScoringTeamId == match.HomeTeam.Id ? homeTeam : awayTeam,
 											g.ScoringTeamId == match.HomeTeam.Id ? homeTeamRoster : awayTeamRoster))
@@ -75,7 +76,10 @@ namespace SportsStats.Application.Matches
 			match.AwayTeam.Score,
 			match.HomeTeam.WinType.GetDescription(),
 			match.AwayTeam.WinType.GetDescription(),
-			match.IsOvertime
+			match.IsOvertime,
+			ToShortPeriodDTO(match.Period)
 		);
+		public static PeriodDTO ToDTO(Period period) => new(period.Current, period.IsBreak, period.Title);
+		public static PeriodShortDTO ToShortPeriodDTO(Period period) => new(period.Current, period.IsBreak);
 	}
 }
