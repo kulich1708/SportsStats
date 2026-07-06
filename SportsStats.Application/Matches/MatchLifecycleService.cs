@@ -51,6 +51,23 @@ namespace SportsStats.Application.Matches
 
 			await _matchRepository.SaveChangesAsync();
 		}
+
+		public async Task StartPeriod(int id, DateTime? startedAt = null)
+		{
+			Match match = await GetMatchOrThrowAsync(id);
+
+			match.StartPeriod();
+
+			await _matchRepository.SaveChangesAsync();
+		}
+		public async Task FinishPeriod(int id, DateTime? finishedAt = null)
+		{
+			Match match = await GetMatchOrThrowAsync(id);
+
+			match.FinishPeriod(finishedAt ?? _timeProvider.GetCurrentTime());
+
+			await _matchRepository.SaveChangesAsync();
+		}
 		public async Task ChangeGeneralInfoAsync(int id, MatchGeneralInfoDTO dto)
 		{
 			Match match = await GetMatchOrThrowAsync(id);
