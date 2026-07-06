@@ -52,7 +52,7 @@ namespace SportsStats.Application.Matches
 			await _matchRepository.SaveChangesAsync();
 		}
 
-		public async Task StartPeriod(int id, DateTime? startedAt = null)
+		public async Task StartPeriodAsync(int id, DateTime? startedAt = null)
 		{
 			Match match = await GetMatchOrThrowAsync(id);
 
@@ -60,7 +60,7 @@ namespace SportsStats.Application.Matches
 
 			await _matchRepository.SaveChangesAsync();
 		}
-		public async Task FinishPeriod(int id, DateTime? finishedAt = null)
+		public async Task FinishPeriodAsync(int id, DateTime? finishedAt = null)
 		{
 			Match match = await GetMatchOrThrowAsync(id);
 

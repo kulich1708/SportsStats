@@ -55,12 +55,18 @@ namespace SportsStats.API.Controllers
 			await _matchLifecycleService.StartAsync(id, startedAt);
 			return NoContent();
 		}
-		//[HttpPost("{id}/finish")]
-		//public async Task<ActionResult> Finish(int id, [FromBody] DateTime? finishedAt)
-		//{
-		//	await _matchFinishService.FinishAsync(id, finishedAt);
-		//	return NoContent();
-		//}
+		[HttpPost("{id}/period/start")]
+		public async Task<ActionResult> StartPeriod(int id, [FromBody] DateTime? startedAt)
+		{
+			await _matchLifecycleService.StartPeriodAsync(id, startedAt);
+			return NoContent();
+		}
+		[HttpPost("{id}/period/finish")]
+		public async Task<ActionResult> FinishPeriod(int id, [FromBody] DateTime? startedAt)
+		{
+			await _matchLifecycleService.FinishPeriodAsync(id, startedAt);
+			return NoContent();
+		}
 		[HttpPost("{id}/general")]
 		public async Task<ActionResult> ChangeGeneralInfo(int id, [FromBody] MatchGeneralInfoDTO dto)
 		{
