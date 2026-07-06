@@ -11,13 +11,11 @@ namespace SportsStats.API.Controllers
 	public class MatchesController(
 		MatchGoalService matchGoalService,
 		MatchLifecycleService matchLifecycleService,
-		MatchFinishService matchFinishService,
 		MatchRosterService matchRosterService,
 		MatchQueriesHandler matchQueriesHandler) : ControllerBase
 	{
 		private readonly MatchGoalService _matchGoalService = matchGoalService;
 		private readonly MatchLifecycleService _matchLifecycleService = matchLifecycleService;
-		private readonly MatchFinishService _matchFinishService = matchFinishService;
 		private readonly MatchRosterService _matchRosterService = matchRosterService;
 		private readonly MatchQueriesHandler _matchQueriesHandler = matchQueriesHandler;
 
@@ -36,7 +34,7 @@ namespace SportsStats.API.Controllers
 		[HttpPost("{id}/goals")]
 		public async Task<ActionResult<int>> AddGoal(int id, [FromBody] AddGoalDTO dto)
 		{
-			int goalId = await _matchGoalService.AddGoalAsync(id, dto.ScoringTeamId, dto.GoalScorerId, dto.Period, dto.Time);
+			int goalId = await _matchGoalService.AddGoalAsync(id, dto.ScoringTeamId, dto.GoalScorerId, dto.Time);
 			return Ok(goalId);
 		}
 		[HttpPost("{id}/roster")]
@@ -57,10 +55,16 @@ namespace SportsStats.API.Controllers
 			await _matchLifecycleService.StartAsync(id, startedAt);
 			return NoContent();
 		}
-		[HttpPost("{id}/finish")]
-		public async Task<ActionResult> Finish(int id, [FromBody] DateTime? finishedAt)
+		[HttpPost("{id}/period/start")]
+		public async Task<ActionResult> StartPeriod(int id, [FromBody] DateTime? startedAt)
 		{
-			await _matchFinishService.FinishAsync(id, finishedAt);
+			await _matchLifecycleService.StartPeriodAsync(id, startedAt);
+			return NoContent();
+		}
+		[HttpPost("{id}/period/finish")]
+		public async Task<ActionResult> FinishPeriod(int id, [FromBody] DateTime? startedAt)
+		{
+			await _matchLifecycleService.FinishPeriodAsync(id, startedAt);
 			return NoContent();
 		}
 		[HttpPost("{id}/general")]

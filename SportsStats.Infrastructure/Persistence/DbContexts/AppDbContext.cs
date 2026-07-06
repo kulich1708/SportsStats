@@ -113,6 +113,12 @@ namespace SportsStats.Infrastructure.Persistence.DbContexts
 						  v => v == null ? null : JsonSerializer.Serialize(v),
 						  v => v == null ? null : JsonSerializer.Deserialize<TournamentRules>(v)
 					  );
+				entity.Property(m => m.Period)
+					  .HasColumnType("jsonb")
+					  .HasConversion(
+						  v => v == null ? null : JsonSerializer.Serialize(v),
+						  v => v == null ? null : JsonSerializer.Deserialize<Period>(v)
+					  );
 			});
 
 			modelBuilder.Entity<Team>(entity =>

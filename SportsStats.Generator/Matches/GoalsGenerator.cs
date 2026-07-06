@@ -76,7 +76,7 @@ namespace ConsoleApp.Matches
 					strengthType = GoalStrengthType.PowerPlay;
 
 
-				int goalId = await _matchGoalService.AddGoalAsync(matchId, teams[scoringTeamIndex].Id, goalScorerId, period, time);
+				int goalId = await _matchGoalService.AddGoalAsync(matchId, teams[scoringTeamIndex].Id, goalScorerId, time);
 				await _matchGoalService.FillGoalDetailsAsync(matchId, goalId, goalScorerId, firstAssistId, secondAssistId, strengthType);
 				return time;
 			}

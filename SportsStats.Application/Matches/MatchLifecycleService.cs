@@ -32,7 +32,7 @@ namespace SportsStats.Application.Matches
 			Tournament tournament = await _tournamentRepository.GetAsync(tournamentId)
 				?? throw new ArgumentException("Нет турнира с таким Id");
 
-			Match match = _matchService.CreateMatch(tournament, homeTeamId, awayTeamId, scheduledAt, tournament.TournamentRules);
+			Match match = _matchService.CreateMatch(tournament, homeTeamId, awayTeamId, scheduledAt, tournament.TournamentRules!);
 			await _matchRepository.AddAsync(match);
 			await _matchRepository.SaveChangesAsync();
 			return match.Id;
@@ -52,6 +52,22 @@ namespace SportsStats.Application.Matches
 			await _matchRepository.SaveChangesAsync();
 		}
 
+		public async Task StartPeriodAsync(int id, DateTime? startedAt = null)
+		{
+			Match match = await GetMatchOrThrowAsync(id);
+
+			match.StartPeriod();
+
+			await _matchRepository.SaveChangesAsync();
+		}
+		public async Task FinishPeriodAsync(int id, DateTime? finishedAt = null)
+		{
+			Match match = await GetMatchOrThrowAsync(id);
+
+			match.FinishPeriod(finishedAt ?? _timeProvider.GetCurrentTime());
+
+			await _matchRepository.SaveChangesAsync();
+		}
 		public async Task ChangeGeneralInfoAsync(int id, MatchGeneralInfoDTO dto)
 		{
 			Match match = await GetMatchOrThrowAsync(id);

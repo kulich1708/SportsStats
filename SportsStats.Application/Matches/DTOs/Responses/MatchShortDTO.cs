@@ -19,6 +19,7 @@ namespace SportsStats.Application.Matches.DTOs.Responses
 		int AwayTeamScore,
 		string HomeTeamWinType,
 		string AwayTeamWinType,
-		bool IsOvertime
+		bool IsOvertime,
+		PeriodShortDTO Period
 	);
 }

@@ -14,7 +14,7 @@ namespace SportsStats.Tests.Domain.Matches
 			Match match = CreateMatch(CreateRulesWithOvertime());
 			PrepareRosters(match);
 
-			var ex = Assert.Throws<ArgumentException>(() => match.AddGoal(10, 101, 1, 120, DateTime.UtcNow));
+			var ex = Assert.Throws<ArgumentException>(() => match.AddGoal(10, 101, 120, DateTime.UtcNow));
 
 			Assert.Contains("сейчас не идёт", ex.Message, StringComparison.OrdinalIgnoreCase);
 		}
@@ -26,7 +26,7 @@ namespace SportsStats.Tests.Domain.Matches
 			PrepareRosters(match);
 			match.Start(new DateTime(2026, 4, 29, 19, 30, 0));
 
-			var ex = Assert.Throws<ArgumentException>(() => match.AddGoal(999, 101, 1, 120, DateTime.UtcNow));
+			var ex = Assert.Throws<ArgumentException>(() => match.AddGoal(999, 101, 120, DateTime.UtcNow));
 
 			Assert.Contains("не учавствует", ex.Message, StringComparison.OrdinalIgnoreCase);
 		}
@@ -38,7 +38,7 @@ namespace SportsStats.Tests.Domain.Matches
 			PrepareRosters(match);
 			match.Start(new DateTime(2026, 4, 29, 19, 30, 0));
 
-			var ex = Assert.Throws<ArgumentException>(() => match.AddGoal(10, 999, 1, 120, DateTime.UtcNow));
+			var ex = Assert.Throws<ArgumentException>(() => match.AddGoal(10, 999, 120, DateTime.UtcNow));
 
 			Assert.Contains("нет в заявке", ex.Message, StringComparison.OrdinalIgnoreCase);
 		}
@@ -50,11 +50,12 @@ namespace SportsStats.Tests.Domain.Matches
 			PrepareRosters(match);
 			match.Start(new DateTime(2026, 4, 29, 19, 30, 0));
 
-			match.AddGoal(10, 101, 1, 120, DateTime.UtcNow);
+			var goal = match.AddGoal(10, 101, 120, DateTime.UtcNow);
 
 			Assert.Equal(1, match.HomeTeam.Score);
 			Assert.Equal(0, match.AwayTeam.Score);
 			Assert.Single(match.Goals);
+			Assert.Equal(1, goal.Period);
 		}
 
 		[Fact]
@@ -63,26 +64,23 @@ namespace SportsStats.Tests.Domain.Matches
 			Match match = CreateMatch(CreateRulesWithOvertime());
 			PrepareRosters(match);
 			match.Start(new DateTime(2026, 4, 29, 19, 30, 0));
-			match.AddGoal(10, 101, 1, 120, DateTime.UtcNow);
-			match.AddGoal(20, 201, 2, 120, DateTime.UtcNow);
+			match.AddGoal(10, 101, 120, DateTime.UtcNow);
+			match.FinishPeriod(DateTime.UtcNow);
+			match.StartPeriod();
+			match.AddGoal(20, 201, 120, DateTime.UtcNow);
 
-			GoalEvent goal = match.AddGoal(10, 101, 4, 30, DateTime.UtcNow);
+
+			match.FinishPeriod(DateTime.UtcNow);
+			match.StartPeriod();
+			match.FinishPeriod(DateTime.UtcNow);
+			match.StartPeriod();
+
+			GoalEvent goal = match.AddGoal(10, 101, 30, DateTime.UtcNow);
 
 			Assert.True(goal.IsWinning);
 			Assert.True(match.IsOvertime);
 		}
 
-		[Fact]
-		public void AddGoal_WhenPeriodIsInvalid_ThrowsArgumentException()
-		{
-			Match match = CreateMatch(CreateRulesWithOvertime());
-			PrepareRosters(match);
-			match.Start(new DateTime(2026, 4, 29, 19, 30, 0));
-
-			var ex = Assert.Throws<ArgumentException>(() => match.AddGoal(10, 101, 7, 120, DateTime.UtcNow));
-
-			Assert.Contains("периода", ex.Message, StringComparison.OrdinalIgnoreCase);
-		}
 
 		[Fact]
 		public void FillGoalDetails_WhenAssistIsGoalScorer_ThrowsArgumentException()
@@ -91,7 +89,7 @@ namespace SportsStats.Tests.Domain.Matches
 			PrepareRosters(match);
 			match.AddPlayerToRoster(102, 10);
 			match.Start(new DateTime(2026, 4, 29, 19, 30, 0));
-			GoalEvent goal = match.AddGoal(10, 101, 1, 120, DateTime.UtcNow);
+			GoalEvent goal = match.AddGoal(10, 101, 120, DateTime.UtcNow);
 
 			var ex = Assert.Throws<ArgumentException>(() => match.FillGoalDetails(
 				goalId: goal.Id,

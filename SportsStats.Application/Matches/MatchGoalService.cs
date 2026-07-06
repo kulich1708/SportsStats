@@ -15,24 +15,19 @@ namespace SportsStats.Application.Matches
 {
 	public class MatchGoalService(
 		IMatchRepository matchRepository,
-		ITimeProvider timeProvider,
-		MatchFinishService matchFinishService) : MatchUseCaseBase(matchRepository)
+		ITimeProvider timeProvider) : MatchUseCaseBase(matchRepository)
 	{
 		private readonly IMatchRepository _matchRepository = matchRepository;
 		private readonly ITimeProvider _timeProvider = timeProvider;
-		private readonly MatchFinishService _matchFinishService = matchFinishService;
 
 
-		public async Task<int> AddGoalAsync(int matchId, int scoringTeamId, int goalScorerId, int period, int time)
+		public async Task<int> AddGoalAsync(int matchId, int scoringTeamId, int goalScorerId, int time)
 		{
 			Match match = await GetMatchOrThrowAsync(matchId);
 
-			GoalEvent goal = match.AddGoal(scoringTeamId, goalScorerId, period, time, _timeProvider.GetCurrentTime());
+			GoalEvent goal = match.AddGoal(scoringTeamId, goalScorerId, time, _timeProvider.GetCurrentTime());
 
-			if (goal.IsWinning)
-				await _matchFinishService.FinishAsync(matchId);
-			else
-				await _matchRepository.SaveChangesAsync();
+			await _matchRepository.SaveChangesAsync();
 
 			return goal.Id;
 		}

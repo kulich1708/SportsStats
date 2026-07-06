@@ -8,14 +8,12 @@ namespace ConsoleApp.Matches
 {
 	public class MatchGenerator(
 		MatchLifecycleService matchLifecycleService,
-		MatchFinishService matchFinishService,
 		MatchRosterService matchRosterService,
 		MatchQueriesHandler matchQueriesHandler,
 		PlayerApplicationService playerApplicationService,
 		GoalsGenerator goalsGenerator)
 	{
 		private readonly MatchLifecycleService _matchLifecycleService = matchLifecycleService;
-		private readonly MatchFinishService _matchFinishService = matchFinishService;
 		private readonly MatchRosterService _matchRosterService = matchRosterService;
 		private readonly MatchQueriesHandler _matchQueriesHandler = matchQueriesHandler;
 		private readonly PlayerApplicationService _playerApplicationService = playerApplicationService;
@@ -29,8 +27,8 @@ namespace ConsoleApp.Matches
 			await _matchLifecycleService.StartAsync(matchId, scheduleAt);
 			await _goalsGenerator.GenerateGoalsAsync(matchId);
 
-			if (!await _matchQueriesHandler.IsFinished(matchId))
-				await _matchFinishService.FinishAsync(matchId, scheduleAt.AddHours(2).AddMinutes(30));
+			//if (!await _matchQueriesHandler.IsFinished(matchId))
+			//	await _matchFinishService.FinishAsync(matchId, scheduleAt.AddHours(2).AddMinutes(30));
 
 			return matchId;
 		}

@@ -1,18 +1,18 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
+using SportsStats.Domain.Common;
 using SportsStats.Domain.Matches;
-using SportsStats.Domain.Teams;
-using SportsStats.Domain.Tournaments;
 using SportsStats.Infrastructure.Persistence.DbContexts;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace SportsStats.Infrastructure.Persistence.Repositories
 {
-	public class MatchRepository(AppDbContext context) : IMatchRepository
+	public class MatchRepository(AppDbContext context, IMediator mediator) : IMatchRepository
 	{
 		private readonly AppDbContext _context = context;
+		private readonly IMediator _mediator = mediator;
 
 		public async Task<Match?> GetAsync(int matchId)
 		{
@@ -21,7 +21,45 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 
 		public async Task SaveChangesAsync()
 		{
+			var events = GetEventsFromTrackedAggregates();
+
 			await _context.SaveChangesAsync();
+
+			foreach (var @event in events)
+				await _mediator.Publish(@event);
+
+			ClearEventsFromTrackedAggregates();
+		}
+		private List<IDomainEvent> GetEventsFromTrackedAggregates()
+		{
+			var events = new List<IDomainEvent>();
+
+			var aggregates = _context.ChangeTracker
+				.Entries()
+				.Where(e => e.Entity is AggregateRoot)
+				.Select(e => (AggregateRoot)e.Entity)
+				.ToList();
+
+			foreach (var aggregate in aggregates)
+			{
+				events.AddRange(aggregate.Events);
+			}
+
+			return events;
+		}
+
+		private void ClearEventsFromTrackedAggregates()
+		{
+			var aggregates = _context.ChangeTracker
+				.Entries()
+				.Where(e => e.Entity is AggregateRoot)
+				.Select(e => (AggregateRoot)e.Entity)
+				.ToList();
+
+			foreach (var aggregate in aggregates)
+			{
+				aggregate.ClearEvents();
+			}
 		}
 		public async Task AddAsync(Match match)
 		{
