@@ -247,7 +247,7 @@ namespace SportsStats.Domain.Matches
 		{
 			string result = isBreak ? "Начать " : "Закончить ";
 
-			if (Rules.MatchTimeRules.IsRegularPeriod(period))
+			if (Rules.MatchTimeRules.IsRegularPeriod(period + (isBreak ? 1 : 0)))
 				result += $"период {period + (isBreak ? 1 : 0)}";
 			else if (Rules.MatchTimeRules.IsOvertimePeriod(period))
 				result += "овертайм " +
