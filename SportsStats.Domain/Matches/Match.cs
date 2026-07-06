@@ -245,14 +245,20 @@ namespace SportsStats.Domain.Matches
 		}
 		private string? GenerateTextForNextPeriod(int period, bool isBreak)
 		{
-			string result = isBreak ? "Начать " : "Закончить ";
+			string result = isBreak ? "Начать " : "Завершить ";
+			if (isBreak)
+				period++;
 
-			if (Rules.MatchTimeRules.IsRegularPeriod(period + (isBreak ? 1 : 0)))
-				result += $"период {period + (isBreak ? 1 : 0)}";
+			if ((Rules.MatchTimeRules.IsShootout(period)
+				|| Rules.MatchTimeRules.AllPeriodsCount == period && !Rules.MatchTimeRules.IsDrawPossible)
+				 && !isBreak)
+				return null;
+			if (Rules.MatchTimeRules.IsRegularPeriod(period))
+				result += $"период {period}";
 			else if (Rules.MatchTimeRules.IsOvertimePeriod(period))
-				result += "овертайм " +
+				result += "овертайм" +
 					(Rules.MatchTimeRules.OvertimeRules!.OvertimesCount == 1 ?
-					"" : period - Rules.MatchTimeRules.PeriodsCount + (isBreak ? 1 : 0));
+					"" : $" {period - Rules.MatchTimeRules.PeriodsCount}");
 			else if (Rules.MatchTimeRules.IsShootout(period))
 				result += $"буллиты";
 			else

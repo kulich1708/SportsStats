@@ -137,47 +137,6 @@ namespace SportsStats.Tests.Domain.Matches
 			Assert.Contains("Период уже начат", ex.Message, StringComparison.OrdinalIgnoreCase);
 		}
 
-		//[Fact]
-		//public void Finish_WhenInProgress_ChangesStatusToFinished()
-		//{
-		//	Match match = CreateMatch(CreateDrawNotAllowedRules());
-		//	PrepareRosters(match);
-		//	DateTime startedAt = new(2026, 4, 29, 19, 30, 0);
-		//	DateTime finishedAt = new(2026, 4, 29, 20, 30, 0);
-		//	match.Start(startedAt);
-		//	match.AddGoal(10, 101, 300, startedAt.AddMinutes(5));
-
-		//	match.Finish(finishedAt);
-
-		//	Assert.True(match.IsMatchFinished());
-		//	Assert.Equal(MatchStatus.Finished, match.Status);
-		//	Assert.Equal(finishedAt, match.FinishedAt);
-		//}
-
-		//[Fact]
-		//public void Finish_WhenNotInProgress_ThrowsArgumentException()
-		//{
-		//	Match match = CreateMatch(TournamentRules.CreateKHLRules());
-		//	DateTime finishedAt = new(2026, 4, 29, 20, 30, 0);
-
-		//	var ex = Assert.Throws<ArgumentException>(() => match.Finish(finishedAt));
-
-		//	Assert.Contains("ещё не начат", ex.Message, StringComparison.OrdinalIgnoreCase);
-		//}
-
-		//[Fact]
-		//public void Finish_WhenScoreIsDrawAndDrawNotAllowed_ThrowsArgumentException()
-		//{
-		//	Match match = CreateMatch(CreateDrawNotAllowedRules());
-		//	DateTime startedAt = new(2026, 4, 29, 19, 30, 0);
-		//	DateTime finishedAt = new(2026, 4, 29, 20, 30, 0);
-		//	match.Start(startedAt);
-
-		//	var ex = Assert.Throws<ArgumentException>(() => match.Finish(finishedAt));
-
-		//	Assert.Contains("ничейным", ex.Message, StringComparison.OrdinalIgnoreCase);
-		//}
-
 		[Fact]
 		public void FinishPeriod_WhenHomeWinsInRegulation_FinishMatchAndSetsWinTypes()
 		{
@@ -276,6 +235,51 @@ namespace SportsStats.Tests.Domain.Matches
 			var ex = Assert.Throws<ArgumentException>(() => match.FinishPeriod(DateTime.UtcNow));
 
 			Assert.Contains("Нельзя завершить бесконечный", ex.Message);
+		}
+		[Fact]
+		public void StartAndFinishPeriods_WhenThreePeriodsAndOneOvertime_CorrectPeriodTitle()
+		{
+			Match match = CreateMatch(CreateRulesForOneInfinityOvertime());
+			PrepareRosters(match);
+			DateTime startedAt = new(2026, 4, 29, 19, 30, 0);
+			DateTime finishedAt = new(2026, 4, 29, 20, 40, 0);
+			match.Start(startedAt);
+			Assert.Equal("Завершить период 1", match.Period.Title);
+			match.FinishPeriod(DateTime.UtcNow);
+			Assert.Equal("Начать период 2", match.Period.Title);
+			match.StartPeriod();
+			Assert.Equal("Завершить период 2", match.Period.Title);
+			match.FinishPeriod(DateTime.UtcNow);
+			Assert.Equal("Начать период 3", match.Period.Title);
+			match.StartPeriod();
+			Assert.Equal("Завершить период 3", match.Period.Title);
+			match.FinishPeriod(DateTime.UtcNow);
+			Assert.Equal("Начать овертайм", match.Period.Title);
+			match.StartPeriod();
+			Assert.Equal(null, match.Period.Title);
+		}
+		[Fact]
+		public void StartAndFinishPeriods_WhenTwoOvertimesAndDraw_CorrectPeriodTitle()
+		{
+			Match match = CreateMatch(CreateRulesForTwoOvertimes());
+			PrepareRosters(match);
+			DateTime startedAt = new(2026, 4, 29, 19, 30, 0);
+			DateTime finishedAt = new(2026, 4, 29, 20, 40, 0);
+			match.Start(startedAt);
+			match.FinishPeriod(DateTime.UtcNow);
+			match.StartPeriod();
+			match.FinishPeriod(DateTime.UtcNow);
+			match.StartPeriod();
+			match.FinishPeriod(DateTime.UtcNow);
+			Assert.Equal("Начать овертайм 1", match.Period.Title);
+			match.StartPeriod();
+			Assert.Equal("Завершить овертайм 1", match.Period.Title);
+			match.FinishPeriod(DateTime.UtcNow);
+			Assert.Equal("Начать овертайм 2", match.Period.Title);
+			match.StartPeriod();
+			Assert.Equal("Завершить овертайм 2", match.Period.Title);
+			match.FinishPeriod(DateTime.UtcNow);
+			Assert.Equal(null, match.Period.Title);
 		}
 
 		private static Match CreateMatch(TournamentRules rules)
