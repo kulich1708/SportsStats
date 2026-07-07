@@ -1,12 +1,13 @@
 using SportsStats.Domain.Common;
-using SportsStats.Domain.Matches.Goals;
-using SportsStats.Domain.Tournaments.Rules;
 using SportsStats.Domain.Matches;
+using SportsStats.Domain.Matches.Goals;
+using SportsStats.Domain.Shared;
+using SportsStats.Domain.Shared.Enums;
+using SportsStats.Domain.Tournaments.Rules;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
-using SportsStats.Domain.Shared.Enums;
 
 namespace SportsStats.Domain.Matches
 {
@@ -28,7 +29,7 @@ namespace SportsStats.Domain.Matches
 		public Match(int tournamentId, int homeTeamId, int awayTeamId, TournamentRules rules, DateTime scheduledAt)
 		{
 			if (homeTeamId == awayTeamId)
-				throw new ArgumentException("Команда не может играть сама с собой");
+				throw new DomainException(MatchError.TeamCannotPlayItself);
 
 			TournamentId = tournamentId;
 			HomeTeam = new(homeTeamId);
@@ -44,7 +45,7 @@ namespace SportsStats.Domain.Matches
 		public void Start(DateTime startedAt)
 		{
 			if (Status != MatchStatus.Waiting)
-				throw new ArgumentException("Нельзя начать матч, который уже не в ожидании");
+				throw new DomainException(MatchError.MatchAlreadyStarted);
 
 			StartedAt = startedAt;
 			Status = MatchStatus.InProgress;
@@ -57,9 +58,9 @@ namespace SportsStats.Domain.Matches
 		private void Finish(DateTime finishedAt)
 		{
 			if (Status != MatchStatus.InProgress)
-				throw new ArgumentException("Нельзя завершить матч, который ещё не начат или уже закончен");
+				throw new DomainException(MatchError.FinishMatchNotInProgress);
 			if (StartedAt > finishedAt)
-				throw new ArgumentException($"Нельзя завершить матч {finishedAt}, так как он был начат лишь {StartedAt}");
+				throw new DomainException(MatchError.MatchFinishTimeCannotBeBeforeStart, finishedAt, StartedAt.Value);
 
 			FinishedAt = finishedAt;
 			Status = MatchStatus.Finished;
@@ -96,7 +97,7 @@ namespace SportsStats.Domain.Matches
 			else if (teamId == AwayTeam.Id)
 				return AwayTeam;
 
-			throw new ArgumentException("Команада не учавствует в этом матче");
+			throw new DomainException(MatchError.TeamNotParticipatingInMatch);
 		}
 		private bool IsPlayerInRoster(int playerId, int? teamId = null)
 		{
@@ -135,34 +136,23 @@ namespace SportsStats.Domain.Matches
 		private void ValidateGoal(int scoringTeamId, int goalScorerId, int time)
 		{
 			if (!IsMatchInProgress())
-				throw new ArgumentException("Нельзя добавить гол, матчу, который сейчас не идёт");
+				throw new DomainException(MatchError.GoalCanOnlyBeAddedToActiveMatch);
 
 			if (!IsTeamInMatch(scoringTeamId))
-				throw new ArgumentException("Нельзя назначить забившей команду, которая не учавствует в матче");
+				throw new DomainException(MatchError.ScoredTeamNotInMatch);
 			if (!IsPlayerInRoster(goalScorerId, scoringTeamId))
-				throw new ArgumentException("Нельзя назначить автором гола игрока, которого нет в заявке за эту команду");
+				throw new DomainException(MatchError.PlayerNotInRoster);
 
 			if (!Rules.MatchTimeRules.IsValidTimeInPeriod(Period.Current, time))
-				throw new ArgumentException("Проверьте время, данный период не может иметь такое время.");
+				throw new DomainException(MatchError.InvalidTimeForPeriod);
 
 		}
-
-		private void ValidatePeriod()
-		{
-			if (!Rules.MatchTimeRules.IsValidPeriod(Period.Current))
-				throw new ArgumentException("Проверьте значение периода, по правилам такого периода не существует");
-			if (Rules.MatchTimeRules.IsOvertimePeriod(Period.Current) && HomeTeam.Score != AwayTeam.Score)
-				throw new ArgumentException("Нельзя добавить гол в овертайме, если у команд разный счёт");
-		}
-
-		private GoalEvent CreateGoal(int scoringTeamId, int goalScorerId, int period, int time)
-			=> new(scoringTeamId, goalScorerId, period, time);
 
 
 		private GoalEvent GetGoalEventById(int goalId)
 		{
 			GoalEvent goal = _goals.SingleOrDefault(goal => goal.Id == goalId)
-				?? throw new ArgumentException("Гол с данным Id не содержится в событиях этого матча");
+				?? throw new DomainException(MatchError.GoalNotFoundInMatch);
 
 			return goal;
 		}
@@ -172,11 +162,11 @@ namespace SportsStats.Domain.Matches
 		{
 			GoalEvent goal = GetGoalEventById(goalId);
 			if (!IsPlayerInRoster(goalScorerId, goal.ScoringTeamId))
-				throw new ArgumentException("Игрок, которого вы пытаетесь установить автором гола, не заявлен за команду, которая забила гол");
+				throw new DomainException(MatchError.GoalScorerNotInTeamRoster);
 			if (firstAssistId.HasValue && !IsPlayerInRoster(firstAssistId.Value, goal.ScoringTeamId))
-				throw new ArgumentException("Игрок, которого вы пытаетесь установить как первого ассистента, не заявлен за команду, которая забила гол");
+				throw new DomainException(MatchError.FirstAssistantNotInTeamRoster);
 			if (secondAssistId.HasValue && !IsPlayerInRoster(secondAssistId.Value, goal.ScoringTeamId))
-				throw new ArgumentException("Игрок, которого вы пытаетесь установить как второго ассистента, не заявлен за команду, которая забила гол");
+				throw new DomainException(MatchError.SecondAssistantNotInTeamRoster);
 
 			goal.SetScorer(goalScorerId);
 			goal.SetAssists(firstAssistId, secondAssistId);
@@ -189,9 +179,9 @@ namespace SportsStats.Domain.Matches
 			ValidateTeamInMatch(teamId);
 
 			if (IsPlayerInRoster(playerId))
-				throw new ArgumentException("Нельзя добавить игрока дважды");
+				throw new DomainException(MatchError.PlayerAlreadyAdded);
 			if (!IsMatchWaiting())
-				throw new ArgumentException("Нельзя добавить игрока, после начала матча");
+				throw new DomainException(MatchError.CannotAddPlayerAfterMatchStart);
 
 			GetTeamById(teamId).AddToRoster(playerId);
 		}
@@ -212,13 +202,13 @@ namespace SportsStats.Domain.Matches
 		private void ValidateTeamInMatch(int teamId)
 		{
 			if (!IsTeamInMatch(teamId))
-				throw new ArgumentException("Команда не учавствует в матче");
+				throw new DomainException(MatchError.TeamNotInMatch);
 		}
 		public void SetScheduleAt(DateTime scheduleAt) => ScheduledAt = scheduleAt;
 		public void StartPeriod()
 		{
 			if (!IsMatchInProgress())
-				throw new ArgumentException("Матч не начат или закончен");
+				throw new DomainException(MatchError.MatchNotInProgress);
 
 			Period.ValidateStart();
 			Period = new(Period.Current + 1, false, GenerateTextForNextPeriod(Period.Current + 1, false));
@@ -229,11 +219,11 @@ namespace SportsStats.Domain.Matches
 		public void FinishPeriod(DateTime dateTime)
 		{
 			if (!IsMatchInProgress())
-				throw new ArgumentException("Матч не начат или закончен");
+				throw new DomainException(MatchError.MatchNotInProgress);
 
 			Period.ValidateFinish();
 			if (Rules.MatchTimeRules.IsOneInfinityOvertime(Period.Current) && HomeTeam.Score == AwayTeam.Score)
-				throw new ArgumentException("Нельзя завершить бесконечный овертайм при равном счёте");
+				throw new DomainException(MatchError.CannotFinishInfiniteOvertimeWithDraw);
 
 			Period = new(Period.Current, true, GenerateTextForNextPeriod(Period.Current, true));
 

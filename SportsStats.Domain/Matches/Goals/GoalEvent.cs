@@ -33,9 +33,10 @@ namespace SportsStats.Domain.Matches.Goals
 		{
 			if (firstAssistId.HasValue && secondAssistId.HasValue &&
 				firstAssistId.Value == secondAssistId.Value)
-				throw new ArgumentException("Нельзя установить первым и вторым ассистентом одного и того же игрока");
+				throw new DomainException(GoalsError.AssistantsMustBeDifferent);
+
 			if (firstAssistId == GoalScorerId || secondAssistId == GoalScorerId)
-				throw new ArgumentException("Нельзя установить ассистентом игрока, который забил этот гол");
+				throw new DomainException(GoalsError.AssistantCannotBeGoalScorer);
 			SetFirstAssists(firstAssistId);
 			SetSecondAssists(secondAssistId);
 		}
@@ -46,7 +47,7 @@ namespace SportsStats.Domain.Matches.Goals
 		public void SetSecondAssists(int? assistsId)
 		{
 			if (!FirstAssistId.HasValue && assistsId.HasValue)
-				throw new ArgumentException("Второй ассистент не может быть указан, пока не указан первый");
+				throw new DomainException(GoalsError.SecondAssistantRequiresFirst);
 
 			SecondAssistId = assistsId;
 		}
