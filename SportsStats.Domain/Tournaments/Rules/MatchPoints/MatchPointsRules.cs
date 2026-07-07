@@ -1,3 +1,4 @@
+using SportsStats.Domain.Shared;
 using SportsStats.Domain.Shared.Enums;
 
 namespace SportsStats.Domain.Tournaments.Rules.MatchPoints
@@ -42,11 +43,11 @@ namespace SportsStats.Domain.Tournaments.Rules.MatchPoints
 		public void ValidateRules(bool hasOvertime, bool hasShootout, bool IsDrawPossible)
 		{
 			if (hasOvertime && (!OTWinPoints.HasValue || !OTLossPoints.HasValue))
-				throw new ArgumentException("Установлено наличие овертайма, но не установлено количество начисляемых очков в овертайме");
+				throw new DomainException(MatchPointsRulesError.OvertimePointsRequired);
 			if (hasShootout && (!ShootoutWinPoints.HasValue || !ShootoutLossPoints.HasValue))
-				throw new ArgumentException("Установлено наличие буллитов, но не установлено количество начисляемых очков в булитах");
+				throw new DomainException(MatchPointsRulesError.ShootoutPointsRequired);
 			if (IsDrawPossible && !DrawPoints.HasValue)
-				throw new ArgumentException("Установлена возможность ничьи, но не установлено количество начисляемых очков при ничьей");
+				throw new DomainException(MatchPointsRulesError.DrawPointsRequired);
 
 			if (!hasOvertime)
 			{

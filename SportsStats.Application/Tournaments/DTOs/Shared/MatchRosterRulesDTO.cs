@@ -5,8 +5,8 @@ using System.Text;
 namespace SportsStats.Application.Tournaments.DTOs.Shared
 {
 	public record MatchRosterRulesDTO(
-		int MaxPlayers,
 		int MinPlayers,
+		int MaxPlayers,
 		int MinForwards,
 		int MaxForwards,
 		int MinDefensemans,
