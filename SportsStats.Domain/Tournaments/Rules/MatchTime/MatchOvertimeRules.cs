@@ -1,3 +1,4 @@
+using SportsStats.Domain.Shared;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -23,13 +24,13 @@ namespace SportsStats.Domain.Tournaments.Rules.MatchTime
 		private void Validate()
 		{
 			if (OvertimeDurationSeconds.HasValue && OvertimeDurationSeconds <= 0)
-				throw new ArgumentException("Длительность овертайма должна быть положительной");
+				throw new DomainException(MatchTimeRulesError.OvertimeDurationMustBePositive);
 
 			if (OvertimesCount.HasValue && OvertimesCount <= 0)
-				throw new ArgumentException("Количество овертаймов должно быть положительным");
+				throw new DomainException(MatchTimeRulesError.OvertimesCountMustBePositive);
 
 			if (!GoalEndsOvertime && (!OvertimeDurationSeconds.HasValue || !OvertimesCount.HasValue))
-				throw new ArgumentException("Овертайм не может быть бесконечный, если гол не завершает его");
+				throw new DomainException(MatchTimeRulesError.InfiniteOvertimeRequiresGoalEnd);
 		}
 
 		public bool IsInfiniteOvertime()

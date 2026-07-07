@@ -3,7 +3,6 @@ using SportsStats.Domain.Tournaments.Rules;
 using SportsStats.Domain.Shared;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace SportsStats.Domain.Tournaments
@@ -27,17 +26,17 @@ namespace SportsStats.Domain.Tournaments
 		public void SetRules(TournamentRules tournamentRules)
 		{
 			if (!IsDrafted())
-				throw new DomainException(Error.Tournament.RulesCanOnlyBeSetForTournamentInDraftStatus);
+				throw new DomainException(TournamentError.RulesCanOnlyBeSetForTournamentInDraftStatus);
 			TournamentRules = tournamentRules;
 		}
 		public void Start(DateTime startedAt)
 		{
 			if (IsStarted())
-				throw new DomainException(Error.Tournament.TournamentAlreadyStarted);
+				throw new DomainException(TournamentError.TournamentAlreadyStarted);
 			if (!IsRegistration())
-				throw new DomainException(Error.Tournament.TournamentCanOnlyBeStartedAfterRegistration);
+				throw new DomainException(TournamentError.TournamentCanOnlyBeStartedAfterRegistration);
 			if (_teamsId.Count < 2)
-				throw new DomainException(Error.Tournament.TournamentRequiresAtLeastTwoTeams);
+				throw new DomainException(TournamentError.TournamentRequiresAtLeastTwoTeams);
 
 			Status = TournamentStatus.InProgress;
 			StartedAt = startedAt;
@@ -45,15 +44,15 @@ namespace SportsStats.Domain.Tournaments
 		public void Finish(DateTime finishAt, int unfinishedMatchesCount, DateTime lastMatchFinishedAt)
 		{
 			if (IsFinished())
-				throw new DomainException(Error.Tournament.TournamentAlreadyFinished);
+				throw new DomainException(TournamentError.TournamentAlreadyFinished);
 			if (!IsStarted())
-				throw new DomainException(Error.Tournament.TournamentCanOnlyBeFinishedAfterStart);
+				throw new DomainException(TournamentError.TournamentCanOnlyBeFinishedAfterStart);
 			if (StartedAt > finishAt)
-				throw new DomainException(Error.Tournament.TournamentFinishDateCannotBeBeforeStartDate, finishAt, StartedAt.Value);
+				throw new DomainException(TournamentError.TournamentFinishDateCannotBeBeforeStartDate, finishAt, StartedAt.Value);
 			if (unfinishedMatchesCount > 0)
-				throw new DomainException(Error.Tournament.TournamentCannotBeFinishedWithUnfinishedMatches, unfinishedMatchesCount.ToString());
+				throw new DomainException(TournamentError.TournamentCannotBeFinishedWithUnfinishedMatches, unfinishedMatchesCount.ToString());
 			if (finishAt < lastMatchFinishedAt)
-				throw new DomainException(Error.Tournament.TournamentFinishDateCannotBeBeforeLastMatch, finishAt, lastMatchFinishedAt);
+				throw new DomainException(TournamentError.TournamentFinishDateCannotBeBeforeLastMatch, finishAt, lastMatchFinishedAt);
 
 			Status = TournamentStatus.Finished;
 			FinishedAt = finishAt;
@@ -61,11 +60,11 @@ namespace SportsStats.Domain.Tournaments
 		public void Registration()
 		{
 			if (IsRegistration())
-				throw new DomainException(Error.Tournament.TournamentRegistrationAlreadyOpen);
+				throw new DomainException(TournamentError.TournamentRegistrationAlreadyOpen);
 			if (!IsDrafted())
-				throw new DomainException(Error.Tournament.RegistrationCanOnlyBeOpenedInDraft);
+				throw new DomainException(TournamentError.RegistrationCanOnlyBeOpenedInDraft);
 			if (!HasRules())
-				throw new DomainException(Error.Tournament.RegistrationRequiresRules);
+				throw new DomainException(TournamentError.RegistrationRequiresRules);
 
 			Status = TournamentStatus.Registration;
 		}
@@ -86,9 +85,9 @@ namespace SportsStats.Domain.Tournaments
 		public void RegistrateTeam(int teamId)
 		{
 			if (!IsRegistration())
-				throw new DomainException(Error.Tournament.TeamsCanOnlyBeRegisteredInRegistrationStatus);
+				throw new DomainException(TournamentError.TeamsCanOnlyBeRegisteredInRegistrationStatus);
 			if (_teamsId.Contains(teamId))
-				throw new DomainException(Error.Tournament.TeamAlreadyRegisteredForTournament);
+				throw new DomainException(TournamentError.TeamAlreadyRegisteredForTournament);
 			_teamsId.Add(teamId);
 		}
 
@@ -100,7 +99,7 @@ namespace SportsStats.Domain.Tournaments
 		public void SetName(string name)
 		{
 			if (string.IsNullOrWhiteSpace(name))
-				throw new DomainException(Error.Tournament.TournamentNameCannotBeEmpty);
+				throw new DomainException(TournamentError.TournamentNameCannotBeEmpty);
 
 			Name = name;
 		}

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SportsStats.Domain.Tournaments.Rules
+namespace SportsStats.Domain.Tournaments.Rules.MatchRoster
 {
 	public record MatchRosterRules
 	{

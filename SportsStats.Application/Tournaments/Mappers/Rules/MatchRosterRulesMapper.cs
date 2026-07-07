@@ -1,5 +1,5 @@
 using SportsStats.Application.Tournaments.DTOs.Shared;
-using SportsStats.Domain.Tournaments.Rules;
+using SportsStats.Domain.Tournaments.Rules.MatchRoster;
 using System;
 using System.Collections.Generic;
 using System.Text;

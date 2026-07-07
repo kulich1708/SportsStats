@@ -1,6 +1,8 @@
 ﻿using SportsStats.Domain.Matches;
 using SportsStats.Domain.Tournaments.Rules;
 using SportsStats.Domain.Tournaments.Rules.MatchTime;
+using SportsStats.Domain.Tournaments.Rules.MatchRoster;
+using SportsStats.Domain.Tournaments.Rules.MatchPoints;
 using SportsStats.Domain.Shared.Enums;
 using System;
 

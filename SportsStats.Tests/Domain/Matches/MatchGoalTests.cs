@@ -1,7 +1,9 @@
 using SportsStats.Domain.Matches;
 using SportsStats.Domain.Matches.Goals;
 using SportsStats.Domain.Tournaments.Rules;
+using SportsStats.Domain.Tournaments.Rules.MatchRoster;
 using SportsStats.Domain.Tournaments.Rules.MatchTime;
+using SportsStats.Domain.Tournaments.Rules.MatchPoints;
 using System;
 
 namespace SportsStats.Tests.Domain.Matches

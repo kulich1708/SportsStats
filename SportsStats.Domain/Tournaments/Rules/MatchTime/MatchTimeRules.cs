@@ -1,4 +1,5 @@
 using SportsStats.Domain.Matches;
+using SportsStats.Domain.Shared;
 using System;
 using System.Collections.Generic;
 using System.Reflection.Metadata.Ecma335;
@@ -51,30 +52,31 @@ namespace SportsStats.Domain.Tournaments.Rules.MatchTime
 		private void ValidateRules()
 		{
 			if (PeriodsCount <= 0)
-				throw new ArgumentException("Количество периодов должно быть положительным");
+				throw new DomainException(MatchTimeRulesError.PeriodsCountMustBePositive);
 
 			if (PeriodDurationSeconds <= 0)
-				throw new ArgumentException("Длительность периода должна быть положительной");
+				throw new DomainException(MatchTimeRulesError.PeriodDurationMustBePositive);
 
 			if (!HasOvertime && OvertimeRules != null)
-				throw new ArgumentException("Нельзя установить правила овертайма, если он не предусмотрен");
+				throw new DomainException(MatchTimeRulesError.OvertimeRulesNotAllowed);
 
 			if (!HasShootout && ShootoutRules != null)
-				throw new ArgumentException("Нельзя установить правила буллитов, если они не предусмотрены");
+				throw new DomainException(MatchTimeRulesError.ShootoutRulesNotAllowed);
 
 			if (HasOvertime && OvertimeRules == null)
-				throw new ArgumentException("Если предусмотрен овертайм, необходимо установить правила для него");
+				throw new DomainException(MatchTimeRulesError.OvertimeRulesRequired);
 
 			if (HasShootout && ShootoutRules == null)
-				throw new ArgumentException("Если предусмотрены буллиты, необходимо установить правила для них");
+				throw new DomainException(MatchTimeRulesError.ShootoutRulesRequired);
 
 			if (HasOvertime && OvertimeRules!.IsInfiniteOvertime() && HasShootout)
-				throw new ArgumentException("Установлено наличие буллитов, но до них никогда не дойдёт из-за бесконечного овертайма");
+				throw new DomainException(MatchTimeRulesError.InfiniteOvertimeWithShootout);
 
 			if (!IsDrawPossible && !HasOvertime && !HasShootout)
-				throw new ArgumentException("Ничья запрещена и при этом не предусмотрены овертайм или буллиты");
+				throw new DomainException(MatchTimeRulesError.DrawNotAllowedWithoutOvertimeOrShootout);
 			if (!IsDrawPossible && HasOvertime && !OvertimeRules!.GoalEndsOvertime && !HasShootout)
-				throw new ArgumentException("Гол в овертайме не завершает его, значит после овертайма может быть равный счёт, но буллиты не предусмотрены, а ничья запрещена");
+
+				throw new DomainException(MatchTimeRulesError.DrawNotAllowedWithInfiniteOvertimeWithoutShootout);
 		}
 		public bool IsValidPeriod(int period)
 		{

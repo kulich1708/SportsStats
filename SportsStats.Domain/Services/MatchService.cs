@@ -3,6 +3,7 @@ using SportsStats.Domain.Players;
 using SportsStats.Domain.Teams;
 using SportsStats.Domain.Tournaments;
 using SportsStats.Domain.Tournaments.Rules;
+using SportsStats.Domain.Tournaments.Rules.MatchRoster;
 using System;
 using System.Collections.Generic;
 using System.Text;

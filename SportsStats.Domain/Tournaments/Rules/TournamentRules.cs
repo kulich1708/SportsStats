@@ -1,4 +1,7 @@
 using SportsStats.Domain.Tournaments.Rules.MatchTime;
+using SportsStats.Domain.Tournaments.Rules.MatchRoster;
+using SportsStats.Domain.Tournaments.Rules.MatchPoints;
+using SportsStats.Domain.Shared;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -23,11 +26,11 @@ namespace SportsStats.Domain.Tournaments.Rules
 		private void ValidateRules()
 		{
 			if (MatchTimeRules == null)
-				throw new ArgumentException("Необходимо заполнить правила длины матча");
+				throw new DomainException(TournamentRulesError.MatchTimeRulesRequired);
 			if (MatchRosterRules == null)
-				throw new ArgumentException("Необходимо заполнить правила заявки игроков на матч");
+				throw new DomainException(TournamentRulesError.MatchRosterRulesRequired);
 			if (MatchPointsRules == null)
-				throw new ArgumentException("Необходимо заполнить правила начисления очков");
+				throw new DomainException(TournamentRulesError.MatchPointsRulesRequired);
 
 			bool hasOvertime = MatchTimeRules.HasOvertime;
 			bool hasShootout = MatchTimeRules.HasShootout;
