@@ -1,5 +1,6 @@
 using SportsStats.Domain.Common;
 using SportsStats.Domain.Tournaments.Rules;
+using SportsStats.Domain.Shared;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -26,17 +27,17 @@ namespace SportsStats.Domain.Tournaments
 		public void SetRules(TournamentRules tournamentRules)
 		{
 			if (!IsDrafted())
-				throw new ArgumentException("Правила можно установить только когда турнир в статусе Draft");
+				throw new DomainException(Error.Tournament.RulesCanOnlyBeSetForTournamentInDraftStatus);
 			TournamentRules = tournamentRules;
 		}
 		public void Start(DateTime startedAt)
 		{
 			if (IsStarted())
-				throw new ArgumentException("Турнир уже начат");
+				throw new DomainException(Error.Tournament.TournamentAlreadyStarted);
 			if (!IsRegistration())
-				throw new ArgumentException("Турнир можно начать только после регистрации команд");
+				throw new DomainException(Error.Tournament.TournamentCanOnlyBeStartedAfterRegistration);
 			if (_teamsId.Count < 2)
-				throw new ArgumentException("Нельзя начать турнир, если не заявлено как минимум 2 команды");
+				throw new DomainException(Error.Tournament.TournamentRequiresAtLeastTwoTeams);
 
 			Status = TournamentStatus.InProgress;
 			StartedAt = startedAt;
@@ -44,15 +45,15 @@ namespace SportsStats.Domain.Tournaments
 		public void Finish(DateTime finishAt, int unfinishedMatchesCount, DateTime lastMatchFinishedAt)
 		{
 			if (IsFinished())
-				throw new AggregateException("Турнир уже завершён");
+				throw new DomainException(Error.Tournament.TournamentAlreadyFinished);
 			if (!IsStarted())
-				throw new ArgumentException("Турнир можно завершить только после того, как он начался");
+				throw new DomainException(Error.Tournament.TournamentCanOnlyBeFinishedAfterStart);
 			if (StartedAt > finishAt)
-				throw new ArgumentException($"Нельзя завершить турнир {finishAt}, так как ещё он был начат позже ({StartedAt})");
+				throw new DomainException(Error.Tournament.TournamentFinishDateCannotBeBeforeStartDate, finishAt, StartedAt.Value);
 			if (unfinishedMatchesCount > 0)
-				throw new ArgumentException($"Нельзя завершить турнир, так как ещё {unfinishedMatchesCount} матча(ей) не закончены");
+				throw new DomainException(Error.Tournament.TournamentCannotBeFinishedWithUnfinishedMatches, unfinishedMatchesCount.ToString());
 			if (finishAt < lastMatchFinishedAt)
-				throw new ArgumentException($"Нельзя завершить турнир {finishAt}, так как в последний матч закончился позже ({lastMatchFinishedAt})");
+				throw new DomainException(Error.Tournament.TournamentFinishDateCannotBeBeforeLastMatch, finishAt, lastMatchFinishedAt);
 
 			Status = TournamentStatus.Finished;
 			FinishedAt = finishAt;
@@ -60,11 +61,11 @@ namespace SportsStats.Domain.Tournaments
 		public void Registration()
 		{
 			if (IsRegistration())
-				throw new ArgumentException("Турнир уже открыт для регистрации команд");
+				throw new DomainException(Error.Tournament.TournamentRegistrationAlreadyOpen);
 			if (!IsDrafted())
-				throw new ArgumentException("Открыть регистрацию команд можно только если турнир находится в статусе Draft");
+				throw new DomainException(Error.Tournament.RegistrationCanOnlyBeOpenedInDraft);
 			if (!HasRules())
-				throw new ArgumentException("Открыть регистрацию команд можно только если турниру уже установлены правила");
+				throw new DomainException(Error.Tournament.RegistrationRequiresRules);
 
 			Status = TournamentStatus.Registration;
 		}
@@ -85,9 +86,9 @@ namespace SportsStats.Domain.Tournaments
 		public void RegistrateTeam(int teamId)
 		{
 			if (!IsRegistration())
-				throw new ArgumentException("Можно заявлять команды, только когда турнир в статусе Registration");
+				throw new DomainException(Error.Tournament.TeamsCanOnlyBeRegisteredInRegistrationStatus);
 			if (_teamsId.Contains(teamId))
-				throw new ArgumentException("Команда уже заявлена на этот турнир");
+				throw new DomainException(Error.Tournament.TeamAlreadyRegisteredForTournament);
 			_teamsId.Add(teamId);
 		}
 
@@ -99,7 +100,7 @@ namespace SportsStats.Domain.Tournaments
 		public void SetName(string name)
 		{
 			if (string.IsNullOrWhiteSpace(name))
-				throw new ArgumentException("Имя турнира не может быть пустым");
+				throw new DomainException(Error.Tournament.TournamentNameCannotBeEmpty);
 
 			Name = name;
 		}
