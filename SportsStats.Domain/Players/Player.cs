@@ -1,4 +1,5 @@
 using SportsStats.Domain.Common;
+using SportsStats.Domain.Shared;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -24,13 +25,13 @@ namespace SportsStats.Domain.Players
 		public void SetNameAndSurname(string name, string surname)
 		{
 			if (string.IsNullOrWhiteSpace(name))
-				throw new ArgumentException("Имя не может быть пустым");
+				throw new DomainException(PlayersError.FirstNameCannotBeEmpty);
 			if (string.IsNullOrWhiteSpace(surname))
-				throw new ArgumentException("Фамилия не может быть пустой");
-			if (name.Count() > 20)
-				throw new ArgumentException("Имя не может быть длинее 20 символов");
-			if (surname.Count() > 20)
-				throw new ArgumentException("Фамилия не может быть длинее 20 символов");
+				throw new DomainException(PlayersError.LastNameCannotBeEmpty);
+			if (name.Length > 20)
+				throw new DomainException(PlayersError.FirstNameTooLong);
+			if (surname.Length > 20)
+				throw new DomainException(PlayersError.LastNameTooLong);
 
 			Name = name;
 			Surname = surname;
