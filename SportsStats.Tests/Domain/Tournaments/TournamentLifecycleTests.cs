@@ -1,4 +1,6 @@
-﻿using SportsStats.Domain.Tournaments;
+﻿using SportsStats.Domain.Matches;
+using SportsStats.Domain.Shared;
+using SportsStats.Domain.Tournaments;
 using SportsStats.Domain.Tournaments.Rules;
 using System;
 using Xunit;
@@ -24,9 +26,9 @@ namespace SportsStats.Tests.Domain.Tournaments
 		{
 			var tournament = new Tournament("KHL test");
 
-			var ex = Assert.Throws<ArgumentException>(tournament.Registration);
+			var ex = Assert.Throws<DomainException>(tournament.Registration);
 
-			Assert.Contains("правила", ex.Message, StringComparison.OrdinalIgnoreCase);
+			Assert.Equal(TournamentError.RegistrationRequiresRules.Code, ex.Code);
 		}
 		[Fact]
 		public void Start_InDraft_ThrowsArgumentException()
@@ -34,9 +36,9 @@ namespace SportsStats.Tests.Domain.Tournaments
 			var tournament = new Tournament("KHL test");
 			DateTime startAt = new(2026, 4, 29);
 
-			var ex = Assert.Throws<ArgumentException>(() => tournament.Start(startAt));
+			var ex = Assert.Throws<DomainException>(() => tournament.Start(startAt));
 
-			Assert.Contains("регистрации", ex.Message, StringComparison.OrdinalIgnoreCase);
+			Assert.Equal(TournamentError.TournamentCanOnlyBeStartedAfterRegistration.Code, ex.Code);
 		}
 		[Fact]
 		public void Start_WithLessThanTwoTeams_ThrowsArgumentExceptoin()
@@ -47,9 +49,9 @@ namespace SportsStats.Tests.Domain.Tournaments
 			tournament.Registration();
 			DateTime startAt = new(2026, 4, 29);
 
-			var ex = Assert.Throws<ArgumentException>(() => tournament.Start(startAt));
+			var ex = Assert.Throws<DomainException>(() => tournament.Start(startAt));
 
-			Assert.Contains("команд", ex.Message, StringComparison.OrdinalIgnoreCase);
+			Assert.Equal(TournamentError.TournamentRequiresAtLeastTwoTeams.Code, ex.Code);
 		}
 		[Fact]
 		public void Start_WithTwoTeams_ChangesStatusToInProgress()
@@ -99,13 +101,13 @@ namespace SportsStats.Tests.Domain.Tournaments
 			DateTime finishAt = new(2026, 04, 29, 14, 00, 00);
 			DateTime lastMatchFinishedAt = new(2026, 04, 29, 13, 55, 00);
 
-			var ex = Assert.Throws<ArgumentException>(() =>
+			var ex = Assert.Throws<DomainException>(() =>
 				tournament.Finish(
 					finishAt: finishAt,
 					unfinishedMatchesCount: 1,
 					lastMatchFinishedAt: lastMatchFinishedAt));
 
-			Assert.Contains("не закончены", ex.Message, StringComparison.OrdinalIgnoreCase);
+			Assert.Equal(TournamentError.TournamentCannotBeFinishedWithUnfinishedMatches.Code, ex.Code);
 		}
 	}
 }

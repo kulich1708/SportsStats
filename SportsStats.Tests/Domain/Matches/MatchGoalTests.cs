@@ -5,6 +5,7 @@ using SportsStats.Domain.Tournaments.Rules.MatchRoster;
 using SportsStats.Domain.Tournaments.Rules.MatchTime;
 using SportsStats.Domain.Tournaments.Rules.MatchPoints;
 using System;
+using SportsStats.Domain.Shared;
 
 namespace SportsStats.Tests.Domain.Matches
 {
@@ -16,9 +17,9 @@ namespace SportsStats.Tests.Domain.Matches
 			Match match = CreateMatch(CreateRulesWithOvertime());
 			PrepareRosters(match);
 
-			var ex = Assert.Throws<ArgumentException>(() => match.AddGoal(10, 101, 120, DateTime.UtcNow));
+			var ex = Assert.Throws<DomainException>(() => match.AddGoal(10, 101, 120, DateTime.UtcNow));
 
-			Assert.Contains("сейчас не идёт", ex.Message, StringComparison.OrdinalIgnoreCase);
+			Assert.Equal(MatchError.GoalCanOnlyBeAddedToActiveMatch.Code, ex.Code);
 		}
 
 		[Fact]
@@ -28,9 +29,9 @@ namespace SportsStats.Tests.Domain.Matches
 			PrepareRosters(match);
 			match.Start(new DateTime(2026, 4, 29, 19, 30, 0));
 
-			var ex = Assert.Throws<ArgumentException>(() => match.AddGoal(999, 101, 120, DateTime.UtcNow));
+			var ex = Assert.Throws<DomainException>(() => match.AddGoal(999, 101, 120, DateTime.UtcNow));
 
-			Assert.Contains("не учавствует", ex.Message, StringComparison.OrdinalIgnoreCase);
+			Assert.Equal(MatchError.ScoredTeamNotInMatch.Code, ex.Code);
 		}
 
 		[Fact]
@@ -40,9 +41,9 @@ namespace SportsStats.Tests.Domain.Matches
 			PrepareRosters(match);
 			match.Start(new DateTime(2026, 4, 29, 19, 30, 0));
 
-			var ex = Assert.Throws<ArgumentException>(() => match.AddGoal(10, 999, 120, DateTime.UtcNow));
+			var ex = Assert.Throws<DomainException>(() => match.AddGoal(10, 999, 120, DateTime.UtcNow));
 
-			Assert.Contains("нет в заявке", ex.Message, StringComparison.OrdinalIgnoreCase);
+			Assert.Equal(MatchError.PlayerNotInRoster.Code, ex.Code);
 		}
 
 		[Fact]
@@ -93,7 +94,7 @@ namespace SportsStats.Tests.Domain.Matches
 			match.Start(new DateTime(2026, 4, 29, 19, 30, 0));
 			GoalEvent goal = match.AddGoal(10, 101, 120, DateTime.UtcNow);
 
-			var ex = Assert.Throws<ArgumentException>(() => match.FillGoalDetails(
+			var ex = Assert.Throws<DomainException>(() => match.FillGoalDetails(
 				goalId: goal.Id,
 				goalScorerId: 101,
 				firstAssistId: 101,
@@ -101,7 +102,7 @@ namespace SportsStats.Tests.Domain.Matches
 				strengthType: GoalStrengthType.EvenStrength,
 				netType: GoalNetType.EmptyNet));
 
-			Assert.Contains("ассистентом", ex.Message, StringComparison.OrdinalIgnoreCase);
+			Assert.Equal(GoalError.AssistantCannotBeGoalScorer.Code, ex.Code);
 		}
 
 		private static Match CreateMatch(TournamentRules rules)

@@ -26,7 +26,7 @@ namespace SportsStats.Domain.Teams
 		public void SetName(string name)
 		{
 			if (string.IsNullOrWhiteSpace(name))
-				throw new DomainException(TeamsError.TeamNameCannotBeEmpty);
+				throw new DomainException(TeamError.TeamNameCannotBeEmpty);
 
 			Name = name;
 		}

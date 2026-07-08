@@ -4,7 +4,5 @@ using System.Text;
 
 namespace SportsStats.Domain.Shared
 {
-	public static partial class Error
-	{
-	}
+	public record ErrorCode(int Code, string Message);
 }

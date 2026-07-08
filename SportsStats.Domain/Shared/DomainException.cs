@@ -6,8 +6,15 @@ namespace SportsStats.Domain.Shared
 {
 	public class DomainException : Exception
 	{
-		public DomainException(string message) : base(message) { }
-		public DomainException(string message, params string[] args) : base(string.Format(message, args)) { }
-		public DomainException(string message, params DateTime[] args) : base(string.Format(message, args)) { }
+		public int Code { get; private set; } = 0;
+		public DomainException(ErrorCode error) : base(error.Message)
+		{
+			Code = error.Code;
+		}
+		public DomainException(ErrorCode error, params object[] args)
+			: base(string.Format(error.Message, args.Select(a => a?.ToString() ?? null).ToArray()))
+		{
+			Code = error.Code;
+		}
 	}
 }

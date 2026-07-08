@@ -16,7 +16,7 @@ namespace SportsStats.Domain.Players
 		private void Validate()
 		{
 			if (Number < 1 || Number > 99)
-				throw new DomainException(PlayersError.PlayerNumberOutOfRange);
+				throw new DomainException(PlayerError.PlayerNumberOutOfRange);
 		}
 	}
 }

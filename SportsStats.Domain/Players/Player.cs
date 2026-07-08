@@ -25,13 +25,13 @@ namespace SportsStats.Domain.Players
 		public void SetNameAndSurname(string name, string surname)
 		{
 			if (string.IsNullOrWhiteSpace(name))
-				throw new DomainException(PlayersError.FirstNameCannotBeEmpty);
+				throw new DomainException(PlayerError.FirstNameCannotBeEmpty);
 			if (string.IsNullOrWhiteSpace(surname))
-				throw new DomainException(PlayersError.LastNameCannotBeEmpty);
+				throw new DomainException(PlayerError.LastNameCannotBeEmpty);
 			if (name.Length > 20)
-				throw new DomainException(PlayersError.FirstNameTooLong);
+				throw new DomainException(PlayerError.FirstNameTooLong);
 			if (surname.Length > 20)
-				throw new DomainException(PlayersError.LastNameTooLong);
+				throw new DomainException(PlayerError.LastNameTooLong);
 
 			Name = name;
 			Surname = surname;

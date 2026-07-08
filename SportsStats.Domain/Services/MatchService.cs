@@ -19,7 +19,7 @@ namespace SportsStats.Domain.Services
 			if (!tournament.IsRegistration() && !tournament.IsStarted())
 				throw new DomainException(MatchServiceError.MatchCanOnlyBeCreatedInRegistrationOrStarted);
 			if (tournament.StartedAt > scheduledAt)
-				throw new DomainException(MatchServiceError.MatchScheduleTimeCannotBeBeforeTournamentStart, scheduledAt, tournament.StartedAt.Value);
+				throw new DomainException(MatchServiceError.MatchScheduleTimeCannotBeBeforeTournamentStart, scheduledAt.ToString(), tournament.StartedAt.Value.ToString());
 			if (!IsTeamInTournament(tournament, homeTeamId))
 				throw new DomainException(MatchServiceError.HomeTeamNotRegistered);
 			if (!IsTeamInTournament(tournament, awayTeamId))
