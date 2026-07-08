@@ -1,4 +1,6 @@
 using SportsStats.Domain.Matches;
+using SportsStats.Domain.Matches.Goals;
+using SportsStats.Domain.Shared;
 using SportsStats.Domain.Tournaments.Rules;
 using System;
 
@@ -11,9 +13,9 @@ namespace SportsStats.Tests.Domain.Matches
 		{
 			Match match = CreateMatch();
 
-			var ex = Assert.Throws<ArgumentException>(() => match.AddPlayerToRoster(playerId: 101, teamId: 999));
+			var ex = Assert.Throws<DomainException>(() => match.AddPlayerToRoster(playerId: 101, teamId: 999));
 
-			Assert.Contains("Команда не учавствует", ex.Message, StringComparison.OrdinalIgnoreCase);
+			Assert.Equal(MatchError.TeamNotInMatch.Code, ex.Code);
 		}
 
 		[Fact]
@@ -22,9 +24,9 @@ namespace SportsStats.Tests.Domain.Matches
 			Match match = CreateMatch();
 			match.AddPlayerToRoster(playerId: 101, teamId: 10);
 
-			var ex = Assert.Throws<ArgumentException>(() => match.AddPlayerToRoster(playerId: 101, teamId: 10));
+			var ex = Assert.Throws<DomainException>(() => match.AddPlayerToRoster(playerId: 101, teamId: 10));
 
-			Assert.Contains("дважды", ex.Message, StringComparison.OrdinalIgnoreCase);
+			Assert.Equal(MatchError.PlayerAlreadyAdded.Code, ex.Code);
 		}
 
 		[Fact]
@@ -33,9 +35,9 @@ namespace SportsStats.Tests.Domain.Matches
 			Match match = CreateMatch();
 			match.Start(new DateTime(2026, 4, 29, 19, 30, 0));
 
-			var ex = Assert.Throws<ArgumentException>(() => match.AddPlayerToRoster(playerId: 101, teamId: 10));
+			var ex = Assert.Throws<DomainException>(() => match.AddPlayerToRoster(playerId: 101, teamId: 10));
 
-			Assert.Contains("после начала", ex.Message, StringComparison.OrdinalIgnoreCase);
+			Assert.Equal(MatchError.CannotAddPlayerAfterMatchStart.Code, ex.Code);
 		}
 
 		[Fact]

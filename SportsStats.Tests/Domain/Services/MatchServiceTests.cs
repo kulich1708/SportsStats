@@ -1,6 +1,7 @@
 using SportsStats.Domain.Matches;
 using SportsStats.Domain.Players;
 using SportsStats.Domain.Services;
+using SportsStats.Domain.Shared;
 using SportsStats.Domain.Teams;
 using SportsStats.Domain.Tournaments;
 using SportsStats.Domain.Tournaments.Rules;
@@ -46,9 +47,10 @@ namespace SportsStats.Tests.Domain.Services
 			TournamentRules rules = TournamentRules.CreateKHLRules();
 			DateTime scheduledAt = new(2026, 4, 29, 19, 0, 0);
 
-			var ex = Assert.Throws<ArgumentException>(() => _matchService.CreateMatch(tournament, 10, 20, scheduledAt, rules));
+			var ex = Assert.Throws<DomainException>(()
+				=> _matchService.CreateMatch(tournament, 10, 20, scheduledAt, rules));
 
-			Assert.Contains("ещё не открыт", ex.Message, StringComparison.OrdinalIgnoreCase);
+			Assert.Equal(MatchServiceError.MatchCanOnlyBeCreatedInRegistrationOrStarted.Code, ex.Code);
 		}
 
 		[Fact]
@@ -57,9 +59,10 @@ namespace SportsStats.Tests.Domain.Services
 			Tournament tournament = CreateTournamentInRegistration();
 			DateTime scheduledAt = new(2026, 4, 29, 19, 0, 0);
 
-			var ex = Assert.Throws<ArgumentException>(() => _matchService.CreateMatch(tournament, 999, 20, scheduledAt, tournament.TournamentRules!));
+			var ex = Assert.Throws<DomainException>(()
+				=> _matchService.CreateMatch(tournament, 999, 20, scheduledAt, tournament.TournamentRules!));
 
-			Assert.Contains("Домашняя команда", ex.Message, StringComparison.OrdinalIgnoreCase);
+			Assert.Equal(MatchServiceError.HomeTeamNotRegistered.Code, ex.Code);
 		}
 
 		[Fact]
@@ -68,9 +71,10 @@ namespace SportsStats.Tests.Domain.Services
 			Tournament tournament = CreateTournamentInRegistration();
 			DateTime scheduledAt = new(2026, 4, 29, 19, 0, 0);
 
-			var ex = Assert.Throws<ArgumentException>(() => _matchService.CreateMatch(tournament, 10, 999, scheduledAt, tournament.TournamentRules!));
+			var ex = Assert.Throws<DomainException>(()
+				=> _matchService.CreateMatch(tournament, 10, 999, scheduledAt, tournament.TournamentRules!));
 
-			Assert.Contains("Гостевая команда", ex.Message, StringComparison.OrdinalIgnoreCase);
+			Assert.Equal(MatchServiceError.AwayTeamNotRegistered.Code, ex.Code);
 		}
 
 		[Fact]
@@ -79,9 +83,11 @@ namespace SportsStats.Tests.Domain.Services
 			Tournament tournament = CreateTournamentInProgress();
 			DateTime scheduledAt = tournament.StartedAt!.Value.AddMinutes(-10);
 
-			var ex = Assert.Throws<ArgumentException>(() => _matchService.CreateMatch(tournament, 10, 20, scheduledAt, tournament.TournamentRules!));
+			var ex = Assert.Throws<DomainException>(
+				() => _matchService.CreateMatch(tournament, 10, 20, scheduledAt, tournament.TournamentRules!));
 
-			Assert.Contains("был открыт только", ex.Message, StringComparison.OrdinalIgnoreCase);
+
+			Assert.Equal(MatchServiceError.MatchScheduleTimeCannotBeBeforeTournamentStart.Code, ex.Code);
 		}
 
 		[Fact]
@@ -95,9 +101,10 @@ namespace SportsStats.Tests.Domain.Services
 			Team awayTeam = new("Away Team");
 			DateTime startedAt = new(2026, 4, 29, 19, 30, 0);
 
-			var ex = Assert.Throws<ArgumentException>(() => _matchService.Start(match, tournament, homeRoster, awayRoster, homeTeam, awayTeam, startedAt));
+			var ex = Assert.Throws<DomainException>(()
+				=> _matchService.Start(match, tournament, homeRoster, awayRoster, homeTeam, awayTeam, startedAt));
 
-			Assert.Contains("неначатом турнире", ex.Message, StringComparison.OrdinalIgnoreCase);
+			Assert.Equal(MatchServiceError.MatchCannotBeStartedInNotStartedTournament.Code, ex.Code);
 		}
 
 		[Fact]
@@ -111,9 +118,10 @@ namespace SportsStats.Tests.Domain.Services
 			Team awayTeam = new("Away Team");
 			DateTime startedAt = tournament.StartedAt!.Value.AddMinutes(-1);
 
-			var ex = Assert.Throws<ArgumentException>(() => _matchService.Start(match, tournament, homeRoster, awayRoster, homeTeam, awayTeam, startedAt));
+			var ex = Assert.Throws<DomainException>(()
+				=> _matchService.Start(match, tournament, homeRoster, awayRoster, homeTeam, awayTeam, startedAt));
 
-			Assert.Contains("данный турнир начался", ex.Message, StringComparison.OrdinalIgnoreCase);
+			Assert.Equal(MatchServiceError.MatchCannotBeStartedBeforeTournamentStart.Code, ex.Code);
 		}
 
 		[Fact]
@@ -127,9 +135,10 @@ namespace SportsStats.Tests.Domain.Services
 			Team awayTeam = new("Away Team");
 			DateTime startedAt = tournament.StartedAt!.Value.AddMinutes(30);
 
-			var ex = Assert.Throws<ArgumentException>(() => _matchService.Start(match, tournament, invalidHomeRoster, awayRoster, homeTeam, awayTeam, startedAt));
+			var ex = Assert.Throws<DomainException>(()
+				=> _matchService.Start(match, tournament, invalidHomeRoster, awayRoster, homeTeam, awayTeam, startedAt));
 
-			Assert.Contains("Проверьте состав команды", ex.Message, StringComparison.OrdinalIgnoreCase);
+			Assert.Equal(MatchServiceError.DefensemenCountOutOfRange.Code, ex.Code);
 		}
 
 		[Fact]

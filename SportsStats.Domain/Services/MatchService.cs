@@ -1,8 +1,10 @@
 ﻿using SportsStats.Domain.Matches;
 using SportsStats.Domain.Players;
+using SportsStats.Domain.Shared;
 using SportsStats.Domain.Teams;
 using SportsStats.Domain.Tournaments;
 using SportsStats.Domain.Tournaments.Rules;
+using SportsStats.Domain.Tournaments.Rules.MatchRoster;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,13 +17,13 @@ namespace SportsStats.Domain.Services
 		public Match CreateMatch(Tournament tournament, int homeTeamId, int awayTeamId, DateTime scheduledAt, TournamentRules rules)
 		{
 			if (!tournament.IsRegistration() && !tournament.IsStarted())
-				throw new ArgumentException("Нельзя создать матч в турнире, который ещё не открыт");
+				throw new DomainException(MatchServiceError.MatchCanOnlyBeCreatedInRegistrationOrStarted);
 			if (tournament.StartedAt > scheduledAt)
-				throw new ArgumentException($"Нельзя создать матч по расписанию на {scheduledAt}, так как турнир был открыт только {tournament.StartedAt}");
+				throw new DomainException(MatchServiceError.MatchScheduleTimeCannotBeBeforeTournamentStart, scheduledAt.ToString(), tournament.StartedAt.Value.ToString());
 			if (!IsTeamInTournament(tournament, homeTeamId))
-				throw new ArgumentException("Домашняя команда не заявлена на турнир");
+				throw new DomainException(MatchServiceError.HomeTeamNotRegistered);
 			if (!IsTeamInTournament(tournament, awayTeamId))
-				throw new ArgumentException("Гостевая команда не заявлена на турнир");
+				throw new DomainException(MatchServiceError.AwayTeamNotRegistered);
 
 
 			Match match = new Match(tournament.Id, homeTeamId, awayTeamId, rules, scheduledAt);
@@ -34,9 +36,9 @@ namespace SportsStats.Domain.Services
 			ValidateRoster(match, homeTeamRoster, homeTeam.Name);
 			ValidateRoster(match, awayTeamRoster, awayTeam.Name);
 			if (!tournament.IsStarted())
-				throw new ArgumentException("Нельзя начать матч в неначатом турнире");
+				throw new DomainException(MatchServiceError.MatchCannotBeStartedInNotStartedTournament);
 			if (tournament.StartedAt > startedAt)
-				throw new ArgumentException($"Нельзя начать матч {startedAt}, так как данный турнир начался {tournament.StartedAt}");
+				throw new DomainException(MatchServiceError.MatchCannotBeStartedBeforeTournamentStart, startedAt, tournament.StartedAt.Value);
 			match.Start(startedAt);
 		}
 		private void ValidateRoster(Match match, List<Player> roster, string teamName)
@@ -52,13 +54,13 @@ namespace SportsStats.Domain.Services
 			int playersCount = roster.Count;
 
 			if (forwardsCount < rules.MinForwards || forwardsCount > rules.MaxForwards)
-				throw new ArgumentException($"Проверьте состав команды {teamName}. По правилам турнира нападающих должно быть от {rules.MinForwards} до {rules.MaxForwards}");
+				throw new DomainException(MatchServiceError.ForwardsCountOutOfRange, teamName, rules.MinForwards.ToString(), rules.MaxForwards.ToString());
 			if (defensemanCount < rules.MinDefensemans || defensemanCount > rules.MaxDefensemans)
-				throw new ArgumentException($"Проверьте состав команды {teamName}. По правилам турнира защитников должно быть от {rules.MinDefensemans} до {rules.MaxDefensemans}");
+				throw new DomainException(MatchServiceError.DefensemenCountOutOfRange, teamName, rules.MinDefensemans.ToString(), rules.MaxDefensemans.ToString());
 			if (goalieCount < rules.MinGoalies || goalieCount > rules.MaxGoalies)
-				throw new ArgumentException($"Проверьте состав команды {teamName}. По правилам турнира вратарей должно быть от {rules.MinGoalies} до {rules.MaxGoalies}");
+				throw new DomainException(MatchServiceError.GoaliesCountOutOfRange, teamName, rules.MinGoalies.ToString(), rules.MaxGoalies.ToString());
 			if (playersCount < rules.MinPlayers || playersCount > rules.MaxPlayers)
-				throw new ArgumentException($"Проверьте состав команды {teamName}. По правилам турнира игроков должно быть от {rules.MinPlayers} до {rules.MaxPlayers}");
+				throw new DomainException(MatchServiceError.PlayersCountOutOfRange, teamName, rules.MinPlayers.ToString(), rules.MaxPlayers.ToString());
 
 		}
 		private bool IsTeamInTournament(Tournament tournament, int teamId) => tournament.TeamsId.Contains(teamId);

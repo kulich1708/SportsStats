@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SportsStats.Domain.Shared;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -9,13 +10,13 @@ namespace SportsStats.Domain.Players
 		public int Number { get; private set; }
 		public PlayerNumber(int number)
 		{
-			Validate(number);
 			Number = number;
+			Validate();
 		}
-		private void Validate(int number)
+		private void Validate()
 		{
-			if (number < 1 || number > 99)
-				throw new ArgumentException("Номер игрока должен быть от 1 до 99");
+			if (Number < 1 || Number > 99)
+				throw new DomainException(PlayerError.PlayerNumberOutOfRange);
 		}
 	}
 }

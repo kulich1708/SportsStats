@@ -1,4 +1,5 @@
 using SportsStats.Domain.Common;
+using SportsStats.Domain.Shared;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -25,7 +26,7 @@ namespace SportsStats.Domain.Teams
 		public void SetName(string name)
 		{
 			if (string.IsNullOrWhiteSpace(name))
-				throw new ArgumentException("Имя команды не может быть пустным");
+				throw new DomainException(TeamError.TeamNameCannotBeEmpty);
 
 			Name = name;
 		}
