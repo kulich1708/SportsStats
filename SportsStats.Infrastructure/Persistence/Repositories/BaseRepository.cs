@@ -7,12 +7,12 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 {
 	public abstract class BaseRepository<TAggregate> where TAggregate : class
 	{
-		protected abstract Task<TAggregate> FindByIdAsync(int id);
-		protected abstract ErrorCode NotFoundError { get; }
+		public abstract Task<TAggregate?> FindByIdAsync(int id);
+		protected abstract ErrorCode NotFoundErrorCode { get; }
 		public async Task<TAggregate> GetByIdAsync(int id)
 		{
 			var entity = await FindByIdAsync(id);
-			return entity ?? throw new NotFoundException(NotFoundError, id);
+			return entity ?? throw new NotFoundException(NotFoundErrorCode, id);
 		}
 	}
 }
