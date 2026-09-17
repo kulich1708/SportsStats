@@ -30,7 +30,7 @@ namespace SportsStats.Application.Matches
 
 		public async Task<MatchDTO?> GetAsync(int matchId)
 		{
-			Match? match = await _matchRepository.GetAsync(matchId);
+			Match? match = await _matchRepository.FindByIdAsync(matchId);
 			if (match == null)
 				return null;
 

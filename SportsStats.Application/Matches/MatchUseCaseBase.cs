@@ -11,7 +11,7 @@ namespace SportsStats.Application.Matches
 
 		protected async Task<Match> GetMatchOrThrowAsync(int matchId)
 		{
-			return await _matchRepository.GetAsync(matchId)
+			return await _matchRepository.FindByIdAsync(matchId)
 				?? throw new ArgumentException($"Матч {matchId} не существует");
 		}
 	}

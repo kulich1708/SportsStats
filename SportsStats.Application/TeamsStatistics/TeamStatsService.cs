@@ -51,7 +51,7 @@ namespace SportsStats.Application.Statistics
 		}
 		public async Task UpdateTeamsStatsAsync(int matchId)
 		{
-			Match match = await _matchRepository.GetAsync(matchId)
+			Match match = await _matchRepository.FindByIdAsync(matchId)
 				?? throw new ArgumentException("Невозможно выполнить пересчёт статистики, потому что не существует матча с таким id");
 			TeamStats homeTeamStats = await _teamStatsRepository.GetAsync(match.HomeTeam.Id, match.TournamentId);
 			TeamStats awayTeamStats = await _teamStatsRepository.GetAsync(match.AwayTeam.Id, match.TournamentId);

@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using SportsStats.Domain.Common;
 using SportsStats.Domain.Matches;
+using SportsStats.Domain.Shared;
 using SportsStats.Infrastructure.Persistence.DbContexts;
 using System;
 using System.Collections.Generic;
@@ -9,12 +10,13 @@ using System.Text;
 
 namespace SportsStats.Infrastructure.Persistence.Repositories
 {
-	public class MatchRepository(AppDbContext context, IMediator mediator) : IMatchRepository
+	public class MatchRepository(AppDbContext context, IMediator mediator) : BaseRepository<Match>, IMatchRepository
 	{
 		private readonly AppDbContext _context = context;
 		private readonly IMediator _mediator = mediator;
+		protected override ErrorCode NotFoundErrorCode => NotFoundError.Match;
 
-		public async Task<Match?> GetAsync(int matchId)
+		public override async Task<Match?> FindByIdAsync(int matchId)
 		{
 			return await _context.Matches.Include(match => match.Goals).FirstOrDefaultAsync(match => match.Id == matchId);
 		}
