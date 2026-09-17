@@ -22,5 +22,6 @@ namespace SportsStats.Domain.Services
 		public static readonly ErrorCode DefensemenCountOutOfRange = new(5021, "Количество защитников в команде {0} должно быть от {1} до {2}");
 		public static readonly ErrorCode GoaliesCountOutOfRange = new(5022, "Количество вратарей в команде {0} должно быть от {1} до {2}");
 		public static readonly ErrorCode PlayersCountOutOfRange = new(5023, "Количество игроков в команде {0} должно быть от {1} до {2}");
+		public static readonly ErrorCode PlayersNotInTeam = new(5024, "Игроки с id: {0}, не состоят в команде {1}");
 	}
 }

@@ -63,6 +63,18 @@ namespace SportsStats.Domain.Services
 				throw new DomainException(MatchServiceError.PlayersCountOutOfRange, teamName, rules.MinPlayers.ToString(), rules.MaxPlayers.ToString());
 
 		}
+		public void SetRoster(Match match, List<Player> players, int teamId)
+		{
+			List<int> playersNotInTeamId = [];
+			foreach (var player in players)
+				if (player.TeamId != teamId)
+					playersNotInTeamId.Add(player.Id);
+
+			if (playersNotInTeamId.Count > 0)
+				throw new DomainException(MatchServiceError.PlayersNotInTeam, string.Join(' ', playersNotInTeamId, teamId));
+
+			match.SetPlayersToRoster(players.Select(p => p.Id).ToList(), teamId);
+		}
 		private bool IsTeamInTournament(Tournament tournament, int teamId) => tournament.TeamsId.Contains(teamId);
 
 	}
