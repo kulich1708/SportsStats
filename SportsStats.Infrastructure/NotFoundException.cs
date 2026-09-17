@@ -12,10 +12,10 @@ namespace SportsStats.Infrastructure
 		{
 			Code = error.Code;
 		}
-		//public NotFoundException(ErrorCode error, params object[] args)
-		//	: base(string.Format(error.Message, args.Select(a => a?.ToString() ?? null).ToArray()))
-		//{
-		//	Code = error.Code;
-		//}
+		public NotFoundException(ErrorCode error, params object[] args)
+			: base(string.Format(error.Message, args.Select(a => a?.ToString() ?? null).ToArray()))
+		{
+			Code = error.Code;
+		}
 	}
 }
