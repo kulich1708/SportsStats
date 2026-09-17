@@ -13,5 +13,6 @@ namespace SportsStats.Domain.Services
 	{
 		public Match CreateMatch(Tournament tournament, int homeTeamId, int awayTeamId, DateTime scheduledAt, TournamentRules rules);
 		public void Start(Match match, Tournament tournament, List<Player> homeTeamRoster, List<Player> awayTeamRoster, Team homeTeam, Team awayTeam, DateTime startedAt);
+		public void SetRoster(Match match, List<Player> players, int teamId);
 	}
 }
