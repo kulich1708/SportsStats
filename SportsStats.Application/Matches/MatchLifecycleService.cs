@@ -29,7 +29,7 @@ namespace SportsStats.Application.Matches
 
 		public async Task<int> CreateAsync(int tournamentId, int homeTeamId, int awayTeamId, DateTime scheduledAt)
 		{
-			Tournament tournament = await _tournamentRepository.GetAsync(tournamentId)
+			Tournament tournament = await _tournamentRepository.FindByIdAsync(tournamentId)
 				?? throw new ArgumentException("Нет турнира с таким Id");
 
 			Match match = _matchService.CreateMatch(tournament, homeTeamId, awayTeamId, scheduledAt, tournament.TournamentRules!);
@@ -40,7 +40,7 @@ namespace SportsStats.Application.Matches
 		public async Task StartAsync(int matchId, DateTime? startedAt = null)
 		{
 			Match match = await GetMatchOrThrowAsync(matchId);
-			Tournament tournament = await _tournamentRepository.GetAsync(match.TournamentId);
+			Tournament tournament = await _tournamentRepository.FindByIdAsync(match.TournamentId);
 			Team homeTeam = await _teamRepository.FindByIdAsync(match.HomeTeam.Id);
 			Team awayTeam = await _teamRepository.FindByIdAsync(match.AwayTeam.Id);
 

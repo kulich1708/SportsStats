@@ -26,7 +26,7 @@ namespace SportsStats.Application.Statistics
 
 			var teamName = (await _teamRepository.FindByIdAsync(teamId))!.Name;
 			var tournamentIds = stats.Select(s => s.TournamentId).Distinct().ToList();
-			var tournamentNames = (await _tournamentRepository.GetAsync(tournamentIds))
+			var tournamentNames = (await _tournamentRepository.GetByIdAsync(tournamentIds))
 								  .ToDictionary(t => t.Id, t => t.Name);
 
 			return stats.Select(s => TeamStatsMapper.ToDTO(
@@ -39,7 +39,7 @@ namespace SportsStats.Application.Statistics
 		{
 			List<TeamStats> stats = await _teamStatsRepository.GetByTournamentAsync(tournamentId);
 
-			var tournamentName = (await _tournamentRepository.GetAsync(tournamentId))!.Name;
+			var tournamentName = (await _tournamentRepository.FindByIdAsync(tournamentId))!.Name;
 			var teamNames = (await _teamRepository.GetByTournamentAsync(tournamentId))
 								  .ToDictionary(t => t.Id, t => t.Name);
 

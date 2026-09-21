@@ -36,7 +36,7 @@ namespace SportsStats.Application.Matches
 
 			var homeTeam = await _teamApplicationService.GetAsync(match.HomeTeam.Id);
 			var awayTeam = await _teamApplicationService.GetAsync(match.AwayTeam.Id);
-			var tournament = await _tournamentRepository.GetAsync(match.TournamentId);
+			var tournament = await _tournamentRepository.FindByIdAsync(match.TournamentId);
 			var homeTeamRoster = await _playerApplicationService.GetAsync(match.HomeTeam.Roster.ToList());
 			var awayTeamRoster = await _playerApplicationService.GetAsync(match.AwayTeam.Roster.ToList());
 			return MatchMapper.ToDTO(match, homeTeam, awayTeam, homeTeamRoster, awayTeamRoster, TournamentMapper.ToDTO(tournament));

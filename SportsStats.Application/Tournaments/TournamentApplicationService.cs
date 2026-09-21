@@ -32,7 +32,7 @@ namespace SportsStats.Application.Tournaments
 
 		private async Task<Tournament> GetTournamentOrThrowAsync(int tournamentId)
 		{
-			Tournament tournament = await _tournamentRepository.GetAsync(tournamentId)
+			Tournament tournament = await _tournamentRepository.FindByIdAsync(tournamentId)
 				?? throw new ArgumentException($"Не существует туринра с id {tournamentId}");
 
 			return tournament;
@@ -101,7 +101,7 @@ namespace SportsStats.Application.Tournaments
 		}
 		public async Task<TournamentDTO?> GetAsync(int tournamentId)
 		{
-			var tournament = await _tournamentRepository.GetAsync(tournamentId);
+			var tournament = await _tournamentRepository.FindByIdAsync(tournamentId);
 			var teams = await _teamRepository.GetByTournamentAsync(tournamentId);
 			return tournament == null ? null : TournamentMapper.ToDTO(tournament, teams);
 		}
@@ -111,7 +111,7 @@ namespace SportsStats.Application.Tournaments
 
 			var matchesInTournaments = matches.ToLookup(m => m.TournamentId);
 			var tournamentIds = matchesInTournaments.Select(g => g.Key).ToList();
-			var tournaments = await _tournamentRepository.GetAsync(tournamentIds);
+			var tournaments = await _tournamentRepository.GetByIdAsync(tournamentIds);
 			var tournamentsLookup = tournaments.ToDictionary(t => t.Id);
 
 			return matchesInTournaments
@@ -141,7 +141,7 @@ namespace SportsStats.Application.Tournaments
 			}
 
 			var tournamentIds = matches.Select(m => m.TournamentId).Distinct().ToList();
-			var tournaments = await _tournamentRepository.GetAsync(tournamentIds);
+			var tournaments = await _tournamentRepository.GetByIdAsync(tournamentIds);
 			var tournamentsLookup = tournaments.ToDictionary(t => t.Id);
 
 			return matchesInTournaments
