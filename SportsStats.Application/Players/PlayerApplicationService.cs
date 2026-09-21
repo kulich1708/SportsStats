@@ -79,7 +79,7 @@ namespace SportsStats.Application.Players
 		public IReadOnlyDictionary<PositionType, string> GetAllPlayerPositions() => PositionTypeText.PositionDescription;
 		private async Task<Player> GetPlayerOrThrowAsync(int playerId)
 		{
-			return await _playerRepository.GetAsync(playerId)
+			return await _playerRepository.FindByIdAsync(playerId)
 				?? throw new ArgumentException("Игрок с таким Id не найден");
 		}
 		private async Task<Team> GetTeamOrThrowAsync(int teamId)

@@ -5,15 +5,17 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using SportsStats.Domain.Teams;
+using SportsStats.Domain.Shared;
 
 namespace SportsStats.Infrastructure.Persistence.Repositories
 {
-	public class PlayerRepository(AppDbContext context) : IPlayerRepository
+	public class PlayerRepository(AppDbContext context) : BaseRepository<Player>, IPlayerRepository
 	{
 
 		private readonly AppDbContext _context = context;
+		protected override ErrorCode NotFoundErrorCode => NotFoundError.Player;
 
-		public async Task<Player?> GetAsync(int playerId)
+		public override async Task<Player?> FindByIdAsync(int playerId)
 		{
 			return await _context.Players.FirstOrDefaultAsync(player => player.Id == playerId);
 		}

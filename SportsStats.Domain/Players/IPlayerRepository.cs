@@ -6,7 +6,8 @@ namespace SportsStats.Domain.Players
 {
 	public interface IPlayerRepository
 	{
-		public Task<Player?> GetAsync(int playerId);
+		public Task<Player?> FindByIdAsync(int playerId);
+		public Task<Player> GetByIdAsync(int playerId);
 		public Task SaveChangesAsync();
 		public Task AddAsync(Player player);
 		public Task<List<Player>> GetByTeamAsync(int teamId);
