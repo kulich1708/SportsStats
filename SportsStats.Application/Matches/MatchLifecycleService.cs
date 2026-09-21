@@ -41,8 +41,8 @@ namespace SportsStats.Application.Matches
 		{
 			Match match = await GetMatchOrThrowAsync(matchId);
 			Tournament tournament = await _tournamentRepository.GetAsync(match.TournamentId);
-			Team homeTeam = await _teamRepository.GetAsync(match.HomeTeam.Id);
-			Team awayTeam = await _teamRepository.GetAsync(match.AwayTeam.Id);
+			Team homeTeam = await _teamRepository.FindByIdAsync(match.HomeTeam.Id);
+			Team awayTeam = await _teamRepository.FindByIdAsync(match.AwayTeam.Id);
 
 			List<Player> homeTeamRoster = await _playerRepository.GetAsync(match.HomeTeam.Roster.ToList());
 			List<Player> awayTeamRoster = await _playerRepository.GetAsync(match.AwayTeam.Roster.ToList());

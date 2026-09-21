@@ -24,7 +24,7 @@ namespace SportsStats.Application.Statistics
 		{
 			List<TeamStats> stats = await _teamStatsRepository.GetByTeamAsync(teamId);
 
-			var teamName = (await _teamRepository.GetAsync(teamId))!.Name;
+			var teamName = (await _teamRepository.FindByIdAsync(teamId))!.Name;
 			var tournamentIds = stats.Select(s => s.TournamentId).Distinct().ToList();
 			var tournamentNames = (await _tournamentRepository.GetAsync(tournamentIds))
 								  .ToDictionary(t => t.Id, t => t.Name);

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SportsStats.Domain.Shared;
 using SportsStats.Domain.Teams;
 using SportsStats.Infrastructure.Persistence.DbContexts;
 using System;
@@ -7,11 +8,12 @@ using System.Text;
 
 namespace SportsStats.Infrastructure.Persistence.Repositories
 {
-	public class TeamRepository(AppDbContext context) : ITeamRepository
+	public class TeamRepository(AppDbContext context) : BaseRepository<Team>, ITeamRepository
 	{
 		private readonly AppDbContext _context = context;
+		protected override ErrorCode NotFoundErrorCode => NotFoundError.Team;
 
-		public async Task<Team?> GetAsync(int teamId)
+		public override async Task<Team?> FindByIdAsync(int teamId)
 		{
 			return await _context.Teams.FirstOrDefaultAsync(team => team.Id == teamId);
 		}

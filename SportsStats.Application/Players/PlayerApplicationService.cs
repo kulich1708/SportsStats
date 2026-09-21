@@ -84,7 +84,7 @@ namespace SportsStats.Application.Players
 		}
 		private async Task<Team> GetTeamOrThrowAsync(int teamId)
 		{
-			return await _teamRepository.GetAsync(teamId)
+			return await _teamRepository.FindByIdAsync(teamId)
 				?? throw new ArgumentException("Команда с таким id не найдена");
 		}
 
