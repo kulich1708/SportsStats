@@ -22,7 +22,7 @@ namespace SportsStats.Tests.Domain.Tournaments
 		}
 
 		[Fact]
-		public void Registration_WhithoutRulesInDraft_ThrowsArgumentException()
+		public void Registration_WhithoutRulesInDraft_ThrowsDomainException()
 		{
 			var tournament = new Tournament("KHL test");
 
@@ -31,7 +31,7 @@ namespace SportsStats.Tests.Domain.Tournaments
 			Assert.Equal(TournamentError.RegistrationRequiresRules.Code, ex.Code);
 		}
 		[Fact]
-		public void Start_InDraft_ThrowsArgumentException()
+		public void Start_InDraft_ThrowsDomainException()
 		{
 			var tournament = new Tournament("KHL test");
 			DateTime startAt = new(2026, 4, 29);
@@ -41,7 +41,7 @@ namespace SportsStats.Tests.Domain.Tournaments
 			Assert.Equal(TournamentError.TournamentCanOnlyBeStartedAfterRegistration.Code, ex.Code);
 		}
 		[Fact]
-		public void Start_WithLessThanTwoTeams_ThrowsArgumentExceptoin()
+		public void Start_WithLessThanTwoTeams_ThrowsDomainException()
 		{
 			var tournament = new Tournament("KHL test");
 			var rules = TournamentRules.CreateKHLRules();
@@ -88,7 +88,7 @@ namespace SportsStats.Tests.Domain.Tournaments
 			Assert.Equal(finishAt, tournament.FinishedAt);
 		}
 		[Fact]
-		public void Finish_WithUnfinishedMatches_ThrowsArgumentException()
+		public void Finish_WithUnfinishedMatches_ThrowsDomainException()
 		{
 			var tournament = new Tournament("KHL test");
 			var rules = TournamentRules.CreateKHLRules();

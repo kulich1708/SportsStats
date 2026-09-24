@@ -9,7 +9,7 @@ namespace SportsStats.Tests.Domain.Matches
 	public class MatchRosterTests
 	{
 		[Fact]
-		public void AddPlayerToRoster_WhenTeamNotInMatch_ThrowsArgumentException()
+		public void AddPlayerToRoster_WhenTeamNotInMatch_ThrowsDomainException()
 		{
 			Match match = CreateMatch();
 
@@ -19,7 +19,7 @@ namespace SportsStats.Tests.Domain.Matches
 		}
 
 		[Fact]
-		public void AddPlayerToRoster_WhenPlayerAlreadyOnRoster_ThrowsArgumentException()
+		public void AddPlayerToRoster_WhenPlayerAlreadyOnRoster_ThrowsDomainException()
 		{
 			Match match = CreateMatch();
 			match.AddPlayerToRoster(playerId: 101, teamId: 10);
@@ -30,7 +30,7 @@ namespace SportsStats.Tests.Domain.Matches
 		}
 
 		[Fact]
-		public void AddPlayerToRoster_WhenMatchAlreadyStarted_ThrowsArgumentException()
+		public void AddPlayerToRoster_WhenMatchAlreadyStarted_ThrowsDomainException()
 		{
 			Match match = CreateMatch();
 			match.Start(new DateTime(2026, 4, 29, 19, 30, 0));

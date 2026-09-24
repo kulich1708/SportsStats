@@ -41,7 +41,7 @@ namespace SportsStats.Tests.Domain.Services
 		}
 
 		[Fact]
-		public void CreateMatch_WhenTournamentIsDraft_ThrowsArgumentException()
+		public void CreateMatch_WhenTournamentIsDraft_ThrowsDomainException()
 		{
 			Tournament tournament = new("KHL Test");
 			TournamentRules rules = TournamentRules.CreateKHLRules();
@@ -54,7 +54,7 @@ namespace SportsStats.Tests.Domain.Services
 		}
 
 		[Fact]
-		public void CreateMatch_WhenHomeTeamNotInTournament_ThrowsArgumentException()
+		public void CreateMatch_WhenHomeTeamNotInTournament_ThrowsDomainException()
 		{
 			Tournament tournament = CreateTournamentInRegistration();
 			DateTime scheduledAt = new(2026, 4, 29, 19, 0, 0);
@@ -66,7 +66,7 @@ namespace SportsStats.Tests.Domain.Services
 		}
 
 		[Fact]
-		public void CreateMatch_WhenAwayTeamNotInTournament_ThrowsArgumentException()
+		public void CreateMatch_WhenAwayTeamNotInTournament_ThrowsDomainException()
 		{
 			Tournament tournament = CreateTournamentInRegistration();
 			DateTime scheduledAt = new(2026, 4, 29, 19, 0, 0);
@@ -78,7 +78,7 @@ namespace SportsStats.Tests.Domain.Services
 		}
 
 		[Fact]
-		public void CreateMatch_WhenScheduledAtEarlierThanTournamentStartedAt_ThrowsArgumentException()
+		public void CreateMatch_WhenScheduledAtEarlierThanTournamentStartedAt_ThrowsDomainException()
 		{
 			Tournament tournament = CreateTournamentInProgress();
 			DateTime scheduledAt = tournament.StartedAt!.Value.AddMinutes(-10);
@@ -91,7 +91,7 @@ namespace SportsStats.Tests.Domain.Services
 		}
 
 		[Fact]
-		public void Start_WhenTournamentIsNotStarted_ThrowsArgumentException()
+		public void Start_WhenTournamentIsNotStarted_ThrowsDomainException()
 		{
 			Tournament tournament = CreateTournamentInRegistration();
 			Match match = CreateMatchForStart(tournament.TournamentRules!);
@@ -108,7 +108,7 @@ namespace SportsStats.Tests.Domain.Services
 		}
 
 		[Fact]
-		public void Start_WhenStartedAtEarlierThanTournamentStartedAt_ThrowsArgumentException()
+		public void Start_WhenStartedAtEarlierThanTournamentStartedAt_ThrowsDomainException()
 		{
 			Tournament tournament = CreateTournamentInProgress();
 			Match match = CreateMatchForStart(tournament.TournamentRules!);
@@ -125,7 +125,7 @@ namespace SportsStats.Tests.Domain.Services
 		}
 
 		[Fact]
-		public void Start_WhenRosterViolatesRules_ThrowsArgumentException()
+		public void Start_WhenRosterViolatesRules_ThrowsDomainException()
 		{
 			Tournament tournament = CreateTournamentInProgress();
 			Match match = CreateMatchForStart(tournament.TournamentRules!);
