@@ -40,7 +40,7 @@ namespace SportsStats.API.Controllers
 		[HttpGet("{id}")]
 		public async Task<ActionResult<TeamDTO>> Get(int id)
 		{
-			return Ok(await _teamApplicationService.GetAsync(id));
+			return Ok(await _teamApplicationService.GetByIdAsync(id));
 		}
 		[HttpGet("{id}/results")]
 		public async Task<ActionResult<TeamDTO>> GetFinishedMatches(int id, [FromQuery] PaginationDTO dto)

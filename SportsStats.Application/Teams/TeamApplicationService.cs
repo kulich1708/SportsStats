@@ -22,10 +22,10 @@ namespace SportsStats.Application.Teams
 
 			return team.Id;
 		}
-		public async Task<TeamDTO?> GetAsync(int id)
+		public async Task<TeamDTO> GetByIdAsync(int id)
 		{
-			Team? team = await _teamRepository.GetAsync(id);
-			return team == null ? null : TeamMapper.ToDTO(team);
+			Team team = await _teamRepository.GetByIdAsync(id);
+			return TeamMapper.ToDTO(team);
 		}
 		public async Task<List<TeamDTO>> GetAllAsync(int page, int pageSize, string? search = null)
 		{
@@ -39,8 +39,7 @@ namespace SportsStats.Application.Teams
 		}
 		public async Task ChangeGeneralInfo(int id, string name, string? city, byte[]? photo, string? photoMime)
 		{
-			var team = await _teamRepository.GetAsync(id)
-				?? throw new ArgumentException("Команда с таким id не найдена");
+			var team = await _teamRepository.GetByIdAsync(id);
 			team.SetName(name);
 			team.SetCity(city);
 			team.SetPhoto(photo, photoMime);

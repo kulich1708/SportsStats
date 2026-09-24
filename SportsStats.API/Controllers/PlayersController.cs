@@ -12,7 +12,7 @@ namespace SportsStats.API.Controllers
 	[ApiController]
 	public class PlayersController(PlayerApplicationService playerApplicationService) : ControllerBase
 	{
-		PlayerApplicationService _playerApplicationService = playerApplicationService;
+		private readonly PlayerApplicationService _playerApplicationService = playerApplicationService;
 
 		[HttpGet("by-team")]
 		public async Task<ActionResult<List<PlayerDTO>>> GetByTeam([FromQuery] int teamId)
@@ -27,10 +27,10 @@ namespace SportsStats.API.Controllers
 		[HttpGet("{id}")]
 		public async Task<ActionResult<PlayerDTO>> Get(int id)
 		{
-			return Ok(await _playerApplicationService.GetAsync(id));
+			return Ok(await _playerApplicationService.GetByIdAsync(id));
 		}
 		[HttpGet("positions")]
-		public ActionResult GetAllPositions() => Ok(_playerApplicationService.GetAllPlayerPositions());
+		public ActionResult GetAllPositions() => Ok(PlayerApplicationService.GetAllPlayerPositions());
 
 		[HttpPost]
 		public async Task<ActionResult<int>> Create([FromBody] CreatePlayerDTO dto)

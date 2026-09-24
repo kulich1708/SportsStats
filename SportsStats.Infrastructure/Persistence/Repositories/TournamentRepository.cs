@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SportsStats.Domain.Shared;
 using SportsStats.Domain.Tournaments;
 using SportsStats.Infrastructure.Persistence.DbContexts;
 using System;
@@ -7,15 +8,16 @@ using System.Text;
 
 namespace SportsStats.Infrastructure.Persistence.Repositories
 {
-	public class TournamentRepository(AppDbContext context) : ITournamentRepository
+	public class TournamentRepository(AppDbContext context) : BaseRepository<Tournament>, ITournamentRepository
 	{
 		private readonly AppDbContext _context = context;
+		protected override ErrorCode NotFoundErrorCode => NotFoundError.Tournament;
 
-		public async Task<Tournament?> GetAsync(int tournamentId)
+		public override async Task<Tournament?> FindByIdAsync(int tournamentId)
 		{
 			return await _context.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId);
 		}
-		public async Task<List<Tournament>> GetAsync(List<int> tournamentIds)
+		public async Task<List<Tournament>> GetByIdAsync(List<int> tournamentIds)
 		{
 			return await _context.Tournaments.Where(t => tournamentIds.Contains(t.Id)).ToListAsync();
 		}

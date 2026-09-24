@@ -17,7 +17,7 @@ namespace ConsoleApp.Matches
 		private readonly Random _random = new();
 		public async Task GenerateGoalsAsync(int matchId)
 		{
-			var match = await _matchQueriesHandle.GetAsync(matchId);
+			var match = await _matchQueriesHandle.GetByIdAsync(matchId);
 
 			List<TeamDTO> teams = [match.HomeTeam, match.AwayTeam];
 			List<List<PlayerDTO>> rosters = [match.HomeTeamRoster, match.AwayTeamRoster];

@@ -24,9 +24,9 @@ namespace SportsStats.Application.Statistics
 		{
 			List<TeamStats> stats = await _teamStatsRepository.GetByTeamAsync(teamId);
 
-			var teamName = (await _teamRepository.GetAsync(teamId))!.Name;
+			var teamName = (await _teamRepository.FindByIdAsync(teamId))!.Name;
 			var tournamentIds = stats.Select(s => s.TournamentId).Distinct().ToList();
-			var tournamentNames = (await _tournamentRepository.GetAsync(tournamentIds))
+			var tournamentNames = (await _tournamentRepository.GetByIdAsync(tournamentIds))
 								  .ToDictionary(t => t.Id, t => t.Name);
 
 			return stats.Select(s => TeamStatsMapper.ToDTO(
@@ -39,7 +39,7 @@ namespace SportsStats.Application.Statistics
 		{
 			List<TeamStats> stats = await _teamStatsRepository.GetByTournamentAsync(tournamentId);
 
-			var tournamentName = (await _tournamentRepository.GetAsync(tournamentId))!.Name;
+			var tournamentName = (await _tournamentRepository.FindByIdAsync(tournamentId))!.Name;
 			var teamNames = (await _teamRepository.GetByTournamentAsync(tournamentId))
 								  .ToDictionary(t => t.Id, t => t.Name);
 
@@ -51,8 +51,7 @@ namespace SportsStats.Application.Statistics
 		}
 		public async Task UpdateTeamsStatsAsync(int matchId)
 		{
-			Match match = await _matchRepository.GetAsync(matchId)
-				?? throw new ArgumentException("Невозможно выполнить пересчёт статистики, потому что не существует матча с таким id");
+			Match match = await _matchRepository.GetByIdAsync(matchId);
 			TeamStats homeTeamStats = await _teamStatsRepository.GetAsync(match.HomeTeam.Id, match.TournamentId);
 			TeamStats awayTeamStats = await _teamStatsRepository.GetAsync(match.AwayTeam.Id, match.TournamentId);
 			int? homeTeamPoint = match.Rules.MatchPointsRules.GetPoints(match.HomeTeam.WinType);

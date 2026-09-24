@@ -15,7 +15,7 @@ namespace SportsStats.Application.Matches
 {
 	public class MatchGoalService(
 		IMatchRepository matchRepository,
-		ITimeProvider timeProvider) : MatchUseCaseBase(matchRepository)
+		ITimeProvider timeProvider)
 	{
 		private readonly IMatchRepository _matchRepository = matchRepository;
 		private readonly ITimeProvider _timeProvider = timeProvider;
@@ -23,7 +23,7 @@ namespace SportsStats.Application.Matches
 
 		public async Task<int> AddGoalAsync(int matchId, int scoringTeamId, int goalScorerId, int time)
 		{
-			Match match = await GetMatchOrThrowAsync(matchId);
+			Match match = await _matchRepository.GetByIdAsync(matchId);
 
 			GoalEvent goal = match.AddGoal(scoringTeamId, goalScorerId, time, _timeProvider.GetCurrentTime());
 
@@ -34,7 +34,7 @@ namespace SportsStats.Application.Matches
 		public async Task FillGoalDetailsAsync(int matchId, int goalId, int scorerId, int? firstAssistId, int? secondAssistId,
 									GoalStrengthType strengthType, GoalNetType? netType = null)
 		{
-			Match match = await GetMatchOrThrowAsync(matchId);
+			Match match = await _matchRepository.GetByIdAsync(matchId);
 
 			match.FillGoalDetails(goalId, scorerId, firstAssistId, secondAssistId, strengthType, netType);
 

@@ -35,7 +35,7 @@ namespace SportsStats.Tests.Domain.Matches
 			Assert.True(match.Period.IsBreak);
 		}
 		[Fact]
-		public void Constructor_WhenHomeAndAwayTeamsAreSame_ThrowsArgumentException()
+		public void Constructor_WhenHomeAndAwayTeamsAreSame_ThrowsDomainException()
 		{
 			var rules = TournamentRules.CreateKHLRules();
 			DateTime scheduleAt = new(2026, 4, 29, 19, 30, 0);
@@ -62,7 +62,7 @@ namespace SportsStats.Tests.Domain.Matches
 		}
 
 		[Fact]
-		public void Start_WhenNotWaiting_ThrowsArgumentException()
+		public void Start_WhenNotWaiting_ThrowsDomainException()
 		{
 			Match match = CreateMatch(TournamentRules.CreateKHLRules());
 			DateTime startedAt = new(2026, 4, 29, 19, 30, 0);
@@ -85,7 +85,7 @@ namespace SportsStats.Tests.Domain.Matches
 			Assert.True(match.Period.IsBreak);
 		}
 		[Fact]
-		public void FinishPeriod_WhenMatchNotStarted_ThrowsArgumentException()
+		public void FinishPeriod_WhenMatchNotStarted_ThrowsDomainException()
 		{
 			Match match = CreateMatch(TournamentRules.CreateKHLRules());
 			var ex = Assert.Throws<DomainException>(() => match.FinishPeriod(DateTime.UtcNow));
@@ -93,7 +93,7 @@ namespace SportsStats.Tests.Domain.Matches
 			Assert.Equal(MatchError.MatchNotInProgress.Code, ex.Code);
 		}
 		[Fact]
-		public void FinishPeriod_WhenPeriodFinished_ThrowsArgumentException()
+		public void FinishPeriod_WhenPeriodFinished_ThrowsDomainException()
 		{
 			Match match = CreateMatch(TournamentRules.CreateKHLRules());
 			DateTime startedAt = new(2026, 4, 29, 19, 30, 0);
@@ -121,7 +121,7 @@ namespace SportsStats.Tests.Domain.Matches
 			Assert.False(match.Period.IsBreak);
 		}
 		[Fact]
-		public void StartPeriod_WhenMatchNotStarted_ThrowsArgumentException()
+		public void StartPeriod_WhenMatchNotStarted_ThrowsDomainException()
 		{
 			Match match = CreateMatch(TournamentRules.CreateKHLRules());
 			var ex = Assert.Throws<DomainException>(() => match.StartPeriod());
@@ -129,7 +129,7 @@ namespace SportsStats.Tests.Domain.Matches
 			Assert.Equal(MatchError.MatchNotInProgress.Code, ex.Code);
 		}
 		[Fact]
-		public void StartPeriod_WhenPeriodStarted_ThrowsArgumentException()
+		public void StartPeriod_WhenPeriodStarted_ThrowsDomainException()
 		{
 			Match match = CreateMatch(TournamentRules.CreateKHLRules());
 			DateTime startedAt = new(2026, 4, 29, 19, 30, 0);
@@ -223,7 +223,7 @@ namespace SportsStats.Tests.Domain.Matches
 			Assert.Equal(MatchWinType.DRAW, match.AwayTeam.WinType);
 		}
 		[Fact]
-		public void FinishPeriod_WhenScoreEqualInOneInfinityOvertime_ThrowsArgumentException()
+		public void FinishPeriod_WhenScoreEqualInOneInfinityOvertime_ThrowsDomainException()
 		{
 			Match match = CreateMatch(CreateRulesForOneInfinityOvertime());
 			PrepareRosters(match);

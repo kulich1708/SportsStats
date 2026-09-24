@@ -12,7 +12,7 @@ namespace SportsStats.Tests.Domain.Matches
 	public class MatchGoalTests
 	{
 		[Fact]
-		public void AddGoal_WhenMatchNotInProgress_ThrowsArgumentException()
+		public void AddGoal_WhenMatchNotInProgress_ThrowsDomainException()
 		{
 			Match match = CreateMatch(CreateRulesWithOvertime());
 			PrepareRosters(match);
@@ -23,7 +23,7 @@ namespace SportsStats.Tests.Domain.Matches
 		}
 
 		[Fact]
-		public void AddGoal_WhenScoringTeamNotInMatch_ThrowsArgumentException()
+		public void AddGoal_WhenScoringTeamNotInMatch_ThrowsDomainException()
 		{
 			Match match = CreateMatch(CreateRulesWithOvertime());
 			PrepareRosters(match);
@@ -35,7 +35,7 @@ namespace SportsStats.Tests.Domain.Matches
 		}
 
 		[Fact]
-		public void AddGoal_WhenScorerNotInScoringTeamRoster_ThrowsArgumentException()
+		public void AddGoal_WhenScorerNotInScoringTeamRoster_ThrowsDomainException()
 		{
 			Match match = CreateMatch(CreateRulesWithOvertime());
 			PrepareRosters(match);
@@ -86,7 +86,7 @@ namespace SportsStats.Tests.Domain.Matches
 
 
 		[Fact]
-		public void FillGoalDetails_WhenAssistIsGoalScorer_ThrowsArgumentException()
+		public void FillGoalDetails_WhenAssistIsGoalScorer_ThrowsDomainException()
 		{
 			Match match = CreateMatch(CreateRulesWithOvertime());
 			PrepareRosters(match);

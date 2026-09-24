@@ -30,16 +30,9 @@ namespace SportsStats.Application.Tournaments
 		private readonly IMatchRepository _matchRepository = matchRepository;
 		private readonly MatchQueriesHandler _matchQueriesHandler = matchQueriesHandler;
 
-		private async Task<Tournament> GetTournamentOrThrowAsync(int tournamentId)
-		{
-			Tournament tournament = await _tournamentRepository.GetAsync(tournamentId)
-				?? throw new ArgumentException($"Не существует туринра с id {tournamentId}");
-
-			return tournament;
-		}
 		private async Task<Tournament> UpdateAndSaveAsync(int tournamentId, Action<Tournament> action)
 		{
-			Tournament tournament = await GetTournamentOrThrowAsync(tournamentId);
+			Tournament tournament = await _tournamentRepository.GetByIdAsync(tournamentId);
 
 			action(tournament);
 
@@ -57,7 +50,7 @@ namespace SportsStats.Application.Tournaments
 		}
 		public async Task StartAsync(int tournamentId, DateTime? startedAt = null)
 		{
-			Tournament tournament = await GetTournamentOrThrowAsync(tournamentId);
+			Tournament tournament = await _tournamentRepository.GetByIdAsync(tournamentId);
 
 
 			foreach (var teamId in tournament.TeamsId)
@@ -95,15 +88,15 @@ namespace SportsStats.Application.Tournaments
 		{
 			var tournaments = await _tournamentRepository.GetAllAsync(page, pageSize, search);
 			var teamIds = tournaments.SelectMany(t => t.TeamsId).Distinct().ToList();
-			var teams = await _teamRepository.GetAsync(teamIds);
+			var teams = await _teamRepository.GetByIdAsync(teamIds);
 
 			return tournaments.Select(TournamentMapper.ToDTO).ToList();
 		}
-		public async Task<TournamentDTO?> GetAsync(int tournamentId)
+		public async Task<TournamentDTO> GetByIdAsync(int tournamentId)
 		{
-			var tournament = await _tournamentRepository.GetAsync(tournamentId);
+			var tournament = await _tournamentRepository.GetByIdAsync(tournamentId);
 			var teams = await _teamRepository.GetByTournamentAsync(tournamentId);
-			return tournament == null ? null : TournamentMapper.ToDTO(tournament, teams);
+			return TournamentMapper.ToDTO(tournament, teams);
 		}
 		public async Task<List<TournamentWithMatchesDTO>> GetActiveByDateWithMatchesAsync(DateOnly date)
 		{
@@ -111,7 +104,7 @@ namespace SportsStats.Application.Tournaments
 
 			var matchesInTournaments = matches.ToLookup(m => m.TournamentId);
 			var tournamentIds = matchesInTournaments.Select(g => g.Key).ToList();
-			var tournaments = await _tournamentRepository.GetAsync(tournamentIds);
+			var tournaments = await _tournamentRepository.GetByIdAsync(tournamentIds);
 			var tournamentsLookup = tournaments.ToDictionary(t => t.Id);
 
 			return matchesInTournaments
@@ -141,7 +134,7 @@ namespace SportsStats.Application.Tournaments
 			}
 
 			var tournamentIds = matches.Select(m => m.TournamentId).Distinct().ToList();
-			var tournaments = await _tournamentRepository.GetAsync(tournamentIds);
+			var tournaments = await _tournamentRepository.GetByIdAsync(tournamentIds);
 			var tournamentsLookup = tournaments.ToDictionary(t => t.Id);
 
 			return matchesInTournaments
@@ -150,7 +143,7 @@ namespace SportsStats.Application.Tournaments
 		}
 		public async Task ChangeGeneralInfoAsync(int id, string name, byte[]? photo, string? photoMime)
 		{
-			Tournament tournament = await GetTournamentOrThrowAsync(id);
+			Tournament tournament = await _tournamentRepository.GetByIdAsync(id);
 			tournament.SetName(name);
 			if (photo != null)
 				tournament.SetPhoto(photo, photoMime);
