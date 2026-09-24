@@ -39,8 +39,7 @@ namespace SportsStats.Application.Teams
 		}
 		public async Task ChangeGeneralInfo(int id, string name, string? city, byte[]? photo, string? photoMime)
 		{
-			var team = await _teamRepository.FindByIdAsync(id)
-				?? throw new ArgumentException("Команда с таким id не найдена");
+			var team = await _teamRepository.GetByIdAsync(id);
 			team.SetName(name);
 			team.SetCity(city);
 			team.SetPhoto(photo, photoMime);

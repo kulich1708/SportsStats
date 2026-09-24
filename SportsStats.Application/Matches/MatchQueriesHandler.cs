@@ -18,8 +18,7 @@ namespace SportsStats.Application.Matches
 		ITeamRepository teamRepository,
 		ITournamentRepository tournamentRepository,
 		TeamApplicationService teamApplicationService,
-		PlayerApplicationService playerApplicationService
-		) : MatchUseCaseBase(matchRepository)
+		PlayerApplicationService playerApplicationService)
 	{
 		private readonly IMatchRepository _matchRepository = matchRepository;
 		private readonly ITeamRepository _teamRepository = teamRepository;
@@ -77,7 +76,7 @@ namespace SportsStats.Application.Matches
 
 		public async Task<bool> IsFinished(int matchId)
 		{
-			var match = await GetMatchOrThrowAsync(matchId);
+			var match = await _matchRepository.GetByIdAsync(matchId);
 			return match.IsMatchFinished();
 		}
 	}

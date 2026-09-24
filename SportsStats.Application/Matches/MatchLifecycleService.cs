@@ -17,7 +17,7 @@ namespace SportsStats.Application.Matches
 		ITournamentRepository tournamentRepository, IMatchRepository matchRepository,
 		ITeamRepository teamRepository,
 		ITimeProvider timeProvider,
-		IMatchService matchService) : MatchUseCaseBase(matchRepository)
+		IMatchService matchService)
 	{
 		private readonly IPlayerRepository _playerRepository = playerRepository;
 		private readonly ITournamentRepository _tournamentRepository = tournamentRepository;
@@ -29,8 +29,7 @@ namespace SportsStats.Application.Matches
 
 		public async Task<int> CreateAsync(int tournamentId, int homeTeamId, int awayTeamId, DateTime scheduledAt)
 		{
-			Tournament tournament = await _tournamentRepository.FindByIdAsync(tournamentId)
-				?? throw new ArgumentException("Нет турнира с таким Id");
+			Tournament tournament = await _tournamentRepository.GetByIdAsync(tournamentId);
 
 			Match match = _matchService.CreateMatch(tournament, homeTeamId, awayTeamId, scheduledAt, tournament.TournamentRules!);
 			await _matchRepository.AddAsync(match);
@@ -39,10 +38,10 @@ namespace SportsStats.Application.Matches
 		}
 		public async Task StartAsync(int matchId, DateTime? startedAt = null)
 		{
-			Match match = await GetMatchOrThrowAsync(matchId);
-			Tournament tournament = await _tournamentRepository.FindByIdAsync(match.TournamentId);
-			Team homeTeam = await _teamRepository.FindByIdAsync(match.HomeTeam.Id);
-			Team awayTeam = await _teamRepository.FindByIdAsync(match.AwayTeam.Id);
+			Match match = await _matchRepository.GetByIdAsync(matchId);
+			Tournament tournament = await _tournamentRepository.GetByIdAsync(match.TournamentId);
+			Team homeTeam = await _teamRepository.GetByIdAsync(match.HomeTeam.Id);
+			Team awayTeam = await _teamRepository.GetByIdAsync(match.AwayTeam.Id);
 
 			List<Player> homeTeamRoster = await _playerRepository.GetAsync(match.HomeTeam.Roster.ToList());
 			List<Player> awayTeamRoster = await _playerRepository.GetAsync(match.AwayTeam.Roster.ToList());
@@ -54,7 +53,7 @@ namespace SportsStats.Application.Matches
 
 		public async Task StartPeriodAsync(int id, DateTime? startedAt = null)
 		{
-			Match match = await GetMatchOrThrowAsync(id);
+			Match match = await _matchRepository.GetByIdAsync(id);
 
 			match.StartPeriod();
 
@@ -62,7 +61,7 @@ namespace SportsStats.Application.Matches
 		}
 		public async Task FinishPeriodAsync(int id, DateTime? finishedAt = null)
 		{
-			Match match = await GetMatchOrThrowAsync(id);
+			Match match = await _matchRepository.GetByIdAsync(id);
 
 			match.FinishPeriod(finishedAt ?? _timeProvider.GetCurrentTime());
 
@@ -70,7 +69,7 @@ namespace SportsStats.Application.Matches
 		}
 		public async Task ChangeGeneralInfoAsync(int id, MatchGeneralInfoDTO dto)
 		{
-			Match match = await GetMatchOrThrowAsync(id);
+			Match match = await _matchRepository.GetByIdAsync(id);
 			match.SetScheduleAt(dto.ScheduleAt);
 			await _matchRepository.SaveChangesAsync();
 		}

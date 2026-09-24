@@ -24,19 +24,19 @@ namespace SportsStats.Application.Players
 		}
 		public async Task ChangeTeamAsync(int playerId, int teamId)
 		{
-			Player player = await GetPlayerOrThrowAsync(playerId);
-			await GetTeamOrThrowAsync(teamId);
+			Player player = await _playerRepository.GetByIdAsync(playerId);
+			await _teamRepository.GetByIdAsync(teamId);
 
 			player.ChangeTeam(teamId);
 
 			await _playerRepository.SaveChangesAsync();
 		}
-		public async Task<PlayerDTO?> GetAsync(int playerId)
+		public async Task<PlayerDTO> GetAsync(int playerId)
 		{
-			Player player = await GetPlayerOrThrowAsync(playerId);
-			string? teamName = player.TeamId.HasValue ? (await GetTeamOrThrowAsync(player.TeamId.Value)).Name : null;
+			Player player = await _playerRepository.GetByIdAsync(playerId);
+			string? teamName = player.TeamId.HasValue ? (await _teamRepository.GetByIdAsync(player.TeamId.Value)).Name : null;
 
-			return player == null ? null : PlayerMapper.ToDTO(player, teamName);
+			return PlayerMapper.ToDTO(player, teamName);
 		}
 		public async Task<List<PlayerDTO>> GetAsync(List<int> playerIds)
 		{
@@ -64,7 +64,7 @@ namespace SportsStats.Application.Players
 		}
 		public async Task ChangeGeneralInfoAsync(int id, PlayerGeneralInfoDTO dto)
 		{
-			var player = await GetPlayerOrThrowAsync(id);
+			var player = await _playerRepository.GetByIdAsync(id);
 
 			player.SetNameAndSurname(dto.Name, dto.Surname);
 			player.SetPosition(dto.Position);
@@ -76,17 +76,6 @@ namespace SportsStats.Application.Players
 
 			await _playerRepository.SaveChangesAsync();
 		}
-		public IReadOnlyDictionary<PositionType, string> GetAllPlayerPositions() => PositionTypeText.PositionDescription;
-		private async Task<Player> GetPlayerOrThrowAsync(int playerId)
-		{
-			return await _playerRepository.FindByIdAsync(playerId)
-				?? throw new ArgumentException("Игрок с таким Id не найден");
-		}
-		private async Task<Team> GetTeamOrThrowAsync(int teamId)
-		{
-			return await _teamRepository.FindByIdAsync(teamId)
-				?? throw new ArgumentException("Команда с таким id не найдена");
-		}
-
+		public static IReadOnlyDictionary<PositionType, string> GetAllPlayerPositions() => PositionTypeText.PositionDescription;
 	}
 }

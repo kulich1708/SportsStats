@@ -10,7 +10,7 @@ namespace SportsStats.Application.Matches
 	public class MatchRosterService(
 		IMatchRepository matchRepository,
 		IPlayerRepository playerRepository,
-		IMatchService matchService) : MatchUseCaseBase(matchRepository)
+		IMatchService matchService)
 	{
 		private readonly IMatchRepository _matchRepository = matchRepository;
 		private readonly IPlayerRepository _playerRepository = playerRepository;
@@ -19,7 +19,7 @@ namespace SportsStats.Application.Matches
 
 		public async Task SetPlayersToRosterAsync(int matchId, List<int> playerIds, int teamId)
 		{
-			Match match = await GetMatchOrThrowAsync(matchId);
+			Match match = await _matchRepository.GetByIdAsync(matchId);
 
 			List<Player> players = await _playerRepository.GetAsync(playerIds);
 

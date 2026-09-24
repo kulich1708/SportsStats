@@ -32,8 +32,7 @@ namespace SportsStats.Application.Tournaments
 
 		private async Task<Tournament> GetTournamentOrThrowAsync(int tournamentId)
 		{
-			Tournament tournament = await _tournamentRepository.FindByIdAsync(tournamentId)
-				?? throw new ArgumentException($"Не существует туринра с id {tournamentId}");
+			Tournament tournament = await _tournamentRepository.GetByIdAsync(tournamentId);
 
 			return tournament;
 		}
