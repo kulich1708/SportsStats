@@ -6,10 +6,9 @@ namespace SportsStats.Domain.Matches
 {
 	public interface IMatchRepository
 	{
+		public void Add(Match match);
 		public Task<Match?> FindByIdAsync(int id);
 		public Task<Match> GetByIdAsync(int id);
-		public Task SaveChangesAsync();
-		public Task AddAsync(Match match);
 
 		public Task<List<Match>> GetByDateAsync(DateOnly date, int? tournamentId = null);
 		public Task<List<Match>> GetByDateAsync(DateOnly date, List<int>? tournamentIds = null);

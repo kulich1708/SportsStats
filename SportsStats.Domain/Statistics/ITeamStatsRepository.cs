@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SportsStats.Domain.Teams;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -8,8 +9,7 @@ namespace SportsStats.Domain.Statistics
 	{
 		public Task<TeamStats> GetAsync(int teamId, int tournamentId);
 		public Task<List<TeamStats>> GetByTeamAsync(int teamId);
+		public void Add(TeamStats teamStats);
 		public Task<List<TeamStats>> GetByTournamentAsync(int tournamentId);
-		public Task SaveChangesAsync();
-		public Task AddAsync(TeamStats stats);
 	}
 }

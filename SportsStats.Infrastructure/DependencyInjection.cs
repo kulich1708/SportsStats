@@ -6,6 +6,7 @@ using SportsStats.Application.Players;
 using SportsStats.Application.Statistics;
 using SportsStats.Application.Teams;
 using SportsStats.Application.Tournaments;
+using SportsStats.Domain.Common;
 using SportsStats.Domain.Matches;
 using SportsStats.Domain.Players;
 using SportsStats.Domain.Services;
@@ -34,6 +35,7 @@ public static class DependencyInjection
 		services.AddScoped<IMatchRepository, MatchRepository>();
 		services.AddScoped<IPlayerRepository, PlayerRepository>();
 		services.AddScoped<ITeamStatsRepository, TeamStatsRepository>();
+		services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 		// Domain services
 		services.AddScoped<ITimeProvider, SystemTimeProvider>();

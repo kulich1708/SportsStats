@@ -1,25 +1,21 @@
+using SportsStats.Domain.Common;
 using SportsStats.Domain.Matches;
 using SportsStats.Domain.Matches.Goals;
-using SportsStats.Domain.Players;
-using SportsStats.Domain.Tournaments;
 using SportsStats.Domain.Shared;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using SportsStats.Domain.Services;
-using SportsStats.Application.Matches.DTOs.Responses;
-using SportsStats.Domain.Teams;
-using SportsStats.Domain.Statistics;
 
 namespace SportsStats.Application.Matches
 {
 	public class MatchGoalService(
 		IMatchRepository matchRepository,
-		ITimeProvider timeProvider)
+		ITimeProvider timeProvider,
+		IUnitOfWork unitOfWork)
 	{
 		private readonly IMatchRepository _matchRepository = matchRepository;
 		private readonly ITimeProvider _timeProvider = timeProvider;
-
+		private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
 		public async Task<int> AddGoalAsync(int matchId, int scoringTeamId, int goalScorerId, int time)
 		{
@@ -27,7 +23,7 @@ namespace SportsStats.Application.Matches
 
 			GoalEvent goal = match.AddGoal(scoringTeamId, goalScorerId, time, _timeProvider.GetCurrentTime());
 
-			await _matchRepository.SaveChangesAsync();
+			await _unitOfWork.SaveChangesAsync();
 
 			return goal.Id;
 		}
@@ -38,7 +34,7 @@ namespace SportsStats.Application.Matches
 
 			match.FillGoalDetails(goalId, scorerId, firstAssistId, secondAssistId, strengthType, netType);
 
-			await _matchRepository.SaveChangesAsync();
+			await _unitOfWork.SaveChangesAsync();
 		}
 	}
 }

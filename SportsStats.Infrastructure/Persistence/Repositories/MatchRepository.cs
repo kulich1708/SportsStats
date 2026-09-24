@@ -1,6 +1,4 @@
-﻿using MediatR;
-using Microsoft.EntityFrameworkCore;
-using SportsStats.Domain.Common;
+﻿using Microsoft.EntityFrameworkCore;
 using SportsStats.Domain.Matches;
 using SportsStats.Domain.Shared;
 using SportsStats.Infrastructure.Persistence.DbContexts;
@@ -10,62 +8,15 @@ using System.Text;
 
 namespace SportsStats.Infrastructure.Persistence.Repositories
 {
-	public class MatchRepository(AppDbContext context, IMediator mediator) : BaseRepository<Match>, IMatchRepository
+	public class MatchRepository(AppDbContext context)
+		: BaseRepository<Match>(context), IMatchRepository
 	{
 		private readonly AppDbContext _context = context;
-		private readonly IMediator _mediator = mediator;
 		protected override ErrorCode NotFoundErrorCode => NotFoundError.Match;
 
 		public override async Task<Match?> FindByIdAsync(int matchId)
 		{
 			return await _context.Matches.Include(match => match.Goals).FirstOrDefaultAsync(match => match.Id == matchId);
-		}
-
-		public async Task SaveChangesAsync()
-		{
-			var events = GetEventsFromTrackedAggregates();
-
-			await _context.SaveChangesAsync();
-
-			foreach (var @event in events)
-				await _mediator.Publish(@event);
-
-			ClearEventsFromTrackedAggregates();
-		}
-		private List<IDomainEvent> GetEventsFromTrackedAggregates()
-		{
-			var events = new List<IDomainEvent>();
-
-			var aggregates = _context.ChangeTracker
-				.Entries()
-				.Where(e => e.Entity is AggregateRoot)
-				.Select(e => (AggregateRoot)e.Entity)
-				.ToList();
-
-			foreach (var aggregate in aggregates)
-			{
-				events.AddRange(aggregate.Events);
-			}
-
-			return events;
-		}
-
-		private void ClearEventsFromTrackedAggregates()
-		{
-			var aggregates = _context.ChangeTracker
-				.Entries()
-				.Where(e => e.Entity is AggregateRoot)
-				.Select(e => (AggregateRoot)e.Entity)
-				.ToList();
-
-			foreach (var aggregate in aggregates)
-			{
-				aggregate.ClearEvents();
-			}
-		}
-		public async Task AddAsync(Match match)
-		{
-			await _context.Matches.AddAsync(match);
 		}
 		public async Task<List<Match>> GetAllAsync(int tournamentId, int? teamId = null)
 		{

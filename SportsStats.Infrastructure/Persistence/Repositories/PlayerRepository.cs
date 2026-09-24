@@ -9,7 +9,8 @@ using SportsStats.Domain.Shared;
 
 namespace SportsStats.Infrastructure.Persistence.Repositories
 {
-	public class PlayerRepository(AppDbContext context) : BaseRepository<Player>, IPlayerRepository
+	public class PlayerRepository(AppDbContext context)
+		: BaseRepository<Player>(context), IPlayerRepository
 	{
 
 		private readonly AppDbContext _context = context;
@@ -18,15 +19,6 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 		public override async Task<Player?> FindByIdAsync(int playerId)
 		{
 			return await _context.Players.FirstOrDefaultAsync(player => player.Id == playerId);
-		}
-
-		public async Task SaveChangesAsync()
-		{
-			await _context.SaveChangesAsync();
-		}
-		public async Task AddAsync(Player player)
-		{
-			await _context.Players.AddAsync(player);
 		}
 		public async Task<List<Player>> GetByTeamAsync(int teamId)
 		{

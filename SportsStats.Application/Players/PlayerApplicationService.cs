@@ -1,5 +1,6 @@
 using SportsStats.Application.Players.DTOs.Requests;
 using SportsStats.Application.Players.DTOs.Responses;
+using SportsStats.Domain.Common;
 using SportsStats.Domain.Players;
 using SportsStats.Domain.Teams;
 using System;
@@ -8,17 +9,21 @@ using System.Text;
 
 namespace SportsStats.Application.Players
 {
-	public class PlayerApplicationService(IPlayerRepository playerRepository, ITeamRepository teamRepository)
+	public class PlayerApplicationService(
+		IPlayerRepository playerRepository,
+		ITeamRepository teamRepository,
+		IUnitOfWork unitOfWork)
 	{
 		private readonly IPlayerRepository _playerRepository = playerRepository;
 		private readonly ITeamRepository _teamRepository = teamRepository;
+		private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
 		public async Task<int> CreateAsync(string name, string surname, PositionType position)
 		{
 			Player player = new(name, surname, position);
 
-			await _playerRepository.AddAsync(player);
-			await _playerRepository.SaveChangesAsync();
+			_playerRepository.Add(player);
+			await _unitOfWork.SaveChangesAsync();
 
 			return player.Id;
 		}
@@ -29,7 +34,7 @@ namespace SportsStats.Application.Players
 
 			player.ChangeTeam(teamId);
 
-			await _playerRepository.SaveChangesAsync();
+			await _unitOfWork.SaveChangesAsync();
 		}
 		public async Task<PlayerDTO> GetByIdAsync(int playerId)
 		{
@@ -74,7 +79,7 @@ namespace SportsStats.Application.Players
 			player.SetCitizenship(dto.Citizenship?.Name, dto.Citizenship?.Photo, dto.Citizenship?.PhotoMime);
 			player.ChangeTeam(dto.TeamId);
 
-			await _playerRepository.SaveChangesAsync();
+			await _unitOfWork.SaveChangesAsync();
 		}
 		public static IReadOnlyDictionary<PositionType, string> GetAllPlayerPositions() => PositionTypeText.PositionDescription;
 	}
