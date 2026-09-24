@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using SportsStats.Domain.Shared;
+using SportsStats.Infrastructure;
 
 namespace SportsStats.API.Middleware;
 
@@ -33,6 +34,15 @@ public class GlobalExceptionHandler
 		{
 			// Ошибки домена
 			context.Response.StatusCode = StatusCodes.Status422UnprocessableEntity;
+			context.Response.ContentType = "application/json";
+
+			var response = new { error = ex.Message };
+			await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+		}
+		catch (NotFoundException ex)
+		{
+			// Ошибки "не найдено"
+			context.Response.StatusCode = StatusCodes.Status404NotFound;
 			context.Response.ContentType = "application/json";
 
 			var response = new { error = ex.Message };
