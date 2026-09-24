@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SportsStats.Domain.Teams;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,10 +7,9 @@ namespace SportsStats.Domain.Players
 {
 	public interface IPlayerRepository
 	{
+		public void Add(Player player);
 		public Task<Player?> FindByIdAsync(int playerId);
 		public Task<Player> GetByIdAsync(int playerId);
-		public Task SaveChangesAsync();
-		public Task AddAsync(Player player);
 		public Task<List<Player>> GetByTeamAsync(int teamId);
 		public Task<List<Player>> GetAllAsync(int page, int pageSize, string? search = null);
 		public Task<List<Player>> GetByIdAsync(List<int> playersId);

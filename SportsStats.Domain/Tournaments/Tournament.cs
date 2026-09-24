@@ -7,7 +7,7 @@ using System.Text;
 
 namespace SportsStats.Domain.Tournaments
 {
-	public class Tournament : BaseEntity, IAggregateRoot
+	public class Tournament : AggregateRoot
 	{
 		private readonly HashSet<int> _teamsId = [];
 		public string Name { get; private set; }

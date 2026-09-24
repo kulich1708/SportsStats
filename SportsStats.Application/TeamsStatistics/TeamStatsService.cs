@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using SportsStats.Application.Statistics.DTOs.Responses;
+using SportsStats.Domain.Common;
 using SportsStats.Domain.Matches;
 using SportsStats.Domain.Statistics;
 using SportsStats.Domain.Teams;
@@ -14,17 +15,19 @@ namespace SportsStats.Application.Statistics
 		ITeamStatsRepository teamStatsRepository,
 		ITeamRepository teamRepository,
 		ITournamentRepository tournamentRepository,
-		IMatchRepository matchRepository)
+		IMatchRepository matchRepository,
+		IUnitOfWork unitOfWork)
 	{
 		private readonly ITeamStatsRepository _teamStatsRepository = teamStatsRepository;
 		private readonly ITeamRepository _teamRepository = teamRepository;
 		private readonly ITournamentRepository _tournamentRepository = tournamentRepository;
 		private readonly IMatchRepository _matchRepository = matchRepository;
+		private readonly IUnitOfWork _unitOfWork = unitOfWork;
 		public async Task<List<TeamStatsDTO>> GetByTeamAsync(int teamId)
 		{
 			List<TeamStats> stats = await _teamStatsRepository.GetByTeamAsync(teamId);
 
-			var teamName = (await _teamRepository.FindByIdAsync(teamId))!.Name;
+			var teamName = (await _teamRepository.GetByIdAsync(teamId)).Name;
 			var tournamentIds = stats.Select(s => s.TournamentId).Distinct().ToList();
 			var tournamentNames = (await _tournamentRepository.GetByIdAsync(tournamentIds))
 								  .ToDictionary(t => t.Id, t => t.Name);
@@ -39,7 +42,7 @@ namespace SportsStats.Application.Statistics
 		{
 			List<TeamStats> stats = await _teamStatsRepository.GetByTournamentAsync(tournamentId);
 
-			var tournamentName = (await _tournamentRepository.FindByIdAsync(tournamentId))!.Name;
+			var tournamentName = (await _tournamentRepository.GetByIdAsync(tournamentId)).Name;
 			var teamNames = (await _teamRepository.GetByTournamentAsync(tournamentId))
 								  .ToDictionary(t => t.Id, t => t.Name);
 
@@ -62,7 +65,7 @@ namespace SportsStats.Application.Statistics
 			homeTeamStats.AddOutcome(match.HomeTeam.WinType, homeTeamPoint.Value);
 			awayTeamStats.AddOutcome(match.AwayTeam.WinType, awayTeamPoint.Value);
 
-			await _teamStatsRepository.SaveChangesAsync();
+			await _unitOfWork.SaveChangesAsync();
 		}
 	}
 }

@@ -1,4 +1,5 @@
 using SportsStats.Application.Teams.DTOs.Responses;
+using SportsStats.Domain.Common;
 using SportsStats.Domain.Shared;
 using SportsStats.Domain.Teams;
 using SportsStats.Domain.Tournaments;
@@ -9,16 +10,19 @@ using System.Text;
 
 namespace SportsStats.Application.Teams
 {
-	public class TeamApplicationService(ITeamRepository teamRepository)
+	public class TeamApplicationService(
+		ITeamRepository teamRepository,
+		IUnitOfWork unitOfWork)
 	{
 		private readonly ITeamRepository _teamRepository = teamRepository;
+		private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
 		public async Task<int> CreateAsync(string name)
 		{
 			Team team = new(name);
 
-			await _teamRepository.AddAsync(team);
-			await _teamRepository.SaveChangesAsync();
+			_teamRepository.Add(team);
+			await _unitOfWork.SaveChangesAsync();
 
 			return team.Id;
 		}
@@ -44,7 +48,7 @@ namespace SportsStats.Application.Teams
 			team.SetCity(city);
 			team.SetPhoto(photo, photoMime);
 
-			await _teamRepository.SaveChangesAsync();
+			await _unitOfWork.SaveChangesAsync();
 		}
 	}
 }

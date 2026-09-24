@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using SportsStats.API.Middleware;
-using SportsStats.Application.Matches;
+using SportsStats.Application.TeamsStatistics;
 using SportsStats.Infrastructure;
 using SportsStats.Infrastructure.Persistence.DbContexts;
 using System.Reflection;

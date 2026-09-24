@@ -8,7 +8,8 @@ using System.Text;
 
 namespace SportsStats.Infrastructure.Persistence.Repositories
 {
-	public class TeamRepository(AppDbContext context) : BaseRepository<Team>, ITeamRepository
+	public class TeamRepository(AppDbContext context)
+		: BaseRepository<Team>(context), ITeamRepository
 	{
 		private readonly AppDbContext _context = context;
 		protected override ErrorCode NotFoundErrorCode => NotFoundError.Team;
@@ -20,15 +21,6 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 		public async Task<List<Team>> GetByIdAsync(List<int> teamIds)
 		{
 			return await _context.Teams.Where(team => teamIds.Contains(team.Id)).ToListAsync();
-		}
-
-		public async Task SaveChangesAsync()
-		{
-			await _context.SaveChangesAsync();
-		}
-		public async Task AddAsync(Team team)
-		{
-			await _context.Teams.AddAsync(team);
 		}
 		public async Task<List<Team>> GetAllAsync(int page, int pageSize, string? search = null)
 		{

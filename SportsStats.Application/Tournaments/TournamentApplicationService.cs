@@ -4,6 +4,7 @@ using SportsStats.Application.Tournaments.DTOs.Responses;
 using SportsStats.Application.Tournaments.DTOs.Shared;
 using SportsStats.Application.Tournaments.Mappers;
 using SportsStats.Application.Tournaments.Mappers.Rules;
+using SportsStats.Domain.Common;
 using SportsStats.Domain.Matches;
 using SportsStats.Domain.Shared;
 using SportsStats.Domain.Statistics;
@@ -21,7 +22,8 @@ namespace SportsStats.Application.Tournaments
 		ITeamRepository teamRepository,
 		ITeamStatsRepository teamStatsRepository,
 		IMatchRepository matchRepository,
-		MatchQueriesHandler matchQueriesHandler)
+		MatchQueriesHandler matchQueriesHandler,
+		IUnitOfWork unitOfWork)
 	{
 		private readonly ITournamentRepository _tournamentRepository = tournamentRepository;
 		private readonly ITimeProvider _timeProvider = timeProvider;
@@ -29,6 +31,7 @@ namespace SportsStats.Application.Tournaments
 		private readonly ITeamStatsRepository _teamStatsRepository = teamStatsRepository;
 		private readonly IMatchRepository _matchRepository = matchRepository;
 		private readonly MatchQueriesHandler _matchQueriesHandler = matchQueriesHandler;
+		private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
 		private async Task<Tournament> UpdateAndSaveAsync(int tournamentId, Action<Tournament> action)
 		{
@@ -36,15 +39,15 @@ namespace SportsStats.Application.Tournaments
 
 			action(tournament);
 
-			await _tournamentRepository.SaveChangesAsync();
+			await _unitOfWork.SaveChangesAsync();
 			return tournament;
 		}
 		public async Task<int> CreateAsync(string name)
 		{
 			Tournament tournament = new(name);
 
-			await _tournamentRepository.AddAsync(tournament);
-			await _tournamentRepository.SaveChangesAsync();
+			_tournamentRepository.Add(tournament);
+			await _unitOfWork.SaveChangesAsync();
 
 			return tournament.Id;
 		}
@@ -56,11 +59,10 @@ namespace SportsStats.Application.Tournaments
 			foreach (var teamId in tournament.TeamsId)
 			{
 				TeamStats teamStats = new(teamId, tournamentId);
-				await _teamStatsRepository.AddAsync(teamStats);
+				_teamStatsRepository.Add(teamStats);
 			}
-			await _teamStatsRepository.SaveChangesAsync();
 			tournament.Start(startedAt ?? _timeProvider.GetCurrentTime());
-			await _tournamentRepository.SaveChangesAsync();
+			await _unitOfWork.SaveChangesAsync();
 		}
 		public async Task FinishAsync(int tournamentId, DateTime? finishedAt = null)
 		{
@@ -148,7 +150,7 @@ namespace SportsStats.Application.Tournaments
 			if (photo != null)
 				tournament.SetPhoto(photo, photoMime);
 
-			await _tournamentRepository.SaveChangesAsync();
+			await _unitOfWork.SaveChangesAsync();
 		}
 	}
 }

@@ -1,10 +1,9 @@
 using SportsStats.Application.Matches.DTOs.Requests;
-using SportsStats.Application.Tournaments.Mappers;
+using SportsStats.Domain.Common;
 using SportsStats.Domain.Matches;
 using SportsStats.Domain.Players;
 using SportsStats.Domain.Services;
 using SportsStats.Domain.Shared;
-using SportsStats.Domain.Statistics;
 using SportsStats.Domain.Teams;
 using SportsStats.Domain.Tournaments;
 using System;
@@ -17,7 +16,8 @@ namespace SportsStats.Application.Matches
 		ITournamentRepository tournamentRepository, IMatchRepository matchRepository,
 		ITeamRepository teamRepository,
 		ITimeProvider timeProvider,
-		IMatchService matchService)
+		IMatchService matchService,
+		IUnitOfWork unitOfWork)
 	{
 		private readonly IPlayerRepository _playerRepository = playerRepository;
 		private readonly ITournamentRepository _tournamentRepository = tournamentRepository;
@@ -25,6 +25,7 @@ namespace SportsStats.Application.Matches
 		private readonly ITeamRepository _teamRepository = teamRepository;
 		private readonly ITimeProvider _timeProvider = timeProvider;
 		private readonly IMatchService _matchService = matchService;
+		private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
 
 		public async Task<int> CreateAsync(int tournamentId, int homeTeamId, int awayTeamId, DateTime scheduledAt)
@@ -32,8 +33,10 @@ namespace SportsStats.Application.Matches
 			Tournament tournament = await _tournamentRepository.GetByIdAsync(tournamentId);
 
 			Match match = _matchService.CreateMatch(tournament, homeTeamId, awayTeamId, scheduledAt, tournament.TournamentRules!);
-			await _matchRepository.AddAsync(match);
-			await _matchRepository.SaveChangesAsync();
+
+			_matchRepository.Add(match);
+			await _unitOfWork.SaveChangesAsync();
+
 			return match.Id;
 		}
 		public async Task StartAsync(int matchId, DateTime? startedAt = null)
@@ -48,7 +51,7 @@ namespace SportsStats.Application.Matches
 
 			_matchService.Start(match, tournament, homeTeamRoster, awayTeamRoster, homeTeam, awayTeam, startedAt ?? _timeProvider.GetCurrentTime());
 
-			await _matchRepository.SaveChangesAsync();
+			await _unitOfWork.SaveChangesAsync();
 		}
 
 		public async Task StartPeriodAsync(int id, DateTime? startedAt = null)
@@ -57,7 +60,7 @@ namespace SportsStats.Application.Matches
 
 			match.StartPeriod();
 
-			await _matchRepository.SaveChangesAsync();
+			await _unitOfWork.SaveChangesAsync();
 		}
 		public async Task FinishPeriodAsync(int id, DateTime? finishedAt = null)
 		{
@@ -65,13 +68,13 @@ namespace SportsStats.Application.Matches
 
 			match.FinishPeriod(finishedAt ?? _timeProvider.GetCurrentTime());
 
-			await _matchRepository.SaveChangesAsync();
+			await _unitOfWork.SaveChangesAsync();
 		}
 		public async Task ChangeGeneralInfoAsync(int id, MatchGeneralInfoDTO dto)
 		{
 			Match match = await _matchRepository.GetByIdAsync(id);
 			match.SetScheduleAt(dto.ScheduleAt);
-			await _matchRepository.SaveChangesAsync();
+			await _unitOfWork.SaveChangesAsync();
 		}
 	}
 }

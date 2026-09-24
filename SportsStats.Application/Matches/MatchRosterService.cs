@@ -1,4 +1,5 @@
-﻿using SportsStats.Domain.Matches;
+﻿using SportsStats.Domain.Common;
+using SportsStats.Domain.Matches;
 using SportsStats.Domain.Players;
 using SportsStats.Domain.Services;
 using System;
@@ -10,11 +11,13 @@ namespace SportsStats.Application.Matches
 	public class MatchRosterService(
 		IMatchRepository matchRepository,
 		IPlayerRepository playerRepository,
-		IMatchService matchService)
+		IMatchService matchService,
+		IUnitOfWork unitOfWork)
 	{
 		private readonly IMatchRepository _matchRepository = matchRepository;
 		private readonly IPlayerRepository _playerRepository = playerRepository;
 		private readonly IMatchService _matchService = matchService;
+		private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
 
 		public async Task SetPlayersToRosterAsync(int matchId, List<int> playerIds, int teamId)
@@ -25,7 +28,7 @@ namespace SportsStats.Application.Matches
 
 			_matchService.SetRoster(match, players, teamId);
 
-			await _matchRepository.SaveChangesAsync();
+			await _unitOfWork.SaveChangesAsync();
 		}
 	}
 }

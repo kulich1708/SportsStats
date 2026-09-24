@@ -12,9 +12,9 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 	public class TeamStatsRepository(AppDbContext context) : ITeamStatsRepository
 	{
 		private readonly AppDbContext _context = context;
-		public async Task AddAsync(TeamStats stats)
+		public void Add(TeamStats stats)
 		{
-			await _context.AddAsync(stats);
+			_context.Add(stats);
 		}
 
 		public async Task<TeamStats> GetAsync(int teamId, int tournamentId)
@@ -30,11 +30,6 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 		public async Task<List<TeamStats>> GetByTournamentAsync(int tournamentId)
 		{
 			return await _context.TeamsStats.Where(stats => stats.TournamentId == tournamentId).ToListAsync();
-		}
-
-		public async Task SaveChangesAsync()
-		{
-			await _context.SaveChangesAsync();
 		}
 	}
 }
