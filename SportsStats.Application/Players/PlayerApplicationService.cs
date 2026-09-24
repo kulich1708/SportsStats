@@ -31,16 +31,16 @@ namespace SportsStats.Application.Players
 
 			await _playerRepository.SaveChangesAsync();
 		}
-		public async Task<PlayerDTO> GetAsync(int playerId)
+		public async Task<PlayerDTO> GetByIdAsync(int playerId)
 		{
 			Player player = await _playerRepository.GetByIdAsync(playerId);
 			string? teamName = player.TeamId.HasValue ? (await _teamRepository.GetByIdAsync(player.TeamId.Value)).Name : null;
 
 			return PlayerMapper.ToDTO(player, teamName);
 		}
-		public async Task<List<PlayerDTO>> GetAsync(List<int> playerIds)
+		public async Task<List<PlayerDTO>> GetByIdAsync(List<int> playerIds)
 		{
-			var players = await _playerRepository.GetAsync(playerIds);
+			var players = await _playerRepository.GetByIdAsync(playerIds);
 			return await GetDTOAsync(players);
 		}
 		public async Task<List<PlayerDTO>> GetByteamAsync(int teamId)
@@ -56,7 +56,7 @@ namespace SportsStats.Application.Players
 		private async Task<List<PlayerDTO>> GetDTOAsync(List<Player> players)
 		{
 			var teamIds = players.Where(p => p.TeamId.HasValue).Select(p => p.TeamId!.Value).Distinct().ToList();
-			var teamNames = (await _teamRepository.GetAsync(teamIds)).ToDictionary(t => t.Id, t => t.Name);
+			var teamNames = (await _teamRepository.GetByIdAsync(teamIds)).ToDictionary(t => t.Id, t => t.Name);
 
 			return players
 				.Select(p => PlayerMapper.ToDTO(p, p.TeamId.HasValue ? teamNames.GetValueOrDefault(p.TeamId.Value) : null))

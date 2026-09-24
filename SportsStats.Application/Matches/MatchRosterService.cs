@@ -21,7 +21,7 @@ namespace SportsStats.Application.Matches
 		{
 			Match match = await _matchRepository.GetByIdAsync(matchId);
 
-			List<Player> players = await _playerRepository.GetAsync(playerIds);
+			List<Player> players = await _playerRepository.GetByIdAsync(playerIds);
 
 			_matchService.SetRoster(match, players, teamId);
 

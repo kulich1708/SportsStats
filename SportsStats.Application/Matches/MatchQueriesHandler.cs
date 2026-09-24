@@ -27,17 +27,15 @@ namespace SportsStats.Application.Matches
 		private readonly PlayerApplicationService _playerApplicationService = playerApplicationService;
 
 
-		public async Task<MatchDTO?> GetAsync(int matchId)
+		public async Task<MatchDTO> GetByIdAsync(int matchId)
 		{
-			Match? match = await _matchRepository.FindByIdAsync(matchId);
-			if (match == null)
-				return null;
+			Match match = await _matchRepository.GetByIdAsync(matchId);
 
-			var homeTeam = await _teamApplicationService.GetAsync(match.HomeTeam.Id);
-			var awayTeam = await _teamApplicationService.GetAsync(match.AwayTeam.Id);
-			var tournament = await _tournamentRepository.FindByIdAsync(match.TournamentId);
-			var homeTeamRoster = await _playerApplicationService.GetAsync(match.HomeTeam.Roster.ToList());
-			var awayTeamRoster = await _playerApplicationService.GetAsync(match.AwayTeam.Roster.ToList());
+			var homeTeam = await _teamApplicationService.GetByIdAsync(match.HomeTeam.Id);
+			var awayTeam = await _teamApplicationService.GetByIdAsync(match.AwayTeam.Id);
+			var tournament = await _tournamentRepository.GetByIdAsync(match.TournamentId);
+			var homeTeamRoster = await _playerApplicationService.GetByIdAsync(match.HomeTeam.Roster.ToList());
+			var awayTeamRoster = await _playerApplicationService.GetByIdAsync(match.AwayTeam.Roster.ToList());
 			return MatchMapper.ToDTO(match, homeTeam, awayTeam, homeTeamRoster, awayTeamRoster, TournamentMapper.ToDTO(tournament));
 		}
 		public async Task<List<MatchShortDTO>> GetFinishedByTournamentAsync(int tournamentId, int page, int pageSize)
@@ -68,7 +66,7 @@ namespace SportsStats.Application.Matches
 		private async Task<List<MatchShortDTO>> GetMatchDTOsByMatchesAsync(List<Match> matches)
 		{
 			var teamIds = matches.SelectMany(m => new[] { m.HomeTeam.Id, m.AwayTeam.Id }).ToList();
-			var teams = await _teamRepository.GetAsync(teamIds);
+			var teams = await _teamRepository.GetByIdAsync(teamIds);
 			var teamsDTO = teams.Select(TeamMapper.ToDTO).ToDictionary(t => t.Id);
 
 			return matches.Select(m => MatchMapper.ToDTO(m, teamsDTO[m.HomeTeam.Id], teamsDTO[m.AwayTeam.Id])).ToList();

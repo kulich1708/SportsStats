@@ -22,11 +22,7 @@ namespace SportsStats.API.Controllers
 		[HttpGet("{id}")]
 		public async Task<ActionResult<MatchDTO>> Get(int id)
 		{
-			MatchDTO? match = await _matchQueriesHandler.GetAsync(id);
-
-			if (match == null)
-				return NotFound();
-
+			MatchDTO match = await _matchQueriesHandler.GetByIdAsync(id);
 			return Ok(match);
 		}
 

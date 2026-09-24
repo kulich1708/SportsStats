@@ -17,7 +17,7 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 		{
 			return await _context.Teams.FirstOrDefaultAsync(team => team.Id == teamId);
 		}
-		public async Task<List<Team>> GetAsync(List<int> teamIds)
+		public async Task<List<Team>> GetByIdAsync(List<int> teamIds)
 		{
 			return await _context.Teams.Where(team => teamIds.Contains(team.Id)).ToListAsync();
 		}

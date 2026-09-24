@@ -24,7 +24,7 @@ namespace SportsStats.API.Controllers
 		[HttpGet("{id}")]
 		public async Task<ActionResult<TournamentDTO>> GetTournament(int id)
 		{
-			var tournament = await _tournamentApplicationService.GetAsync(id);
+			var tournament = await _tournamentApplicationService.GetByIdAsync(id);
 			return Ok(tournament);
 		}
 		//[HttpGet("by-date/{date}")]

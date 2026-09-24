@@ -22,10 +22,10 @@ namespace SportsStats.Application.Teams
 
 			return team.Id;
 		}
-		public async Task<TeamDTO?> GetAsync(int id)
+		public async Task<TeamDTO> GetByIdAsync(int id)
 		{
-			Team? team = await _teamRepository.FindByIdAsync(id);
-			return team == null ? null : TeamMapper.ToDTO(team);
+			Team team = await _teamRepository.GetByIdAsync(id);
+			return TeamMapper.ToDTO(team);
 		}
 		public async Task<List<TeamDTO>> GetAllAsync(int page, int pageSize, string? search = null)
 		{

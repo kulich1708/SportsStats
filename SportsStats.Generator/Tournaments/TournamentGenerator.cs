@@ -38,7 +38,7 @@ namespace ConsoleApp.Tournaments
 			startedAt = startedAt ?? _timeProvider.GetCurrentTime().AddDays(-1 * (scheduleDays / 2));
 			await _tournamentApplicationService.StartAsync(tournamentId, startedAt);
 
-			startedAt = (await _tournamentApplicationService.GetAsync(tournamentId))?.StartedAt;
+			startedAt = (await _tournamentApplicationService.GetByIdAsync(tournamentId)).StartedAt;
 			DateOnly currentDate = DateOnly.FromDateTime(startedAt.Value).AddDays(1);
 			DateTime time = DateTime.SpecifyKind(currentDate.ToDateTime(new TimeOnly(19, 30, 0)), DateTimeKind.Utc);
 

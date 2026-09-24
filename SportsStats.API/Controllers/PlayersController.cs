@@ -27,7 +27,7 @@ namespace SportsStats.API.Controllers
 		[HttpGet("{id}")]
 		public async Task<ActionResult<PlayerDTO>> Get(int id)
 		{
-			return Ok(await _playerApplicationService.GetAsync(id));
+			return Ok(await _playerApplicationService.GetByIdAsync(id));
 		}
 		[HttpGet("positions")]
 		public ActionResult GetAllPositions() => Ok(PlayerApplicationService.GetAllPlayerPositions());

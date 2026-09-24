@@ -12,6 +12,6 @@ namespace SportsStats.Domain.Players
 		public Task AddAsync(Player player);
 		public Task<List<Player>> GetByTeamAsync(int teamId);
 		public Task<List<Player>> GetAllAsync(int page, int pageSize, string? search = null);
-		public Task<List<Player>> GetAsync(List<int> playersId);
+		public Task<List<Player>> GetByIdAsync(List<int> playersId);
 	}
 }

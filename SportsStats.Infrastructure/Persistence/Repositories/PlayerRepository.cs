@@ -43,7 +43,7 @@ namespace SportsStats.Infrastructure.Persistence.Repositories
 				.Take(pageSize)
 				.ToListAsync();
 		}
-		public async Task<List<Player>> GetAsync(List<int> playersId)
+		public async Task<List<Player>> GetByIdAsync(List<int> playersId)
 		{
 			return await _context.Players.Where(p => playersId.Contains(p.Id)).ToListAsync();
 		}

@@ -43,8 +43,8 @@ namespace SportsStats.Application.Matches
 			Team homeTeam = await _teamRepository.GetByIdAsync(match.HomeTeam.Id);
 			Team awayTeam = await _teamRepository.GetByIdAsync(match.AwayTeam.Id);
 
-			List<Player> homeTeamRoster = await _playerRepository.GetAsync(match.HomeTeam.Roster.ToList());
-			List<Player> awayTeamRoster = await _playerRepository.GetAsync(match.AwayTeam.Roster.ToList());
+			List<Player> homeTeamRoster = await _playerRepository.GetByIdAsync(match.HomeTeam.Roster.ToList());
+			List<Player> awayTeamRoster = await _playerRepository.GetByIdAsync(match.AwayTeam.Roster.ToList());
 
 			_matchService.Start(match, tournament, homeTeamRoster, awayTeamRoster, homeTeam, awayTeam, startedAt ?? _timeProvider.GetCurrentTime());
 
