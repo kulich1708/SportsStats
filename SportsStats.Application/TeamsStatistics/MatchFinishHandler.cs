@@ -1,13 +1,11 @@
 using SportsStats.Application.Statistics;
 using SportsStats.Domain.Matches;
 using MediatR;
-using SportsStats.Domain.Shared;
-using SportsStats.Domain.Statistics;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SportsStats.Application.Matches
+namespace SportsStats.Application.TeamsStatistics
 {
 	public class MatchFinishHandler(
 		TeamStatsService teamStatsService) : INotificationHandler<MatchFinishedEvent>
