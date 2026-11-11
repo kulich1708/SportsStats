@@ -1,7 +1,9 @@
 services:
-  sports-stats-db:
-    mem_limit: 256m
-    memswap_limit: 512m          # 256m RAM + 256m swap (буфер на пики)
+  db:
+    deploy:
+      resources:
+        limits:
+          memory: 256M
     restart: unless-stopped
     # Оптимизация PostgreSQL под 256 MB: не даём ему раздуться
     command: >
@@ -22,8 +24,10 @@ services:
         max-file: "3"
 
   sports-stats-api:
-    mem_limit: 256m
-    memswap_limit: 512m
+    deploy:
+      resources:
+        limits:
+          memory: 256M
     restart: unless-stopped
     # ASP.NET Core: ограничиваем кучу .NET, чтобы приложение не раздувалось
     environment:
@@ -34,3 +38,10 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
+  sports-stats-generator:
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    restart: "no"
