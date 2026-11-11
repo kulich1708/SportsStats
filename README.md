@@ -47,7 +47,7 @@
 
 ## Онлайн демо
 
-Развернутое демо приложения: [https://sportsstats-production.up.railway.app/](https://sportsstats-production.up.railway.app/).
+Развернутое демо приложения: [https://hockey-stats.publicvm.com/](https://hockey-stats.publicvm.com/).
 
 Можно открыть и попробовать функциональность без локальной настройки.
 
