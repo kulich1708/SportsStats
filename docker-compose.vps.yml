@@ -1,0 +1,36 @@
+services:
+  sports-stats-db:
+    mem_limit: 256m
+    memswap_limit: 512m          # 256m RAM + 256m swap (буфер на пики)
+    restart: unless-stopped
+    # Оптимизация PostgreSQL под 256 MB: не даём ему раздуться
+    command: >
+      postgres
+      -c shared_buffers=64MB
+      -c work_mem=2MB
+      -c maintenance_work_mem=32MB
+      -c max_connections=20
+      -c effective_cache_size=128MB
+      -c wal_buffers=4MB
+      -c checkpoint_timeout=15min
+      -c checkpoint_completion_target=0.9
+    # Ограничение логов, чтобы 15 ГБ диска не забились логами
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  sports-stats-api:
+    mem_limit: 256m
+    memswap_limit: 512m
+    restart: unless-stopped
+    # ASP.NET Core: ограничиваем кучу .NET, чтобы приложение не раздувалось
+    environment:
+      DOTNET_gcServer: "0"                 # Workstation GC вместо Server GC (меньше памяти)
+      DOTNET_GCHeapHardLimit: "0x10000000" # ~256 MB жёсткий лимит кучи .NET
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
