@@ -1,7 +1,9 @@
 services:
   db:
-    mem_limit: 256m
-    memswap_limit: 512m
+    deploy:
+      resources:
+        limits:
+          memory: 256M
     restart: unless-stopped
     command: >
       postgres
@@ -19,9 +21,11 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  sports-stats-api: # Имя совпадает с базовым файлом, тут всё ок
-    mem_limit: 256m
-    memswap_limit: 512m
+  sports-stats-api:
+    deploy:
+      resources:
+        limits:
+          memory: 256M
     restart: unless-stopped
     environment:
       DOTNET_gcServer: "0"
@@ -32,7 +36,9 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  sports-stats-generator: # <--- ДОБАВЛЕНО: тоже ограничиваем, чтобы не съел память при старте
-    mem_limit: 256m
-    memswap_limit: 512m
-    restart: "no" # Оставляем как в базовом файле, он должен отработать и завершиться
+  sports-stats-generator:
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    restart: "no"
